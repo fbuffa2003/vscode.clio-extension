@@ -40,7 +40,7 @@ export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstan
 
 	getClioEnvironments() : string {
 		let file = fs.readFileSync(
-			path.join(getAppDataPath() + "\\..\\Local\\creatio\\clio\\appsettings.json"),			
+			path.join(getAppDataPath() + "\\..\\Local\\creatio\\clio\\appsettings.json"),
 			{
 				encoding: "utf-8"
 			}
@@ -60,8 +60,8 @@ export class CreatioInstance extends vscode.TreeItem {
 		this.description = description;
 	}
 	iconPath = {
-		light: path.join(__filename, '..', '..', 'resources', 'light', 'dependency.svg'),
-		dark: path.join(__filename, '..', '..', 'resources', 'dark', 'dependency.svg')
+		light: path.join(__filename, '..', '..','..', 'resources', 'icon', 'creatio-circle-white.svg'),
+		dark: path.join(__filename, '..', '..', '..', 'resources', 'icon', 'creatio-circle-white.svg')
 	};
 	contextValue = 'CreatioInstace';
 }

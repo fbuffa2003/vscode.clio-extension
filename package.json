@@ -64,6 +64,11 @@
 			],
 			"view/item/context": [
 				{
+					"command": "ClioSQL.Open",
+					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
+					"group": "inline"
+				},
+				{
 					"command": "ClioSQL.flushDb",
 					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
 					"group": "inline"
@@ -76,18 +81,19 @@
 				{
 					"command": "ClioSQL.ExecuteSql",
 					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "inline"
+					"group": "kebab"
 				},
 				{
 					"command": "ClioSQL.GenerateModels",
 					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "inline"
+					"group": "kebab"
 				},
 				{
 					"command": "ClioSQL.RestoreWorkspace",
 					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "inline"
+					"group": "kebab"
 				}
+				
 			]
 		},
 		"commands": [
@@ -145,6 +151,14 @@
 				"icon": {
 					"light": "resources/icon/RestoreLocalServer.svg",
 					"dark": "resources/icon/RestoreLocalServer.svg"
+				}
+			},
+			{
+				"command": "ClioSQL.Open",
+				"title": "Open application",
+				"icon": {
+					"light": "resources/icon/Open.svg",
+					"dark": "resources/icon/Open.svg"
 				}
 			}
 		]
