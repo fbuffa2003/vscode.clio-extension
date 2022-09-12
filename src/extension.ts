@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const envService = new EnvironmentService();
 	vscode.window.registerTreeDataProvider('vscode-clio-extension.creatioExplorer', envService);
 
-	let disposable = vscode.commands.registerCommand('ClioSQL.console', () => {
+	let disposable = vscode.commands.registerCommand('ClioSQL.ExecuteSql', () => {
 		let commandsDocument = vscode.window.activeTextEditor?.document;
 		let text : string = commandsDocument?.getText() as string;
 		if(!text){

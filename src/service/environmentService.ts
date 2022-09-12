@@ -16,8 +16,8 @@ export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstan
 	}
 	
 	getChildren(element?: CreatioInstance | undefined): vscode.ProviderResult<CreatioInstance[]> {
-		let settingsFile = this.getClioEnvironments();
-		let json = JSON.parse(settingsFile);
+		const settingsFile = this.getClioEnvironments();
+		const json = JSON.parse(settingsFile);
 		const environments = json['Environments'];
 		if(element === undefined){
 			let instances : Array<CreatioInstance> = [];
@@ -37,25 +37,18 @@ export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstan
 		return Promise.resolve([]);
 	}
 
-
 	getClioEnvironments() : string {
-
 		let file = fs.readFileSync(
 			path.join("C:\\Users\\k.krylov.TSCRM\\AppData\\Local\\creatio\\clio\\appsettings.json"),
 			{
 				encoding: "utf-8"
 			}
 		);
-
 		return file;
 	}
-
 }
 
-
-
 export class CreatioInstance extends vscode.TreeItem {
-
 	constructor(
 		public readonly label: string,
 		public readonly description: string,
@@ -70,10 +63,4 @@ export class CreatioInstance extends vscode.TreeItem {
 		dark: path.join(__filename, '..', '..', 'resources', 'dark', 'dependency.svg')
 	};
 	contextValue = 'CreatioInstace';
-}
-
-class EnvironmentModel {
-	
-	public name?: string;
-	public uri?: string;
 }
