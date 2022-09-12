@@ -72,7 +72,6 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 		let isWin = process.platform === 'win32';
 		terminal = terminal || vscode.window.createTerminal('clio sql console', isWin ? 'C:\\Windows\\System32\\cmd.exe' : undefined);
-		terminal.show();
 		terminal.sendText(`${isWin ? '' : 'wine '}"${clioPath}"  open -e "${node.label}"`);
 		vscode.window.onDidCloseTerminal(closedTerminal => {
 			if (closedTerminal === terminal) {
