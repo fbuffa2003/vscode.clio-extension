@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import getAppDataPath from 'appdata-path';
 
 export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstance>{
 	
@@ -39,7 +40,7 @@ export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstan
 
 	getClioEnvironments() : string {
 		let file = fs.readFileSync(
-			path.join("C:\\Users\\k.krylov.TSCRM\\AppData\\Local\\creatio\\clio\\appsettings.json"),
+			path.join(getAppDataPath() + "\\..\\Local\\creatio\\clio\\appsettings.json"),			
 			{
 				encoding: "utf-8"
 			}
