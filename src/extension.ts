@@ -7,7 +7,7 @@ let terminal: vscode.Terminal | undefined;
 
 export function activate(context: vscode.ExtensionContext) {
 	
-	const clioPath = 'C:\\Users\\k.krylov.TSCRM\\.dotnet\\tools\\clio.exe';
+	const clioPath = 'clio';
 
 	const envService = new EnvironmentService();
 	vscode.window.registerTreeDataProvider('vscode-clio-extension.creatioExplorer', envService);
@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
 		if(!text){
 			return;
 		}
-		let filePath = 'E:\\Projects\\clio\\clio\\bin\\Release\\netcoreapp3.1\\clio.exe';
+		let filePath = 'clio';
 		let isWin = process.platform === 'win32';
 		terminal = terminal || vscode.window.createTerminal('clio sql console', isWin ? 'C:\\Windows\\System32\\cmd.exe' : undefined);
 		terminal.show();
