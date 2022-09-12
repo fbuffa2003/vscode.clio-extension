@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const envService = new EnvironmentService();
 	vscode.window.registerTreeDataProvider('vscode-clio-extension.creatioExplorer', envService);
 
-	let disposable = vscode.commands.registerCommand('ClioSQL.ExecuteSql', () => {
+	let disposable = vscode.commands.registerCommand('ClioSQL.ExecuteSql', (node: vscode.TreeItem) => {
 		let commandsDocument = vscode.window.activeTextEditor?.document;
 		let text : string = commandsDocument?.getText() as string;
 		if(!text){
@@ -22,7 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
 		let isWin = process.platform === 'win32';
 		terminal = terminal || vscode.window.createTerminal('clio sql console', isWin ? 'C:\\Windows\\System32\\cmd.exe' : undefined);
 		terminal.show();
-		terminal.sendText(`${isWin ? '' : 'wine '}"${filePath}"  sql "${text}"`);
+		terminal.sendText(`${isWin ? '' : 'wine '}"${filePath}"  sql "${text}" -e "${node.label}"`);
 		vscode.window.onDidCloseTerminal(closedTerminal => {
 			if (closedTerminal === terminal) {
 				terminal = undefined;
