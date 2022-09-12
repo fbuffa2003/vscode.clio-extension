@@ -1,53 +1,173 @@
 {
-  "name": "ClioSQL",
-  "displayName": "clio-sql",
-  "description": "Clio SQL",
-  "version": "0.0.1",
-  "engines": {
-    "vscode": "^1.54.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "onCommand:ClioSQL.console"
-  ],
-  "main": "./out/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "ClioSQL.console",
-        "title": "Clio SQL"
-      },
-      {
-        "command": "ClioSQL.Test", 
-        "title": "Clio Test",
-        "icon": {
-            "light": "/assets/dark-preview.svg", 
-            "dark": "/assets/light-preview.svg"
-        }
-      }
-    ]
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
-  },
-  "devDependencies": {
-    "@types/vscode": "^1.54.0",
-    "@types/glob": "^7.2.0",
-    "@types/mocha": "^9.1.1",
-    "@types/node": "16.x",
-    "@typescript-eslint/eslint-plugin": "^5.31.0",
-    "@typescript-eslint/parser": "^5.31.0",
-    "eslint": "^8.20.0",
-    "glob": "^8.0.3",
-    "mocha": "^10.0.0",
-    "typescript": "^4.7.4",
-    "@vscode/test-electron": "^2.1.5"
-  }
+	"name": "ClioSQL",
+	"displayName": "clio-sql",
+	"description": "Clio SQL",
+	"version": "0.0.1",
+	"publisher": "Advance Technologies Foundation",
+	"license": "MIT",
+	"icon": "resources/creatio-triangle.png",
+	"engines": {
+		"vscode": "^1.54.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"keywords": [
+		"Creatio",
+		"Clio",
+		"CRM",
+		"Awesome",
+		"FreedomUI",
+		"LowCode"
+	],
+	"bugs": {
+		"url": "https://github.com/Advance-Technologies-Foundation/vscode.clio-extension/issues",
+		"email": "cweijan@163.com"
+	},
+	"homepage": "https://github.com/Advance-Technologies-Foundation/vscode.clio-extension/blob/main/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Advance-Technologies-Foundation/vscode.clio-extension"
+	},
+	"activationEvents": [
+		"onCommand:ClioSQL.console",
+		"onView:vscode-clio-extension.creatioExplorer"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "vscode-clio-extension",
+					"title": "Creatio Explorer",
+					"icon": "resources/icon/creatio-triangle.svg"
+				}
+			]
+		},
+		"views": {
+			"vscode-clio-extension": [
+				{
+					"id": "vscode-clio-extension.creatioExplorer",
+					"name": "Creatio Explorer",
+					"icon": "resources/icon/creatio-triangle.svg",
+					"contextualTitle": "Creatio Explorer"
+				}
+			]
+		},
+		"menus": {
+			"view/title": [
+				{
+					"command": "ClioSQL.AddConnection",
+					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
+					"group": "navigation@3"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "ClioSQL.flushDb",
+					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
+					"group": "inline"
+				},
+				{
+					"command": "ClioSQL.restart",
+					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
+					"group": "inline"
+				},
+				{
+					"command": "ClioSQL.ExecuteSql",
+					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
+					"group": "inline"
+				},
+				{
+					"command": "ClioSQL.GenerateModels",
+					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
+					"group": "inline"
+				},
+				{
+					"command": "ClioSQL.RestoreWorkspace",
+					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
+					"group": "inline"
+				}
+			]
+		},
+		"commands": [
+			{
+				"command": "ClioSQL.ExecuteSql",
+				"title": "Execute SQL",
+				"icon": {
+					"light": "resources/icon/DatabaseScript.svg",
+					"dark": "resources/icon/DatabaseScript.svg"
+				}
+			},
+			{
+				"command": "ClioSQL.Test",
+				"title": "Clio Test",
+				"icon": {
+					"light": "/assets/dark-preview.svg",
+					"dark": "/assets/light-preview.svg"
+				}
+			},
+			{
+				"command": "ClioSQL.AddConnection",
+				"title": "Add Connection",
+				"icon": {
+					"light": "resources/icon/Add.svg",
+					"dark": "resources/icon/Add.svg"
+				}
+			},
+			{
+				"command": "ClioSQL.flushDb",
+				"title": "Flush redis",
+				"icon": {
+					"light": "resources/icon/CleanData.svg",
+					"dark": "resources/icon/CleanData.svg"
+				}
+			},
+			{
+				"command": "ClioSQL.restart",
+				"title": "Restart web app",
+				"icon": {
+					"light": "resources/icon/Restart.svg",
+					"dark": "resources/icon/Restart.svg"
+				}
+			},
+			{
+				"command": "ClioSQL.GenerateModels",
+				"title": "Generate ATF Models",
+				"icon": {
+					"light": "resources/icon/DataGenerator.svg",
+					"dark": "resources/icon/DataGenerator.svg"
+				}
+			},
+			{
+				"command": "ClioSQL.RestoreWorkspace",
+				"title": "Restore workspace",
+				"icon": {
+					"light": "resources/icon/RestoreLocalServer.svg",
+					"dark": "resources/icon/RestoreLocalServer.svg"
+				}
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "npm run compile && npm run lint",
+		"lint": "eslint src --ext ts",
+		"test": "node ./out/test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/vscode": "^1.54.0",
+		"@types/glob": "^7.2.0",
+		"@types/mocha": "^9.1.1",
+		"@types/node": "16.x",
+		"@typescript-eslint/eslint-plugin": "^5.31.0",
+		"@typescript-eslint/parser": "^5.31.0",
+		"eslint": "^8.20.0",
+		"glob": "^8.0.3",
+		"mocha": "^10.0.0",
+		"typescript": "^4.7.4",
+		"@vscode/test-electron": "^2.1.5"
+	}
 }
