@@ -3,6 +3,8 @@ import { fileURLToPath } from 'url';
 import {EnvironmentService} from './service/environmentService';
 import { AddConnection, FormData } from './pannels/AddConnection';
 import {ClioExecutor} from './Common/clioExecutor';
+import { exec, spawn, ChildProcess } from 'child_process';
+
 
 let terminal: vscode.Terminal | undefined;
 let clioExecutor : ClioExecutor  | undefined;
@@ -26,7 +28,25 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 		//let sqlRequestResult = getClioExecutor().executeClioCommand(`sql "${text}" -e "${node.label}"`) as string;
-		getClioExecutor().executeCommandByTerminal(`sql "${text}" -e "${node.label}"`);
+		//getClioExecutor().executeCommandByTerminal(`sql "${text}" -e "${node.label}"`);
+		const cmd = `clio sql "${text}" -e ${node.label}`;
+
+		exec(cmd, (error, stdout, stderr )=>{
+			if(error){
+				vscode.window.showErrorMessage(error.message);
+			}
+			if(stdout){
+				vscode.workspace.openTextDocument({
+					language: 'text',
+					content: stdout
+				}).then(doc=>{
+					vscode.window.showTextDocument(doc);
+				});
+			}
+			if(stderr){
+				vscode.window.showErrorMessage(stderr);
+			}
+		});
 	});
 
 	context.subscriptions.push(disposable);
