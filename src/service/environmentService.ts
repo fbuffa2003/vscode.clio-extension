@@ -8,7 +8,7 @@ export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstan
 	private _onDidChangeTreeData: vscode.EventEmitter<CreatioInstance | undefined | void> = new vscode.EventEmitter<CreatioInstance | undefined | void>();
 	readonly onDidChangeTreeData: vscode.Event<CreatioInstance | undefined | void> = this._onDidChangeTreeData.event;
 	
-	refresh(): void {
+	public refresh(): void {
 		this._onDidChangeTreeData?.fire();
 	}
 
@@ -47,6 +47,8 @@ export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstan
 		);
 		return file;
 	}
+
+	
 }
 
 export class CreatioInstance extends vscode.TreeItem {

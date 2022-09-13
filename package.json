@@ -160,6 +160,10 @@
 					"light": "resources/icon/Open.svg",
 					"dark": "resources/icon/Open.svg"
 				}
+			},
+			{
+				"command": "ClioSQL.RegisterWebApp",
+				"title": "Register Web App"
 			}
 		]
 	},
