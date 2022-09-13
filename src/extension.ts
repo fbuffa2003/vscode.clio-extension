@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { fileURLToPath } from 'url';
 import {EnvironmentService} from './service/environmentService';
+import { AddConnection, FormData } from './pannels/AddConnection';
 
 
 let terminal: vscode.Terminal | undefined;
@@ -80,6 +81,29 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 	context.subscriptions.push(openCommand);
+
+	
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.RegisterWebApp", (args: FormData )=>{
+			let isWin = process.platform === 'win32';
+			terminal = terminal || vscode.window.createTerminal('clio sql console', isWin ? 'C:\\Windows\\System32\\cmd.exe' : undefined);
+			terminal.show();
+			terminal.sendText(`${isWin ? '' : 'wine '} ${clioPath} reg-web-app ${args.name} -u ${args.url} -l ${args.username} -p ${args.password} -m ${args.maintainer} -i ${args.isNetCore} -c ${args.isDeveloperModeEnabled} -s ${args.isSafe}`);
+
+			vscode.window.onDidCloseTerminal(closedTerminal => {
+				if (closedTerminal === terminal) {
+					terminal = undefined;
+				}
+			});
+			envService.refresh();
+	}));
+
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.AddConnection", ()=>{
+			AddConnection.createOrShow(context.extensionUri);
+		})
+	);
 
 }
 export function deactivate() {}
