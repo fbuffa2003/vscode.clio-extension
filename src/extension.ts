@@ -21,15 +21,39 @@ export function activate(context: vscode.ExtensionContext) {
 	const envService = new EnvironmentService();
 	vscode.window.registerTreeDataProvider('vscode-clio-extension.creatioExplorer', envService);
 
+
+	let showSqlDocument = vscode.commands.registerCommand('ClioSQL.OpenSqlDocument', (node: vscode.TreeItem) => {
+		
+		vscode.workspace.openTextDocument({
+			language: 'sql',
+			content: `-- connection_env:${node.label}`
+		}).then(doc=>{
+			let w = vscode.window.showTextDocument(doc);
+			vscode.commands.executeCommand("workbench.action.editor.changeLanguageMode", "sql");
+		});
+	});
+	context.subscriptions.push(showSqlDocument);
+
+
 	let disposable = vscode.commands.registerCommand('ClioSQL.ExecuteSql', (node: vscode.TreeItem) => {
+		
 		let commandsDocument = vscode.window.activeTextEditor?.document;
 		let text : string = commandsDocument?.getText() as string;
-		if(!text || !node.label){
+		let sqlText: string[] = text.split(/^-- connection_env:.*/, 2);
+
+		let envName: string = "";
+		let m =  text.match(/^-- connection_env:.*/);
+		
+		if(m){
+			envName = m[0].split(':',2)[1];
+		}
+		if(!sqlText[1] || !envName){
 			return;
 		}
-		//let sqlRequestResult = getClioExecutor().executeClioCommand(`sql "${text}" -e "${node.label}"`) as string;
-		//getClioExecutor().executeCommandByTerminal(`sql "${text}" -e "${node.label}"`);
-		const cmd = `clio sql "${text}" -e ${node.label}`;
+		
+		const sqlCmd = sqlText[1].replace('\r','').replace('\n','').trim();
+
+		const cmd = `clio sql "${sqlCmd}" -e ${envName}`;
 
 		exec(cmd, (error, stdout, stderr )=>{
 			if(error){
@@ -40,8 +64,11 @@ export function activate(context: vscode.ExtensionContext) {
 					language: 'text',
 					content: stdout
 				}).then(doc=>{
-					vscode.window.showTextDocument(doc);
+					vscode.window.showTextDocument(doc,{
+						viewColumn: vscode.ViewColumn.Beside
+					});
 				});
+
 			}
 			if(stderr){
 				vscode.window.showErrorMessage(stderr);

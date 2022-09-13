@@ -79,9 +79,9 @@
 					"group": "inline"
 				},
 				{
-					"command": "ClioSQL.ExecuteSql",
+					"command": "ClioSQL.OpenSqlDocument",
 					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "kebab"
+					"group": "inline"
 				},
 				{
 					"command": "ClioSQL.GenerateModels",
@@ -94,12 +94,24 @@
 					"group": "kebab"
 				}
 				
+			],
+			"editor/title": [
+				{
+				  "command": "ClioSQL.ExecuteSql",
+				  "group": "navigation"
+				}
+			],
+			"editor/context": [
+				{
+				  "command": "ClioSQL.ExecuteSql",
+				  "group": "navigation"
+				}
 			]
 		},
 		"commands": [
 			{
 				"command": "ClioSQL.ExecuteSql",
-				"title": "Execute SQL",
+				"title": "Clio - Execute SQL",
 				"icon": {
 					"light": "resources/icon/DatabaseScript.svg",
 					"dark": "resources/icon/DatabaseScript.svg"
@@ -164,6 +176,14 @@
 			{
 				"command": "ClioSQL.RegisterWebApp",
 				"title": "Register Web App"
+			},
+			{
+				"command": "ClioSQL.OpenSqlDocument",
+				"title": "Open Sql Document",
+				"icon": {
+					"light": "resources/icon/DatabaseScript.svg",
+					"dark": "resources/icon/DatabaseScript.svg"
+				}
 			}
 		]
 	},
