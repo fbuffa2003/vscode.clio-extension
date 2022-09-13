@@ -59,16 +59,7 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.RegisterWebApp", (args: FormData )=>{
-			let isWin = process.platform === 'win32';
-			terminal = terminal || vscode.window.createTerminal('clio sql console', isWin ? 'C:\\Windows\\System32\\cmd.exe' : undefined);
-			terminal.show();
-			terminal.sendText(`${isWin ? '' : 'wine '} ${clioPath} reg-web-app ${args.name} -u ${args.url} -l ${args.username} -p ${args.password} -m ${args.maintainer} -i ${args.isNetCore} -c ${args.isDeveloperModeEnabled} -s ${args.isSafe}`);
-
-			vscode.window.onDidCloseTerminal(closedTerminal => {
-				if (closedTerminal === terminal) {
-					terminal = undefined;
-				}
-			});
+			getClioExecutor().executeCommandByTerminal(`reg-web-app ${args.name} -u ${args.url} -l ${args.username} -p ${args.password} -m ${args.maintainer} -i ${args.isNetCore} -c ${args.isDeveloperModeEnabled} -s ${args.isSafe}`);
 			envService.refresh();
 	}));
 
