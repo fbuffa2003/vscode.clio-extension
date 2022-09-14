@@ -1,4 +1,5 @@
 import { format } from "path";
+import path = require("path");
 import * as vscode from "vscode";
 import { getNonce } from "./getNonce";
 
@@ -14,7 +15,7 @@ export class AddConnection
 	public static createOrShow(extensionUri: vscode.Uri) 
 	{
 		const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
-
+		
 		// If we already have a panel, show it.
 		if (AddConnection.currentPanel) 
 		{
@@ -23,22 +24,36 @@ export class AddConnection
 			return;
 		}
 
+		const options :vscode.WebviewOptions = {
+			enableScripts : true,
+			localResourceRoots: [
+				vscode.Uri.joinPath(extensionUri, "media")
+			],
+			
+		};
+
 		// Otherwise, create a new panel.
 		const panel = vscode.window.createWebviewPanel(
 			AddConnection.viewType, 
-			"Add new connection", 
+			"Add new connection",
 			column || vscode.ViewColumn.One,
-			{
-				// Enable javascript in the webview
-				enableScripts: true,
+			options
+			// {
+			// 	// Enable javascript in the webview
+			// 	enableScripts: true,
 
-				// And restrict the webview to only loading content from our extension's `media` directory.
-				localResourceRoots: [
-					vscode.Uri.joinPath(extensionUri, "media")
-				],
-			}
+			// 	// And restrict the webview to only loading content from our extension's `media` directory.
+			// 	localResourceRoots: [
+			// 		vscode.Uri.joinPath(extensionUri, "media")
+			// 	],
+			// }
 		);
+		panel.title = "Add new Connection";
 
+		panel.iconPath = {
+			light: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'creatio-circle-white.svg'),
+			dark: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'creatio-circle-white.svg')
+		};
 		AddConnection.currentPanel = new AddConnection(panel, extensionUri);
 	}
 
@@ -105,7 +120,7 @@ export class AddConnection
 		
 		// And the uri we use to load this script in the webview
 		const scriptUri = webview.asWebviewUri(scriptPathOnDisk);
-
+		
 		// // Use a nonce to only allow specific scripts to be run
 		const nonce = getNonce();
 		
