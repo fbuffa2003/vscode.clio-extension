@@ -1,5 +1,3 @@
-import { format } from "path";
-import path = require("path");
 import * as vscode from "vscode";
 import { getNonce } from "./getNonce";
 
@@ -7,7 +5,6 @@ export class AddConnection
 {
 	public static currentPanel: AddConnection | undefined;
 	public static readonly viewType = "AddConnection";
-
 	private readonly _panel: vscode.WebviewPanel;
 	private readonly _extensionUri: vscode.Uri;
 	private _disposables: vscode.Disposable[] = [];
@@ -169,21 +166,53 @@ export class AddConnection
 	}
 
 	private _deserializeData(obj: any): FormData{
-		
 		const a : FormData = obj;
 		return obj;
 	}
-
 }
 
+/**
+ * Data Model
+ */
 export interface FormData{
 
+	/**
+	 * Connection Name
+	 */
 	name: string;
+
+	/**
+	 * Connection url
+	 */
 	url : string;
+
+	/**
+	 * Username for the connection
+	 */
 	username: string;
+
+	/**
+	 * Password for the connection
+	 */
 	password: string;
+
+	/**
+	 * Maintainer for the connection
+	 */
 	maintainer: string;
+
+	/**
+	 * Indicates that connection to a NetCore Creatio instance
+	 */
 	isNetCore: boolean;
+
+	/**
+	 * Will ask for confirmation for every command
+	 */
 	isSafe: boolean;
+
+	/**
+	 * Will unlock packages
+	 */
 	isDeveloperModeEnabled: boolean;
 }

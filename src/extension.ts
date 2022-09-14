@@ -3,9 +3,7 @@ import { fileURLToPath } from 'url';
 import {CreatioInstance, EnvironmentService, HealthStatus} from './service/environmentService';
 import { AddConnection, FormData } from './pannels/AddConnection';
 import {ClioExecutor} from './Common/clioExecutor';
-import { exec, spawn, ChildProcess } from 'child_process';
-import { cpSync } from 'fs';
-import { DiffieHellman } from 'crypto';
+import { exec } from 'child_process';
 
 
 let terminal: vscode.Terminal | undefined;
@@ -98,9 +96,20 @@ export function activate(context: vscode.ExtensionContext) {
 
 	
 	context.subscriptions.push(
-		vscode.commands.registerCommand("ClioSQL.RegisterWebApp", (args: FormData )=>{
-			getClioExecutor().executeCommandByTerminal(`reg-web-app ${args.name} -u ${args.url} -l ${args.username} -p ${args.password} -m ${args.maintainer} -i ${args.isNetCore} -c ${args.isDeveloperModeEnabled} -s ${args.isSafe}`);
-			envService.refresh();
+		vscode.commands.registerCommand("ClioSQL.RegisterWebApp", async (args: FormData )=>{
+			const cmd = ` clio reg-web-app ${args.name} -u ${args.url} -l ${args.username} -p ${args.password} -m ${args.maintainer} -i ${args.isNetCore} -c ${args.isDeveloperModeEnabled} -s ${args.isSafe}`;
+			exec(cmd, (error, stdout, stderr )=>{
+				if(error){
+					vscode.window.showErrorMessage(error.message, "OK")
+					.then(answer=>{
+						AddConnection.kill();
+					});
+				}
+				if(stdout){
+					envService.addNewNode(new CreatioInstance(args.name, args.url, vscode.TreeItemCollapsibleState.Collapsed));
+					AddConnection.kill();
+				}
+			});
 	}));
 
 	// HealthCheck Command

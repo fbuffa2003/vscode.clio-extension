@@ -11,9 +11,12 @@ export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstan
 	
 	private instances : Array<CreatioInstance> = [];
 
+	/**
+	 * Gets initial values from appsettings.json
+	 * @returns 
+	 */
 	private getInitialInstances(): void {
-
-		if(this.instances && this.instances.length>0) {return;};
+		this.instances = [];
 		const settingsFile = this.getClioEnvironments();
 		const json = JSON.parse(settingsFile);
 		const environments = json['Environments'];
@@ -38,6 +41,16 @@ export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstan
 		this._onDidChangeTreeData?.fire();
 	}
 
+	/**
+	 * Adds new node to the existing tree
+	 * @param node Node to add
+	 */
+	public async addNewNode(node : CreatioInstance){
+		await node.checkHealth(this);
+		this.instances.push(node);
+		this.refresh();
+	}
+
 	public async updateNode(node: CreatioInstance) {
 		await node.checkHealth(this);
 	}
@@ -48,11 +61,17 @@ export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstan
 	
 	getChildren(element?: CreatioInstance | undefined): vscode.ProviderResult<CreatioInstance[]> {
 		if(!element){
-			this.getInitialInstances();
+			if(this.instances && this.instances.length === 0){
+				this.getInitialInstances();
+			}
 			return Promise.resolve(this.instances);
 		}
 	}
 
+	/**
+	 * Gets content of appsettings.json
+	 * @returns content of appsettings.json
+	 */
 	private getClioEnvironments() : string {
 		let file = fs.readFileSync(
 			path.join(getAppDataPath() + "\\..\\Local\\creatio\\clio\\appsettings.json"),
@@ -79,32 +98,37 @@ export class CreatioInstance extends vscode.TreeItem {
 		this.setUnknownHealthIcon();
 	}
 	
-	public async checkHealth(envService: EnvironmentService): Promise<void>{
+	/**
+	 * Checks node health
+	 * @param envService 
+	 */
+	public async checkHealth(envService?: EnvironmentService): Promise<void>{
 		const cmd = `clio hc ${this.label} -a true -h true`;
 			exec(cmd, (error, stdout, stderr )=>{
 				if(error){
 					this.setHealthStatus(HealthStatus.UnHealthy);
-					envService.refresh();
+					envService?.refresh();
 				}
 				if(stdout){
 					let isWebHostOk =  stdout.match(/\tWebHost - OK/);
 					let isWebAppLoaderOk = stdout.match(/\tWebAppLoader - OK/);
 					if(isWebAppLoaderOk && isWebHostOk){
 						this.setHealthStatus(HealthStatus.Healthy);
-						envService.refresh();
+						envService?.refresh();
 					}else{
 						this.setHealthStatus(HealthStatus.UnHealthy);
-						envService.refresh();
+						envService?.refresh();
 					}
 				}
 				if(stderr){
 					this.setHealthStatus(HealthStatus.UnHealthy);
-					envService.refresh();
+					envService?.refresh();
 				}
 			});
 	}
 
-	public setHealthStatus(status: HealthStatus): void {
+
+	private setHealthStatus(status: HealthStatus): void {
 		switch (status){
 			case  HealthStatus.Unknown : {
 				this.setUnknownHealthIcon();
