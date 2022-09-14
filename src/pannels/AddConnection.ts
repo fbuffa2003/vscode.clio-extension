@@ -138,19 +138,19 @@ export class AddConnection
 					<body>
 						<form id='add-new-connection' class='add-new-connection'>
 							<label for="cname">Connection name:</label><br>
-							<input type="text" id="cname" name="cname"><br><br>
+							<input type="text" id="cname" name="cname" size="40" placeholder="MyConnection"><br><br>
 
 							<label for="url">Creatio Url:</label><br>
-							<input type="text" id="url" name="url" size="50" placeholder="https://myInstance.creatio.com"><br><br>
+							<input type="text" id="url" name="url" size="40" placeholder="https://myInstance.creatio.com"><br><br>
 							
 							<label for="username">Username:</label><br>
-							<input type="text" id="username" name="username" placeholder="Supervisor"><br><br>
+							<input type="text" id="username" name="username" size="40" placeholder="Supervisor"><br><br>
 							
 							<label for="password">Password:</label><br>
-							<input type="password" id="password" name="password" placeholder="Supervisor"><br><br>
+							<input type="password" id="password" name="password" size="40" placeholder="Supervisor"><br><br>
 							
 							<label for="maintainer">Maintainer:</label><br>
-							<input type="text" id="maintainer" name="maintainer" placeholder="Customer"><br><br>
+							<input type="text" id="maintainer" name="maintainer" size="40" placeholder="Customer"><br><br>
 							
 							<label for="isNetCore">Is NetCore</label>
 							<input type="checkbox" id="isNetCore" name="isNetCore" value="isNetCore"><br>

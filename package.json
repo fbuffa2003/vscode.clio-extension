@@ -86,12 +86,17 @@
 				{
 					"command": "ClioSQL.GenerateModels",
 					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "kebab"
+					"group": "breadcrumbs"
 				},
 				{
 					"command": "ClioSQL.RestoreWorkspace",
 					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "kebab"
+					"group": "breadcrumbs"
+				},
+				{
+					"command": "ClioSQL.HealthCheck",
+					"when": "viewItem == CreatioInstance",
+					"group": "breadcrumbs"
 				}
 				
 			],
@@ -183,6 +188,14 @@
 				"icon": {
 					"light": "resources/icon/DatabaseScript.svg",
 					"dark": "resources/icon/DatabaseScript.svg"
+				}
+			},
+			{
+				"command": "ClioSQL.HealthCheck",
+				"title": "Health check",
+				"icon": {
+					"light": "resources/icon/Health.svg",
+					"dark": "resources/icon/Health.svg"
 				}
 			}
 		]
