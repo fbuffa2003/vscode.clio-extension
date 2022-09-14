@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
-import { fileURLToPath } from 'url';
 import {CreatioInstance, EnvironmentService, HealthStatus} from './service/environmentService';
 import { AddConnection, FormData } from './pannels/AddConnection';
 import {ClioExecutor} from './Common/clioExecutor';
 import { exec } from 'child_process';
-
+import { writeFileSync, rmSync } from 'fs';
+import getAppDataPath from 'appdata-path';
+import path = require('path');
+import { randomUUID } from 'crypto';
 
 let terminal: vscode.Terminal | undefined;
 let clioExecutor : ClioExecutor  | undefined;
@@ -46,7 +48,11 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 		const sqlCmd = sqlText[1].replace('\r','').replace('\n','').trim();
-		const cmd = `clio sql "${sqlCmd}" -e ${envName}`;
+
+		const filePath = path.join(getAppDataPath() + `\\..\\Local\\creatio\\clio\\${randomUUID()}.sql`);
+		writeFileSync(filePath,sqlText[1]);
+		
+		const cmd = `clio sql -f "${filePath}" -e ${envName}`;
 		exec(cmd, (error, stdout, stderr )=>{
 			if(error){
 				vscode.window.showErrorMessage(error.message);
@@ -56,9 +62,10 @@ export function activate(context: vscode.ExtensionContext) {
 					language: 'text',
 					content: stdout
 				}).then(doc=>{
-					vscode.window.showTextDocument(doc,{
+					vscode.window.showTextDocument(doc, {
 						viewColumn: vscode.ViewColumn.Beside
 					});
+					rmSync(filePath);
 				});
 			}
 			if(stderr){
