@@ -1,3 +1,4 @@
+import { exec } from 'child_process';
 import * as vscode from 'vscode';
 
 export class ClioExecutor {
@@ -57,6 +58,20 @@ export class ClioExecutor {
 	    return procData;
     }
 
-
-
+	public async ExecuteClioCommand(command: string): Promise<string>{
+		
+		return new Promise<string>((resolve, reject)=>{
+			exec(command, (error, stdout, stderr )=>{
+				if(error){
+					resolve(error?.message);
+				}
+				if(stdout){
+					resolve(stdout);
+				}
+				if(stderr){
+					resolve(stderr);
+				}
+			});
+		});
+	}
 }

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import {CreatioInstance, EnvironmentService, HealthStatus} from './service/environmentService';
-import { AddConnection, FormData } from './pannels/AddConnection';
+import { AddConnection, FormData } from './panels/AddConnection';
 import {ClioExecutor} from './Common/clioExecutor';
 import { exec } from 'child_process';
 import { writeFileSync, rmSync } from 'fs';
@@ -8,8 +8,8 @@ import getAppDataPath from 'appdata-path';
 import path = require('path');
 import { randomUUID } from 'crypto';
 
-let terminal: vscode.Terminal | undefined;
-let clioExecutor : ClioExecutor  | undefined;
+// let terminal: vscode.Terminal | undefined;
+let clioExecutor : ClioExecutor | undefined;
 
 function getClioExecutor(): ClioExecutor {
 	if(clioExecutor){
@@ -23,7 +23,6 @@ export function activate(context: vscode.ExtensionContext) {
 	const envService = new EnvironmentService();
 	vscode.window.registerTreeDataProvider('vscode-clio-extension.creatioExplorer', envService);
 
-
 	let showSqlDocument = vscode.commands.registerCommand('ClioSQL.OpenSqlDocument', (node: vscode.TreeItem) => {
 		vscode.workspace.openTextDocument({
 			language: 'sql',
@@ -34,7 +33,8 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 	context.subscriptions.push(showSqlDocument);
-	let disposable = vscode.commands.registerCommand('ClioSQL.ExecuteSql', (node: vscode.TreeItem) => {
+	
+	const executeSqlCommand = vscode.commands.registerCommand('ClioSQL.ExecuteSql', async (node: vscode.TextDocument) => {
 		let commandsDocument = vscode.window.activeTextEditor?.document;
 		let text : string = commandsDocument?.getText() as string;
 		let sqlText: string[] = text.split(/^-- connection_env:.*/, 2);
@@ -47,60 +47,44 @@ export function activate(context: vscode.ExtensionContext) {
 		if(!sqlText[1] || !envName){
 			return;
 		}
-		const sqlCmd = sqlText[1].replace('\r','').replace('\n','').trim();
-
-		const filePath = path.join(getAppDataPath() + `\\..\\Local\\creatio\\clio\\${randomUUID()}.sql`);
-		writeFileSync(filePath,sqlText[1]);
-		
-		const cmd = `clio sql -f "${filePath}" -e ${envName}`;
-		exec(cmd, (error, stdout, stderr )=>{
-			if(error){
-				vscode.window.showErrorMessage(error.message);
-			}
-			if(stdout){
-				vscode.workspace.openTextDocument({
-					language: 'text',
-					content: stdout
-				}).then(doc=>{
-					vscode.window.showTextDocument(doc, {
-						viewColumn: vscode.ViewColumn.Beside
-					});
-					rmSync(filePath);
+		const sqlCmd = sqlText[1].replace('\r','').replace('\n','').trim();		
+		const result = await envService.findInstanceByName(envName)?.executeSql(sqlCmd);
+		vscode.workspace.openTextDocument({
+				language: 'text',
+				content: result
+			})
+			.then(doc => {
+				vscode.window.showTextDocument(doc, {
+					viewColumn: vscode.ViewColumn.Beside
 				});
-			}
-			if(stderr){
-				vscode.window.showErrorMessage(stderr);
-			}
-		});
+			});
 	});
-
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(executeSqlCommand);
 	
-	let restartCommand = vscode.commands.registerCommand('ClioSQL.restart', (node: vscode.TreeItem) => {
-		if(!node.label){
-			return;
-		}
-		getClioExecutor().executeCommandByTerminal(`restart -e "${node.label}"`);
-	});
-	context.subscriptions.push(restartCommand);
 
+	context.subscriptions.push( 
+		vscode.commands.registerCommand('ClioSQL.restart', async (node: CreatioInstance) => {
+			if(node){
+				await node.restartWebApp();
+			}
+		})
+	);
 
-	let flushdbCommand = vscode.commands.registerCommand('ClioSQL.flushDb', (node: vscode.TreeItem) => {
-		if(!node.label){
-			return;
-		}
-		getClioExecutor().executeCommandByTerminal(`flushdb -e "${node.label}"`);
-	});
-	context.subscriptions.push(flushdbCommand);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ClioSQL.flushDb', async (node: CreatioInstance) => {
+			if(node){
+				await node.flushDb();
+			}
+		})
+	);
 
-	let openCommand = vscode.commands.registerCommand('ClioSQL.Open', (node: vscode.TreeItem) => {
-		if(!node.label){
-			return;
-		}
-		getClioExecutor().executeCommandByTerminal(`open -e "${node.label}"`);
-	});
-	context.subscriptions.push(openCommand);
-
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ClioSQL.Open', async (node: CreatioInstance) => {
+			if(node){
+				await node.openInBrowser();
+			}
+		})
+	);
 	
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.RegisterWebApp", async (args: FormData )=>{
@@ -108,7 +92,7 @@ export function activate(context: vscode.ExtensionContext) {
 			exec(cmd, (error, stdout, stderr )=>{
 				if(error){
 					vscode.window.showErrorMessage(error.message, "OK")
-					.then(answer=>{
+					.then(answer => {
 						AddConnection.kill();
 					});
 				}
@@ -117,15 +101,14 @@ export function activate(context: vscode.ExtensionContext) {
 					AddConnection.kill();
 				}
 			});
-	}));
+		})
+	);
 
-	// HealthCheck Command
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ClioSQL.HealthCheck', async (node: CreatioInstance) => {
-			if(!node.label){
-				return;
+			if(node){
+				await node.checkHealth();
 			}
-			await envService.updateNode(node);
 		})
 	);
 
