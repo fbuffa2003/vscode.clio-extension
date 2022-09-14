@@ -132,7 +132,7 @@ export class AddConnection
 							<input type="text" id="username" name="username" placeholder="Supervisor"><br><br>
 							
 							<label for="password">Password:</label><br>
-							<input type="text" id="password" name="password" placeholder="Supervisor"><br><br>
+							<input type="password" id="password" name="password" placeholder="Supervisor"><br><br>
 							
 							<label for="maintainer">Maintainer:</label><br>
 							<input type="text" id="maintainer" name="maintainer" placeholder="Customer"><br><br>
