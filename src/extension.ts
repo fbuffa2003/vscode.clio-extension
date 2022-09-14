@@ -7,6 +7,7 @@ import { writeFileSync, rmSync } from 'fs';
 import getAppDataPath from 'appdata-path';
 import path = require('path');
 import { randomUUID } from 'crypto';
+import { InstallMarketplaceApp } from './panels/MarketplaceApp';
 
 // let terminal: vscode.Terminal | undefined;
 let clioExecutor : ClioExecutor | undefined;
@@ -36,9 +37,9 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	const executeSqlCommand = vscode.commands.registerCommand('ClioSQL.ExecuteSql', async (node: vscode.TextDocument) => {
 		let commandsDocument = vscode.window.activeTextEditor?.document;
-		let text : string = commandsDocument?.getText() as string;
-		let sqlText: string[] = text.split(/^-- connection_env:.*/, 2);
-		let envName: string = "";
+		let text : String = commandsDocument?.getText() as string;
+		let sqlText: String[] = text.split(/^-- connection_env:.*/, 2);
+		let envName: String = "";
 		let m =  text.match(/^-- connection_env:.*/);
 		
 		if(m){
@@ -49,15 +50,18 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 		const sqlCmd = sqlText[1].replace('\r','').replace('\n','').trim();		
 		const result = await envService.findInstanceByName(envName)?.executeSql(sqlCmd);
+		
 		vscode.workspace.openTextDocument({
-				language: 'text',
-				content: result
-			})
-			.then(doc => {
-				vscode.window.showTextDocument(doc, {
-					viewColumn: vscode.ViewColumn.Beside
-				});
+			language: 'text',
+			content : (result|| '').toString()
+		})
+		.then(doc => {
+			vscode.window.showTextDocument(doc, {
+				viewColumn: vscode.ViewColumn.Beside
 			});
+		});
+		
+		
 	});
 	context.subscriptions.push(executeSqlCommand);
 	
@@ -115,6 +119,12 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.AddConnection", ()=>{
 			AddConnection.createOrShow(context.extensionUri);
+		})
+	);
+	
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.InstallMarketplaceApp", ()=>{
+			InstallMarketplaceApp.createOrShow(context.extensionUri);
 		})
 	);
 

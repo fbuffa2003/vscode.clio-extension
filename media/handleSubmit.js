@@ -32,4 +32,11 @@
         break;
     }
   });
+
+  window.addEventListener('click', (event)=>{
+	vscode.postMessage({
+		command: 'submit',
+		data: event.path[0].id,
+	  });
+  });
 }());

@@ -60,6 +60,11 @@
 					"command": "ClioSQL.AddConnection",
 					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
 					"group": "navigation@3"
+				},
+				{
+					"command": "ClioSQL.InstallMarketplaceApp",
+					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
+					"group": "navigation@3"
 				}
 			],
 			"view/item/context": [
@@ -133,6 +138,14 @@
 			{
 				"command": "ClioSQL.AddConnection",
 				"title": "Add Connection",
+				"icon": {
+					"light": "resources/icon/Add.svg",
+					"dark": "resources/icon/Add.svg"
+				}
+			},
+			{
+				"command": "ClioSQL.InstallMarketplaceApp",
+				"title": "Instal marketplace app",
 				"icon": {
 					"light": "resources/icon/Add.svg",
 					"dark": "resources/icon/Add.svg"

@@ -19,7 +19,7 @@ export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstan
 		this._onDidChangeTreeData.fire(underChange);
 	}
 
-	public findInstanceByName(name: string): CreatioInstance | undefined {
+	public findInstanceByName(name: String): CreatioInstance | undefined {
 		return this.instances.find(instance => instance.label===name);
 	}
 	/**
@@ -164,7 +164,7 @@ export class CreatioInstance extends vscode.TreeItem {
 		this.clioExecutor.executeCommandByTerminal(`flushdb -e "${this.label}"`);
 	}
 
-	public async executeSql(sqlText: string): Promise<string>{
+	public async executeSql(sqlText: String): Promise<String>{
 		const dir = `${getAppDataPath()}\\..\\Local\\creatio\\clio\\SQL`;
 		if(!fs.existsSync(dir)){
 			fs.mkdirSync(dir);
