@@ -195,7 +195,7 @@
 				"command": "ClioSQL.Open",
 				"title": "Open application",
 				"icon": {
-					"light": "resources/icon/home.svg",
+					"light": "resources/icon/homeDark.svg",
 					"dark": "resources/icon/home.svg"
 				}
 			},

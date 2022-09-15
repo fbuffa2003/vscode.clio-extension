@@ -116,6 +116,16 @@ export class AddConnection
 		// And the uri we use to load this script in the webview
 		const scriptUri = webview.asWebviewUri(scriptPathOnDisk);
 		
+		
+		//const cssPathOnDisk = vscode.Uri.joinPath(this._extensionUri, 'media','css.css');
+				
+		// And the uri we use to load this script in the webview
+		//const cssUri = webview.asWebviewUri(cssPathOnDisk);
+
+		const stylesPathMainPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'css.css');
+		const stylesMainUri = webview.asWebviewUri(stylesPathMainPath);
+
+
 		// // Use a nonce to only allow specific scripts to be run
 		const nonce = getNonce();
 		
@@ -129,7 +139,9 @@ export class AddConnection
 						-->
 						<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}';">
 						<meta name="viewport" content="width=device-width, initial-scale=1.0">
+						<link href="${stylesMainUri}" rel="stylesheet">
 					</head>
+					
 					<body>
 						<form id='add-new-connection' class='add-new-connection'>
 							<label for="cname">Connection name:</label><br>
@@ -146,17 +158,17 @@ export class AddConnection
 							
 							<label for="maintainer">Maintainer:</label><br>
 							<input type="text" id="maintainer" name="maintainer" size="40" placeholder="Customer"><br><br>
-							
+							<div id="CheckBoxes">
 							<label for="isNetCore">Is NetCore</label>
-							<input type="checkbox" id="isNetCore" name="isNetCore" value="isNetCore"><br>
+							<input type="checkbox" id="isNetCore" name="isNetCore" value="isNetCore">
 
 							<label for="isSafe">Is Safe</label>
-							<input type="checkbox" id="isSafe" name="isSafe" value="isSafe"><br>
+							<input type="checkbox" id="isSafe" name="isSafe" value="isSafe">
 
 							<label for="isDeveloperModeEnabled">Is Developer Mode Enabled</label>
 							<input type="checkbox" id="isDeveloperModeEnabled" name="isDeveloperModeEnabled" value="isDeveloperModeEnabled"><br><br><br>
-
-							<input type="submit" value="Save">
+							</div>
+							<input id="MainButton" type="submit" value="Save">
 						</form>
 						<script nonce="${nonce}" src="${scriptUri}"></script>
 					</body>
