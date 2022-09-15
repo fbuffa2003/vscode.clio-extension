@@ -1,14 +1,9 @@
-import getAppDataPath from 'appdata-path';
 import { ClioExecutor } from '../Common/clioExecutor';
 import { BaseCommand, ICanExecuteValidationResult, ICommand, ICommandArgs, ICommandResponse } from './BaseCommand';
-import * as fs from 'fs';
-import { rm, writeFile } from 'fs/promises';
-import { randomUUID } from 'crypto';
-import path = require('path');
 
 /**
- * SQL arguments
- * - See clio {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/README.md#execute-custom-sql-script documentation}
+ * RegisterWebApp arguments
+ * - See _clio Create/Update environment_ {@link https://github.com/Advance-Technologies-Foundation/clio#createupdate-an-environment documentation}
  */
 export interface IRegisterWebAppArgs extends ICommandArgs{
 	
@@ -49,15 +44,12 @@ export interface IRegisterWebAppArgs extends ICommandArgs{
 }
 
 /**
- * SQL response
+ * RegisterWebApp response
  */
 export interface IRegisterWebAppResponse extends ICommandResponse{}
 
 export class RegisterWebApp extends BaseCommand implements ICommand<IRegisterWebAppArgs, IRegisterWebAppResponse> {
 	
-	/**
-	 * Constructor
-	 */
 	constructor(public executor: ClioExecutor) {
 		super(executor);
 	}
@@ -96,7 +88,7 @@ export class RegisterWebApp extends BaseCommand implements ICommand<IRegisterWeb
 			throw new Error(`${this._validationResult.message}`);
 		}
 
-		const cmd = ` clio reg-web-app ${args.environmentName} -u ${args.url} -l ${args.username} -p ${args.password} -m ${args.maintainer} -i ${args.isNetCore} -c ${args.isDeveloperModeEnabled} -s ${args.isSafe}`;
+		const cmd = `clio reg-web-app ${args.environmentName} -u ${args.url} -l ${args.username} -p ${args.password} -m ${args.maintainer} -i ${args.isNetCore} -c ${args.isDeveloperModeEnabled} -s ${args.isSafe}`;
 		const result = await this.executor.ExecuteClioCommand(cmd);
 		return this.convertResult(result, args);
 	}
