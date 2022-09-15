@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import {CreatioInstance, EnvironmentService, HealthStatus} from './service/environmentService';
+import {EnvironmentService, HealthStatus} from './service/environmentService';
+import { CreatioInstance } from "./service/CreatioInstance";
 import { AddConnection, FormData } from './panels/AddConnection';
 import {ClioExecutor} from './Common/clioExecutor';
 import { exec } from 'child_process';
