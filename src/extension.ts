@@ -13,6 +13,7 @@ import { Clio } from './commands/Clio';
 import { IFlushDbArgs } from './commands/FlushDbCommand';
 import { resourceLimits } from 'worker_threads';
 import { IRegisterWebAppArgs } from './commands/RegisterWebAppCommand';
+import { TextEditor } from 'vscode';
 
 // let terminal: vscode.Terminal | undefined;
 let clioExecutor : ClioExecutor | undefined;
@@ -32,9 +33,15 @@ export function activate(context: vscode.ExtensionContext) {
 	let showSqlDocument = vscode.commands.registerCommand('ClioSQL.OpenSqlDocument', (node: vscode.TreeItem) => {
 		vscode.workspace.openTextDocument({
 			language: 'sql',
-			content: `-- connection_env:${node.label}`
+			content: `-- connection_env:${node.label}\r\n`
 		}).then(doc=>{
-			let w = vscode.window.showTextDocument(doc);
+			let w = vscode.window.showTextDocument(doc).then((textEditor: TextEditor) => {
+				const lineNumber = 1;
+				const characterNumberOnLine = 1;
+				const position = new vscode.Position(lineNumber, characterNumberOnLine);
+				const newSelection = new vscode.Selection(position, position);
+				textEditor.selection = newSelection;
+			  });
 			vscode.commands.executeCommand("workbench.action.editor.changeLanguageMode", "sql");
 		});
 	});

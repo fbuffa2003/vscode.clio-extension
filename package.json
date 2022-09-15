@@ -60,11 +60,6 @@
 					"command": "ClioSQL.AddConnection",
 					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
 					"group": "navigation@3"
-				},
-				{
-					"command": "ClioSQL.InstallMarketplaceApp",
-					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "navigation@3"
 				}
 			],
 			"view/item/context": [
