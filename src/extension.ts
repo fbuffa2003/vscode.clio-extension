@@ -86,6 +86,14 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
+	context.subscriptions.push( 
+		vscode.commands.registerCommand('ClioSQL.Unreg', async (node: CreatioInstance) => {
+			if(node){
+				await node.UnregWebApp();
+			}
+		})
+	);
+
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ClioSQL.flushDb', async (node: CreatioInstance) => {
 			if(node){

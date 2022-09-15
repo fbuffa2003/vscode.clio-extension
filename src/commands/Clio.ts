@@ -4,6 +4,8 @@ import {FlushDb,IFlushDbArgs,IFlushDbResponse } from './FlushDbCommand';
 import { HealthCheck, IHealthCheckArgs, IHealthCheckResponse } from './HealthCheckCommand';
 import { IRegisterWebAppArgs, IRegisterWebAppResponse, RegisterWebApp } from './RegisterWebAppCommand';
 import { ISqlArgs, ISqlResponse, Sql } from './SqlCommand';
+import { UnregWebApp } from './UnregWebApp';
+
 
 export class Clio {
 	private readonly executor : ClioExecutor = new ClioExecutor();
@@ -13,6 +15,12 @@ export class Clio {
 	 * - See _clear redis database_ {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/README.md#clear-redis-database **documentation**}
 	 */
 	public readonly flushDb: ICommand<IFlushDbArgs,IFlushDbResponse> = new FlushDb(this.executor);
+
+	/**
+	 * Command abstraction to unreg web app
+	 * - See _Delete the existing environment_ {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/README.md#delete-the-existing-environment **documentation**}
+	 */
+	public readonly unregWebApp: ICommand<IFlushDbArgs,IFlushDbResponse> = new UnregWebApp(this.executor);
 	
 	/**
 	 * Command abstraction to execute sql scripts

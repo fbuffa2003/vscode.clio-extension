@@ -13,6 +13,8 @@ export class CreatioInstance extends vscode.TreeItem {
 
 	private _onDidStatusUpdate: vscode.EventEmitter<CreatioInstance> = new vscode.EventEmitter<CreatioInstance>();
 	readonly onDidStatusUpdate: vscode.Event<CreatioInstance> = this._onDidStatusUpdate.event;
+	private _onDeleted: vscode.EventEmitter<CreatioInstance> = new vscode.EventEmitter<CreatioInstance>();
+	readonly onDeleted: vscode.Event<CreatioInstance> = this._onDeleted.event;
 	private readonly clioExecutor: ClioExecutor;
 	private readonly clio: Clio;
 
@@ -77,6 +79,25 @@ export class CreatioInstance extends vscode.TreeItem {
 				vscode.window.showInformationMessage(`Flushdb : ${result.message}`);
 			} else if (!result.success) {
 				vscode.window.showErrorMessage(`Flushdb : ${result.message}`);
+			}
+		}
+	}
+
+		/**
+	 * Flushes redis
+	 */
+	public async UnregWebApp(): Promise<void> {
+		const args: IFlushDbArgs = {
+			environmentName: this.label
+		};
+		const isArgValid = this.clio.unregWebApp.canExecute(args);
+		if (isArgValid) {
+			const result = await this.clio.unregWebApp.executeAsync(args);
+			if (result.success) {
+				this._onDeleted?.fire(this);
+				vscode.window.showInformationMessage(`Unreg web app : ${result.message}`);
+			} else if (!result.success) {
+				vscode.window.showErrorMessage(`Unreg web app : ${result.message}`);
 			}
 		}
 	}

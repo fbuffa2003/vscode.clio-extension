@@ -84,6 +84,11 @@
 					"group": "inline"
 				},
 				{
+					"command": "ClioSQL.Unreg",
+					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
+					"group": "inline"
+				},
+				{
 					"command": "ClioSQL.GenerateModels",
 					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
 					"group": "breadcrumbs"
@@ -160,6 +165,14 @@
 				"icon": {
 					"light": "resources/icon/Restart.svg",
 					"dark": "resources/icon/Restart.svg"
+				}
+			},
+			{
+				"command": "ClioSQL.Unreg",
+				"title": "Unreg web app",
+				"icon": {
+					"light": "resources/icon/trash.svg",
+					"dark": "resources/icon/trash.svg"
 				}
 			},
 			{
