@@ -1,13 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-  <defs>
-    <style>.canvas{fill: none; opacity: 0;}
-	.light-blue{fill: #005dba; opacity: 1;}</style>
-  </defs>
-  <title>IconLightRestart</title>
-  <g id="canvas" class="canvas">
-    <path class="canvas" d="M16,16H0V0H16Z" />
-  </g>
-  <g id="level-1">
-    <path class="light-blue" d="M5,1.683l.43.9A6.019,6.019,0,1,0,11,2.829V5.5H10v-4l.5-.5h4V2H11.56A6.983,6.983,0,1,1,5,1.683Z" />
-  </g>
-</svg>
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"></path><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm4.82-4.924A7 7 0 0 0 9.032 5.658l.975 1.755A5 5 0 0 1 17 12h-3l2.82 5.076zm-1.852 1.266-.975-1.755A5 5 0 0 1 7 12h3L7.18 6.924a7 7 0 0 0 7.788 11.418z" fill="#dc3545" class="fill-000000"></path></svg>
