@@ -118,8 +118,8 @@
 				"command": "ClioSQL.ExecuteSql",
 				"title": "Clio - Execute SQL",
 				"icon": {
-					"light": "resources/icon/DatabaseScript.svg",
-					"dark": "resources/icon/DatabaseScript.svg"
+					"light": "resources/icon/database.svg",
+					"dark": "resources/icon/database.svg"
 				}
 			},
 			{
@@ -194,8 +194,8 @@
 				"command": "ClioSQL.OpenSqlDocument",
 				"title": "Open Sql Document",
 				"icon": {
-					"light": "resources/icon/DatabaseScript.svg",
-					"dark": "resources/icon/DatabaseScript.svg"
+					"light": "resources/icon/database.svg",
+					"dark": "resources/icon/database.svg"
 				}
 			},
 			{
