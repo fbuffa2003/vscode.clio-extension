@@ -80,9 +80,16 @@ export class Sql extends BaseCommand implements ICommand<ISqlArgs, ISqlResponse>
 		const filePath = path.join(`${dir}\\${randomUUID()}.sql`);
 		await writeFile(filePath, args.sqlText);
 		
-		const result = await this.executor.ExecuteClioCommand(`clio sql -e ${args.environmentName} -f ${filePath}`);
-		await rm(filePath);
-		return this.convertResult(result, args);
+		// const result = await this.executor.ExecuteClioCommand(`clio sql -e ${args.environmentName} -f ${filePath}`);
+		// await rm(filePath);
+		// return this.convertResult(result, args);
+		this.executor.executeCommandByTerminal(`sql -e ${args.environmentName} -f ${filePath}`);
+		return new Promise<ISqlResponse>(()=>{
+			return {
+				success : true,
+				message : ""
+			} as ISqlResponse;
+		});
 	}
 
 	private convertResult(clioResult : String, args: ISqlArgs) : ISqlResponse{
