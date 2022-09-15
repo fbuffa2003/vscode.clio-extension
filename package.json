@@ -155,8 +155,8 @@
 				"command": "ClioSQL.flushDb",
 				"title": "Flush redis",
 				"icon": {
-					"light": "resources/icon/CleanData.svg",
-					"dark": "resources/icon/CleanData.svg"
+					"light": "resources/icon/broom.svg",
+					"dark": "resources/icon/broom.svg"
 				}
 			},
 			{
@@ -195,8 +195,8 @@
 				"command": "ClioSQL.Open",
 				"title": "Open application",
 				"icon": {
-					"light": "resources/icon/Open.svg",
-					"dark": "resources/icon/Open.svg"
+					"light": "resources/icon/home.svg",
+					"dark": "resources/icon/home.svg"
 				}
 			},
 			{
