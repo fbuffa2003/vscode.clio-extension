@@ -107,7 +107,7 @@ export class InstallMarketplaceApp
 	private async _getHtmlForWebview(webview: vscode.Webview) 
 	{
 		// Local path to main script run in the webview
-		const scriptPathOnDisk = vscode.Uri.joinPath(this._extensionUri, 'media','handleSubmit.js');
+		const scriptPathOnDisk = vscode.Uri.joinPath(this._extensionUri, 'media','handleClick.js');
 		
 		// And the uri we use to load this script in the webview
 		const scriptUri = webview.asWebviewUri(scriptPathOnDisk);

@@ -79,9 +79,7 @@ export class AddConnection
 				switch (message.command) {
 					case "submit":
 						const data = this._deserializeData(message.data);
-						
 						vscode.commands.executeCommand("ClioSQL.RegisterWebApp", data);
-						
 						return;
 				}
 			},

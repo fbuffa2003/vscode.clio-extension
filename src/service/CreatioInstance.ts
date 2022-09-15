@@ -33,7 +33,7 @@ export class CreatioInstance extends vscode.TreeItem {
 		this.clio = new Clio();
 	}
 
-	//#region Public mathods
+	//#region Public methods
 	/**
 	 * Checks node health
 	 */

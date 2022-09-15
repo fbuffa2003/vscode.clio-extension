@@ -12,6 +12,7 @@ import { InstallMarketplaceApp } from './panels/MarketplaceApp';
 import { Clio } from './commands/Clio';
 import { IFlushDbArgs } from './commands/FlushDbCommand';
 import { resourceLimits } from 'worker_threads';
+import { IRegisterWebAppArgs } from './commands/RegisterWebAppCommand';
 
 // let terminal: vscode.Terminal | undefined;
 let clioExecutor : ClioExecutor | undefined;
@@ -24,7 +25,7 @@ function getClioExecutor(): ClioExecutor {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-	
+	const clio = new Clio();
 	const envService = new EnvironmentService();
 	vscode.window.registerTreeDataProvider('vscode-clio-extension.creatioExplorer', envService);
 
@@ -90,25 +91,57 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('ClioSQL.Open', async (node: CreatioInstance) => {
 			if(node){
 				await node.openInBrowser();
+				
 			}
 		})
 	);
 	
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.RegisterWebApp", async (args: FormData )=>{
-			const cmd = ` clio reg-web-app ${args.name} -u ${args.url} -l ${args.username} -p ${args.password} -m ${args.maintainer} -i ${args.isNetCore} -c ${args.isDeveloperModeEnabled} -s ${args.isSafe}`;
-			exec(cmd, (error, stdout, stderr )=>{
-				if(error){
-					vscode.window.showErrorMessage(error.message, "OK")
-					.then(answer => {
-						AddConnection.kill();
-					});
-				}
-				if(stdout){
-					envService.addNewNode(new CreatioInstance(args.name, args.url, vscode.TreeItemCollapsibleState.Collapsed));
+
+			const commandArgs : IRegisterWebAppArgs ={
+				url: args.url,
+				username: args.username,
+				password: args.password,
+				maintainer: args.maintainer,
+				isNetCore: args.isNetCore,
+				isSafe: args.isSafe,
+				isDeveloperModeEnabled: args.isDeveloperModeEnabled,
+				environmentName: args.name
+			};
+			const isArgValid = clio.registerWebApp.canExecute(commandArgs);
+
+			if(!isArgValid.success){
+				vscode.window.showErrorMessage(isArgValid.message.toString());
+			}
+
+			const result = await clio.registerWebApp.executeAsync(commandArgs);
+			if(result.success){
+				envService.addNewNode(new CreatioInstance(args.name, args.url, vscode.TreeItemCollapsibleState.Collapsed));
+				AddConnection.kill();
+				vscode.window.showInformationMessage(result.message.toString());
+			} else {
+				vscode.window.showErrorMessage(result.message.toString(), "OK")
+				.then(answer => {
 					AddConnection.kill();
-				}
-			});
+				});
+			}
+
+			
+
+			// const cmd = ` clio reg-web-app ${args.name} -u ${args.url} -l ${args.username} -p ${args.password} -m ${args.maintainer} -i ${args.isNetCore} -c ${args.isDeveloperModeEnabled} -s ${args.isSafe}`;
+			// exec(cmd, (error, stdout, stderr )=>{
+			// 	if(error){
+			// 		vscode.window.showErrorMessage(error.message, "OK")
+			// 		.then(answer => {
+			// 			AddConnection.kill();
+			// 		});
+			// 	}
+			// 	if(stdout){
+			// 		envService.addNewNode(new CreatioInstance(args.name, args.url, vscode.TreeItemCollapsibleState.Collapsed));
+			// 		AddConnection.kill();
+			// 	}
+			// });
 		})
 	);
 
@@ -116,6 +149,8 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('ClioSQL.HealthCheck', async (node: CreatioInstance) => {
 			if(node){
 				await node.checkHealth();
+
+
 			}
 		})
 	);
