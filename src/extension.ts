@@ -56,17 +56,17 @@ export function activate(context: vscode.ExtensionContext) {
 		const sqlCmd = sqlText[1].replace('\r','').replace('\n','').trim();		
 		const result = await envService.findInstanceByName(envName)?.executeSql(sqlCmd);
 		
+		await vscode.commands.executeCommand("workbench.action.editorLayoutTwoRows");
+				
 		vscode.workspace.openTextDocument({
 			language: 'text',
 			content : (result|| '').toString()
 		})
-		.then(doc => {
+		.then((doc: vscode.TextDocument)=>{
 			vscode.window.showTextDocument(doc, {
-				viewColumn: vscode.ViewColumn.Beside
+				viewColumn: vscode.ViewColumn.Two
 			});
 		});
-		
-		
 	});
 	context.subscriptions.push(executeSqlCommand);
 	
