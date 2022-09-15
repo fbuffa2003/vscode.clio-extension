@@ -8,6 +8,9 @@ import getAppDataPath from 'appdata-path';
 import path = require('path');
 import { randomUUID } from 'crypto';
 import { InstallMarketplaceApp } from './panels/MarketplaceApp';
+import { Clio } from './commands/Clio';
+import { IFlushDbArgs } from './commands/FlushDbCommand';
+import { resourceLimits } from 'worker_threads';
 
 // let terminal: vscode.Terminal | undefined;
 let clioExecutor : ClioExecutor | undefined;
@@ -121,10 +124,27 @@ export function activate(context: vscode.ExtensionContext) {
 			AddConnection.createOrShow(context.extensionUri);
 		})
 	);
-	
+		
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.InstallMarketplaceApp", ()=>{
 			InstallMarketplaceApp.createOrShow(context.extensionUri);
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.TestCommand", async ()=>{
+			const clio = new Clio();
+			
+			const args = {environmentName: "zoom"} as IFlushDbArgs;
+			if(clio.flushDb.canExecute(args)){
+				const result = await clio.flushDb.executeAsync(args);
+				
+				if(result.success){
+					vscode.window.showInformationMessage(`Flushdb : ${result.message}`);
+				} else if(!result.success){
+					vscode.window.showErrorMessage(`Flushdb : ${result.message}`);
+				}
+			}
 		})
 	);
 

@@ -7,6 +7,8 @@ import { randomUUID } from 'crypto';
 import { ClioExecutor } from '../Common/clioExecutor';
 import { rmSync, writeFileSync } from 'fs';
 import { rm, writeFile } from 'fs/promises';
+import { Clio } from '../commands/Clio';
+import { ISqlArgs } from '../commands/SqlCommand';
 
 export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstance>{
 	
@@ -165,15 +167,29 @@ export class CreatioInstance extends vscode.TreeItem {
 	}
 
 	public async executeSql(sqlText: String): Promise<String>{
-		const dir = `${getAppDataPath()}\\..\\Local\\creatio\\clio\\SQL`;
-		if(!fs.existsSync(dir)){
-			fs.mkdirSync(dir);
+		
+		const clio = new Clio();
+		
+		const args = {
+			sqlText: sqlText,
+			environmentName: this.label
+		} as ISqlArgs;
+		const validationResult = clio.Sql.canExecute(args);
+
+
+		if(!validationResult.success){
+			throw new Error(validationResult.message.toString());
 		}
-		const filePath = path.join(`${dir}\\${randomUUID()}.sql`);
-		await writeFile(filePath, sqlText);
-		const result = await this.clioExecutor.ExecuteClioCommand(`clio sql -f ${filePath}`);
-		await rm(filePath);
-		return result;
+
+		const result = await clio.Sql.executeAsync(args);
+		if(result.success){
+			return result.message;
+		}
+		else{
+			throw new Error(result.message.toString());
+		}
+		
+
 	}
 
 	private setHealthStatus(status: HealthStatus): void {

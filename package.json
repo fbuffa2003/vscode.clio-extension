@@ -210,6 +210,10 @@
 					"light": "resources/icon/Health.svg",
 					"dark": "resources/icon/Health.svg"
 				}
+			},
+			{
+				"command": "ClioSQL.TestCommand",
+				"title": "Test Command"
 			}
 		]
 	},
