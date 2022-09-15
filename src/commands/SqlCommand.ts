@@ -7,7 +7,8 @@ import { randomUUID } from 'crypto';
 import path = require('path');
 
 /**
- * FlushDB arguments
+ * SQL arguments
+ * - See clio {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/README.md#execute-custom-sql-script documentation}
  */
 export interface ISqlArgs extends ICommandArgs{
 	/**
@@ -17,7 +18,7 @@ export interface ISqlArgs extends ICommandArgs{
 }
 
 /**
- * FlushDb response
+ * SQL response
  */
 export interface ISqlResponse extends ICommandResponse{}
 
@@ -60,6 +61,7 @@ export class Sql extends BaseCommand implements ICommand<ISqlArgs, ISqlResponse>
 		};
 		return this._validationResult;
 	}
+	
 	/**
 	 * Executes FlushDb command
 	 * @param args Arguments to pass to clio

@@ -9,6 +9,8 @@ import { rmSync, writeFileSync } from 'fs';
 import { rm, writeFile } from 'fs/promises';
 import { Clio } from '../commands/Clio';
 import { ISqlArgs } from '../commands/SqlCommand';
+import { IHealthCheckArgs } from '../commands/HealthCheckCommand';
+import { IFlushDbArgs } from '../commands/FlushDbCommand';
 
 export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstance>{
 	
@@ -106,6 +108,7 @@ export class CreatioInstance extends vscode.TreeItem {
 	private _onDidStatusUpdate: vscode.EventEmitter<CreatioInstance> = new vscode.EventEmitter<CreatioInstance>();
 	readonly onDidStatusUpdate: vscode.Event<CreatioInstance> = this._onDidStatusUpdate.event;
 	private readonly clioExecutor : ClioExecutor;
+	private readonly clio : Clio;
 
 	contextValue = 'CreatioInstance';
 	private healthStatus : HealthStatus = HealthStatus.unknown;
@@ -120,6 +123,7 @@ export class CreatioInstance extends vscode.TreeItem {
 		this.setUnknownHealthIcon();
 		this.id = randomUUID();
 		this.clioExecutor = new ClioExecutor();
+		this.clio = new Clio();
 	}
 	
 	/**
@@ -127,24 +131,41 @@ export class CreatioInstance extends vscode.TreeItem {
 	 * @param envService 
 	 */
 	public async checkHealth(): Promise<void>{
-		const cmd = `clio hc ${this.label} -a true -h true`;
-		exec(cmd, (error, stdout, stderr )=>{
-			if(error){
+
+		const args : IHealthCheckArgs = {
+			webApp: true,
+			webHost: true, 
+			environmentName: this.label
+		};
+		const isValidArgs = this.clio.healthCheck.canExecute(args);
+		if(isValidArgs.success){
+			const result = await this.clio.healthCheck.executeAsync(args);
+			if(result.success && result.isWebAppHeathy && result.isWebHostHealthy){
+				this.setHealthStatus(HealthStatus.healthy);
+			} else{
 				this.setHealthStatus(HealthStatus.unHealthy);
 			}
-			if(stdout){
-				let isWebHostOk =  stdout.match(/\tWebHost - OK/);
-				let isWebAppLoaderOk = stdout.match(/\tWebAppLoader - OK/);
-				if(isWebAppLoaderOk && isWebHostOk){
-					this.setHealthStatus(HealthStatus.healthy);
-				}else{
-					this.setHealthStatus(HealthStatus.unHealthy);
-				}
-			}
-			if(stderr){
-				this.setHealthStatus(HealthStatus.unHealthy);
-			}
-		});
+		}
+
+
+		// const cmd = `clio hc ${this.label} -a true -h true`;
+		// exec(cmd, (error, stdout, stderr )=>{
+		// 	if(error){
+		// 		this.setHealthStatus(HealthStatus.unHealthy);
+		// 	}
+		// 	if(stdout){
+		// 		let isWebHostOk =  stdout.match(/\tWebHost - OK/);
+		// 		let isWebAppLoaderOk = stdout.match(/\tWebAppLoader - OK/);
+		// 		if(isWebAppLoaderOk && isWebHostOk){
+		// 			this.setHealthStatus(HealthStatus.healthy);
+		// 		}else{
+		// 			this.setHealthStatus(HealthStatus.unHealthy);
+		// 		}
+		// 	}
+		// 	if(stderr){
+		// 		this.setHealthStatus(HealthStatus.unHealthy);
+		// 	}
+		// });
 	}
 
 	
@@ -159,37 +180,41 @@ export class CreatioInstance extends vscode.TreeItem {
 	 * Flushes redis
 	 */
 	public async flushDb(): Promise<void>{
-		this.clioExecutor.executeCommandByTerminal(`flushdb -e "${this.label}"`);
+		const args : IFlushDbArgs = {
+			environmentName: this.label
+		};
+		const isArgValid = this.clio.flushDb.canExecute(args);
+		if(isArgValid){
+			const result = await this.clio.flushDb.executeAsync(args);
+			if(result.success){
+				vscode.window.showInformationMessage(`Flushdb : ${result.message}`);
+			} else if(!result.success){
+				vscode.window.showErrorMessage(`Flushdb : ${result.message}`);
+			}
+		}
 	}
 
 	public async openInBrowser(): Promise<void>{
-		this.clioExecutor.executeCommandByTerminal(`flushdb -e "${this.label}"`);
+		this.clioExecutor.executeCommandByTerminal(`open -e "${this.label}"`);
 	}
 
 	public async executeSql(sqlText: String): Promise<String>{
-		
-		const clio = new Clio();
-		
-		const args = {
+		const args :ISqlArgs = {
 			sqlText: sqlText,
 			environmentName: this.label
-		} as ISqlArgs;
-		const validationResult = clio.Sql.canExecute(args);
-
+		};
+		const validationResult = this.clio.sql.canExecute(args);
 
 		if(!validationResult.success){
 			throw new Error(validationResult.message.toString());
 		}
 
-		const result = await clio.Sql.executeAsync(args);
+		const result = await this.clio.sql.executeAsync(args);
 		if(result.success){
 			return result.message;
-		}
-		else{
+		} else {
 			throw new Error(result.message.toString());
 		}
-		
-
 	}
 
 	private setHealthStatus(status: HealthStatus): void {
@@ -236,8 +261,4 @@ export enum HealthStatus{
 	unknown =0,
 	healthy = 1,
 	unHealthy = 2
-}
-
-function getClioExecutor() {
-	throw new Error('Function not implemented.');
 }
