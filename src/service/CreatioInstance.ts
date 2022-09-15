@@ -133,15 +133,15 @@ export class CreatioInstance extends vscode.TreeItem {
 	}
 	private setHealthyIcon(): void {
 		this.iconPath = {
-			light: path.join(__filename, '..', '..', '..', 'resources', 'icon', 'circle-green.svg'),
-			dark: path.join(__filename, '..', '..', '..', 'resources', 'icon', 'circle-green.svg')
+			light: path.join(__filename, '..', '..', '..', 'resources', 'icon', 'circle-green-bottom.svg'),
+			dark: path.join(__filename, '..', '..', '..', 'resources', 'icon', 'circle-green-bottom.svg')
 		};
 		this._onDidStatusUpdate?.fire(this);
 	}
 	private setUnhealthyIcon(): void {
 		this.iconPath = {
-			light: path.join(__filename, '..', '..', '..', 'resources', 'icon', 'circle-red.svg'),
-			dark: path.join(__filename, '..', '..', '..', 'resources', 'icon', 'circle-red.svg')
+			light: path.join(__filename, '..', '..', '..', 'resources', 'icon', 'circle-red-bottom.svg'),
+			dark: path.join(__filename, '..', '..', '..', 'resources', 'icon', 'circle-red-bottom.svg')
 		};
 		this._onDidStatusUpdate?.fire(this);
 	}
