@@ -75,6 +75,11 @@
 					"command": "ClioSQL.HealthCheck",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-2@3"
+				},
+				{
+					"command": "ClioSQL.InstallGate",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-2@4"
 				}
 			],
 			"view/title": [
@@ -117,9 +122,9 @@
 					"group": "inline@5"
 				},
 				{
-					"command": "ClioSQL.InstallGate",
+					"submenu": "ClioSQL.OverflowMenu",
 					"when": "viewItem == CreatioInstance",
-					"group": "breadcrumbs"
+					"group": "inline@6"
 				}
 			],
 			"editor/title": [
@@ -254,15 +259,11 @@
 			},
 			{
 				"command": "ClioSQL.InstallGate",
-				"title": "Install clio gate API",
+				"title": "Install CLIO API",
 				"icon": {
-					"light": "resources/icon/gate.svg",
-					"dark": "resources/icon/gate.svg"
+					"light": "resources/icon/Health.svg",
+					"dark": "resources/icon/Health.svg"
 				}
-			},
-			{
-				"command": "ClioSQL.TestCommand",
-				"title": "Test Command"
 			}
 		]
 	},
