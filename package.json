@@ -102,6 +102,11 @@
 					"command": "ClioSQL.HealthCheck",
 					"when": "viewItem == CreatioInstance",
 					"group": "breadcrumbs"
+				},
+				{
+					"command": "ClioSQL.InstallGate",
+					"when": "viewItem == CreatioInstance",
+					"group": "breadcrumbs"
 				}
 				
 			],
@@ -217,6 +222,14 @@
 				"icon": {
 					"light": "resources/icon/Health.svg",
 					"dark": "resources/icon/Health.svg"
+				}
+			},
+			{
+				"command": "ClioSQL.InstallGate",
+				"title": "Install clio gate API",
+				"icon": {
+					"light": "resources/icon/gate.svg",
+					"dark": "resources/icon/gate.svg"
 				}
 			},
 			{

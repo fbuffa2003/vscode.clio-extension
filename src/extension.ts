@@ -110,6 +110,14 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		})
 	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ClioSQL.InstallGate', async (node: CreatioInstance) => {
+			if(node){
+				await node.installGate();
+			}
+		})
+	);
 	
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.RegisterWebApp", async (args: FormData )=>{
