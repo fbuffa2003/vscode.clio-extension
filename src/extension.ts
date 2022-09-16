@@ -1,29 +1,13 @@
 import * as vscode from 'vscode';
-import {EnvironmentService, HealthStatus} from './service/environmentService';
+import {EnvironmentService} from './service/environmentService';
 import { CreatioInstance } from "./service/CreatioInstance";
 import { AddConnection, FormData } from './panels/AddConnection';
-import {ClioExecutor} from './Common/clioExecutor';
-import { exec } from 'child_process';
-import { writeFileSync, rmSync } from 'fs';
-import getAppDataPath from 'appdata-path';
-import path = require('path');
-import { randomUUID } from 'crypto';
 import { InstallMarketplaceApp } from './panels/MarketplaceApp';
 import { Clio } from './commands/Clio';
 import { IFlushDbArgs } from './commands/FlushDbCommand';
-import { resourceLimits } from 'worker_threads';
 import { IRegisterWebAppArgs } from './commands/RegisterWebAppCommand';
 import { TextEditor } from 'vscode';
 
-// let terminal: vscode.Terminal | undefined;
-let clioExecutor : ClioExecutor | undefined;
-
-function getClioExecutor(): ClioExecutor {
-	if(clioExecutor){
-		return clioExecutor;
-	}
-	return clioExecutor = new ClioExecutor();
-}
 
 export function activate(context: vscode.ExtensionContext) {
 	const clio = new Clio();
@@ -141,22 +125,6 @@ export function activate(context: vscode.ExtensionContext) {
 					AddConnection.kill();
 				});
 			}
-
-			
-
-			// const cmd = ` clio reg-web-app ${args.name} -u ${args.url} -l ${args.username} -p ${args.password} -m ${args.maintainer} -i ${args.isNetCore} -c ${args.isDeveloperModeEnabled} -s ${args.isSafe}`;
-			// exec(cmd, (error, stdout, stderr )=>{
-			// 	if(error){
-			// 		vscode.window.showErrorMessage(error.message, "OK")
-			// 		.then(answer => {
-			// 			AddConnection.kill();
-			// 		});
-			// 	}
-			// 	if(stdout){
-			// 		envService.addNewNode(new CreatioInstance(args.name, args.url, vscode.TreeItemCollapsibleState.Collapsed));
-			// 		AddConnection.kill();
-			// 	}
-			// });
 		})
 	);
 
@@ -164,8 +132,6 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('ClioSQL.HealthCheck', async (node: CreatioInstance) => {
 			if(node){
 				await node.checkHealth();
-
-
 			}
 		})
 	);

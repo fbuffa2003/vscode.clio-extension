@@ -55,6 +55,28 @@
 			]
 		},
 		"menus": {
+			"ClioSQL.OverflowMenu":[
+				{
+					"command": "ClioSQL.InstallMarketplaceApp",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-1@1"
+				},
+				{
+					"command": "ClioSQL.GenerateModels",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-2@1"
+				},
+				{
+					"command": "ClioSQL.RestoreWorkspace",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-2@2"
+				},
+				{
+					"command": "ClioSQL.HealthCheck",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-2@3"
+				}
+			],
 			"view/title": [
 				{
 					"command": "ClioSQL.AddConnection",
@@ -62,62 +84,68 @@
 					"group": "navigation@3"
 				}
 			],
+
 			"view/item/context": [
 				{
 					"command": "ClioSQL.Open",
-					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "inline"
+					"when": "viewItem == CreatioInstance",
+					"group": "inline@0"
 				},
 				{
 					"command": "ClioSQL.flushDb",
-					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "inline"
+					"when": "viewItem == CreatioInstance",
+					"group": "inline@1"
 				},
 				{
 					"command": "ClioSQL.restart",
-					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "inline"
+					"when": "viewItem == CreatioInstance",
+					"group": "inline@2"
 				},
 				{
 					"command": "ClioSQL.OpenSqlDocument",
-					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "inline"
+					"when": "viewItem == CreatioInstance",
+					"group": "inline@3"
 				},
 				{
 					"command": "ClioSQL.Unreg",
-					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "inline"
-				},
-				{
-					"command": "ClioSQL.GenerateModels",
-					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "breadcrumbs"
-				},
-				{
-					"command": "ClioSQL.RestoreWorkspace",
-					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "breadcrumbs"
-				},
-				{
-					"command": "ClioSQL.HealthCheck",
 					"when": "viewItem == CreatioInstance",
-					"group": "breadcrumbs"
+					"group": "inline@4"
+				},
+				{
+					"submenu": "ClioSQL.OverflowMenu",
+					"when": "viewItem == CreatioInstance",
+					"group": "inline@5"
 				}
-				
 			],
 			"editor/title": [
 				{
 				  "command": "ClioSQL.ExecuteSql",
-				  "group": "navigation"
+				  "group": "navigation",
+				  "when":"editorLangId == sql"
 				}
 			],
 			"editor/context": [
 				{
 				  "command": "ClioSQL.ExecuteSql",
-				  "group": "navigation"
+				  "group": "navigation",
+				  "when":"editorLangId == sql"
+				}
+			],
+			"editor/title/context": [
+				{
+				  "command": "ClioSQL.ExecuteSql",
+				  "group": "navigation",
+				  "when":"editorLangId == sql"
 				}
 			]
 		},
+		"submenus": [
+			{
+				"id": "ClioSQL.OverflowMenu",
+				"label": "More",
+				"icon": "$(search-details)"
+			}
+		],
 		"commands": [
 			{
 				"command": "ClioSQL.ExecuteSql",
