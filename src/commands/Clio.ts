@@ -5,6 +5,7 @@ import { HealthCheck, IHealthCheckArgs, IHealthCheckResponse } from './HealthChe
 import { IRegisterWebAppArgs, IRegisterWebAppResponse, RegisterWebApp } from './RegisterWebAppCommand';
 import { ISqlArgs, ISqlResponse, Sql } from './SqlCommand';
 import { UnregWebApp } from './UnregWebApp';
+import { InstallGate } from './InstallGate';
 
 
 export class Clio {
@@ -15,6 +16,12 @@ export class Clio {
 	 * - See _clear redis database_ {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/README.md#clear-redis-database **documentation**}
 	 */
 	public readonly flushDb: ICommand<IFlushDbArgs,IFlushDbResponse> = new FlushDb(this.executor);
+
+	/**
+	 * Command abstraction to flush redis db
+	 * - See _install-gate_ {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/README.md#development **documentation**}
+	 */
+	public readonly installGate: ICommand<IFlushDbArgs,IFlushDbResponse> = new InstallGate(this.executor);
 
 	/**
 	 * Command abstraction to unreg web app
