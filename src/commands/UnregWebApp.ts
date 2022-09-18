@@ -48,7 +48,6 @@ export class UnregWebApp extends BaseCommand implements ICommand<IFlushDbArgs, I
 	 * @returns Result of the operation
 	 */
 	async executeAsync(args: IFlushDbArgs): Promise<IFlushDbResponse> {
-		
 		if(!this._validationResult.success){
 			throw new Error("Make sure to call canExecute before calling execute");
 		}
