@@ -127,21 +127,7 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 		})
 	);
-	
-	context.subscriptions.push(
-		vscode.commands.registerCommand('ClioSQL.InstallGate', async (node: CreatioInstance) => {
-			vscode.window
-				.showInformationMessage("Do you want install clio api on environment \"" + node.label + "\"?", "Yes", "No",)
-				.then(answer => {
-					if (answer === "Yes") {
-						if(node){
-							node.installGate();
-						}
-					}
-				});
-		})
-	);
-	
+		
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.RegisterWebApp", async (args: FormData )=>{
 
