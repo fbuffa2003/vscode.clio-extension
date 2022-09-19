@@ -11,7 +11,7 @@ export interface IFlushDbArgs extends ICommandArgs{}
  */
 export interface IFlushDbResponse extends ICommandResponse{}
 
-export class UnregWebApp extends BaseCommand implements ICommand<IFlushDbArgs, IFlushDbResponse> {
+export class InstallGate extends BaseCommand implements ICommand<IFlushDbArgs, IFlushDbResponse> {
 	
 	/**
 	 * Constructor
@@ -43,15 +43,16 @@ export class UnregWebApp extends BaseCommand implements ICommand<IFlushDbArgs, I
 		return this._validationResult;
 	}
 	/**
-	 * Executes FlushDb command
+	 * Executes install-gate command
 	 * @param args Arguments to pass to clio
 	 * @returns Result of the operation
 	 */
 	async executeAsync(args: IFlushDbArgs): Promise<IFlushDbResponse> {
+		
 		if(!this._validationResult.success){
 			throw new Error("Make sure to call canExecute before calling execute");
 		}
-		const result = await this.executor.ExecuteClioCommand(`clio unreg-web-app ${args.environmentName}`);
+		const result = await this.executor.ExecuteClioCommand(`clio installgate -e ${args.environmentName}`);
 		return this.convertResult(result);
 	}
 
@@ -61,7 +62,7 @@ export class UnregWebApp extends BaseCommand implements ICommand<IFlushDbArgs, I
 				success : true,
 				message : "successfully completed"
 			} as IFlushDbResponse;
-		}else{
+		} else {
 			return {
 				success : false,
 				message : clioResult

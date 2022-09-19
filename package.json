@@ -1,7 +1,7 @@
 {
-	"name": "ClioSQL",
-	"displayName": "clio-sql",
-	"description": "Clio SQL",
+	"name": "ClioExplorer",
+	"displayName": "clio-explorer",
+	"description": "Clio explorer",
 	"version": "0.0.1",
 	"publisher": "Advance Technologies Foundation",
 	"license": "MIT",
@@ -39,7 +39,7 @@
 			"activitybar": [
 				{
 					"id": "vscode-clio-extension",
-					"title": "Creatio Explorer",
+					"title": "Clio explorer",
 					"icon": "resources/icon/creatio-triangle.svg"
 				}
 			]
@@ -48,9 +48,9 @@
 			"vscode-clio-extension": [
 				{
 					"id": "vscode-clio-extension.creatioExplorer",
-					"name": "Creatio Explorer",
+					"name": "Clio explorer",
 					"icon": "resources/icon/creatio-triangle.svg",
-					"contextualTitle": "Creatio Explorer"
+					"contextualTitle": "Clio explorer"
 				}
 			]
 		},
@@ -75,6 +75,21 @@
 					"command": "ClioSQL.HealthCheck",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-2@3"
+				},
+				{
+					"command": "ClioSQL.InstallGate",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-2@4"
+				},
+				{
+					"command": "ClioSQL.flushDb",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-3@1"
+				},
+				{
+					"command": "ClioSQL.restart",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-3@2"
 				}
 			],
 			"view/title": [
@@ -90,16 +105,6 @@
 					"command": "ClioSQL.Open",
 					"when": "viewItem == CreatioInstance",
 					"group": "inline@0"
-				},
-				{
-					"command": "ClioSQL.flushDb",
-					"when": "viewItem == CreatioInstance",
-					"group": "inline@1"
-				},
-				{
-					"command": "ClioSQL.restart",
-					"when": "viewItem == CreatioInstance",
-					"group": "inline@2"
 				},
 				{
 					"command": "ClioSQL.OpenSqlDocument",
@@ -149,18 +154,10 @@
 		"commands": [
 			{
 				"command": "ClioSQL.ExecuteSql",
-				"title": "Clio - Execute SQL",
+				"title": "Clio - execute sql",
 				"icon": {
 					"light": "resources/icon/database.svg",
 					"dark": "resources/icon/database.svg"
-				}
-			},
-			{
-				"command": "ClioSQL.Test",
-				"title": "Clio Test",
-				"icon": {
-					"light": "/assets/dark-preview.svg",
-					"dark": "/assets/light-preview.svg"
 				}
 			},
 			{
@@ -205,7 +202,7 @@
 			},
 			{
 				"command": "ClioSQL.GenerateModels",
-				"title": "Generate ATF Models",
+				"title": "Generate models",
 				"icon": {
 					"light": "resources/icon/DataGenerator.svg",
 					"dark": "resources/icon/DataGenerator.svg"
@@ -229,11 +226,11 @@
 			},
 			{
 				"command": "ClioSQL.RegisterWebApp",
-				"title": "Register Web App"
+				"title": "Register web app"
 			},
 			{
 				"command": "ClioSQL.OpenSqlDocument",
-				"title": "Open Sql Document",
+				"title": "Open sql document",
 				"icon": {
 					"light": "resources/icon/database.svg",
 					"dark": "resources/icon/database.svg"
@@ -248,8 +245,12 @@
 				}
 			},
 			{
-				"command": "ClioSQL.TestCommand",
-				"title": "Test Command"
+				"command": "ClioSQL.InstallGate",
+				"title": "Install clio api",
+				"icon": {
+					"light": "resources/icon/Health.svg",
+					"dark": "resources/icon/Health.svg"
+				}
 			}
 		]
 	},

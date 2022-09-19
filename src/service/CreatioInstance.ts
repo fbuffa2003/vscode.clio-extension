@@ -83,7 +83,7 @@ export class CreatioInstance extends vscode.TreeItem {
 		}
 	}
 
-		/**
+	/**
 	 * Flushes redis
 	 */
 	public async UnregWebApp(): Promise<void> {
@@ -104,6 +104,10 @@ export class CreatioInstance extends vscode.TreeItem {
 
 	public async openInBrowser(): Promise<void> {
 		this.clioExecutor.executeCommandByTerminal(`open -e "${this.label}"`);
+	}
+
+	public async installGate(): Promise<void> {
+		this.clioExecutor.executeCommandByTerminal(`installgate "${this.label}"`);
 	}
 
 	public async executeSql(sqlText: String): Promise<String> {
