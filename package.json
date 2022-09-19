@@ -55,7 +55,7 @@
 			]
 		},
 		"menus": {
-			"ClioSQL.OverflowMenu":[
+			"ClioSQL.OverflowMenu": [
 				{
 					"command": "ClioSQL.InstallMarketplaceApp",
 					"when": "viewItem == CreatioInstance",
@@ -99,7 +99,6 @@
 					"group": "navigation@3"
 				}
 			],
-
 			"view/item/context": [
 				{
 					"command": "ClioSQL.Open",
@@ -124,23 +123,23 @@
 			],
 			"editor/title": [
 				{
-				  "command": "ClioSQL.ExecuteSql",
-				  "group": "navigation",
-				  "when":"editorLangId == sql"
+					"command": "ClioSQL.ExecuteSql",
+					"group": "navigation",
+					"when": "editorLangId == sql"
 				}
 			],
 			"editor/context": [
 				{
-				  "command": "ClioSQL.ExecuteSql",
-				  "group": "navigation",
-				  "when":"editorLangId == sql"
+					"command": "ClioSQL.ExecuteSql",
+					"group": "navigation",
+					"when": "editorLangId == sql"
 				}
 			],
 			"editor/title/context": [
 				{
-				  "command": "ClioSQL.ExecuteSql",
-				  "group": "navigation",
-				  "when":"editorLangId == sql"
+					"command": "ClioSQL.ExecuteSql",
+					"group": "navigation",
+					"when": "editorLangId == sql"
 				}
 			]
 		},
@@ -266,19 +265,20 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.54.0",
 		"@types/glob": "^7.2.0",
 		"@types/mocha": "^9.1.1",
 		"@types/node": "16.x",
+		"@types/vscode": "^1.54.0",
 		"@typescript-eslint/eslint-plugin": "^5.31.0",
 		"@typescript-eslint/parser": "^5.31.0",
+		"@vscode/test-electron": "^2.1.5",
 		"eslint": "^8.20.0",
 		"glob": "^8.0.3",
 		"mocha": "^10.0.0",
-		"typescript": "^4.7.4",
-		"@vscode/test-electron": "^2.1.5"
+		"typescript": "^4.7.4"
 	},
 	"dependencies": {
+		"@vscode/codicons": "^0.0.32",
 		"appdata-path": "^1.0.0"
 	}
 }

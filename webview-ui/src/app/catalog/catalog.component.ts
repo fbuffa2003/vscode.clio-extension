@@ -22,8 +22,6 @@ export class CatalogComponent implements OnInit {
 	onMessage(ev: any) {
 		let data = ev.data;
 		if(data.getCatalog){
-			console.log('Data Arrived');
-			console.log(data.getCatalog);
 			this.onGetCatalog(data.getCatalog);
 		}
 	}
@@ -33,7 +31,6 @@ export class CatalogComponent implements OnInit {
 	 * @param catalog data from clio
 	 */
 	private onGetCatalog(catalog: string){
-		console.log("Catalog data arrived");
 		const lines: string[] = catalog.split("\r\n");
 		
 		debugger;
@@ -59,6 +56,7 @@ export class CatalogComponent implements OnInit {
 	}
 	ngOnInit(): void {
 
+		debugger;
 		//Ask extension to run clio catalog
 		vscode.postMessage({
 			command: "getCatalog",

@@ -173,6 +173,9 @@ export class AddConnection
 						<script nonce="${nonce}" src="${scriptUri}"></script>
 					</body>
 				</html>`;
+
+		
+		
 	}
 
 	private _deserializeData(obj: any): FormData{

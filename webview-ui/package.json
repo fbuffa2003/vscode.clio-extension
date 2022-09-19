@@ -19,6 +19,7 @@
     "@angular/platform-browser-dynamic": "^14.2.0",
     "@angular/router": "^14.2.0",
     "@types/vscode-webview": "^1.57.0",
+    "@vscode/codicons": "^0.0.32",
     "@vscode/webview-ui-toolkit": "^1.1.0",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",

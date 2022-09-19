@@ -8,6 +8,7 @@ import { IFlushDbArgs } from './commands/FlushDbCommand';
 import { IRegisterWebAppArgs } from './commands/RegisterWebAppCommand';
 import { TextEditor } from 'vscode';
 import { HelloWorldPanel } from './panels/HelloWorldPanel';
+import { ConnectionPanel } from './panels/ConnectionPanel';
 
 
 export function activate(context: vscode.ExtensionContext) {
@@ -153,6 +154,7 @@ export function activate(context: vscode.ExtensionContext) {
 				AddConnection.kill();
 				vscode.window.showInformationMessage(result.message.toString());
 			} else {
+				envService.addNewNode(new CreatioInstance(args.name, args.url, vscode.TreeItemCollapsibleState.Collapsed));
 				vscode.window.showErrorMessage(result.message.toString(), "OK")
 				.then(answer => {
 					AddConnection.kill();
@@ -171,7 +173,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.AddConnection", ()=>{
-			AddConnection.createOrShow(context.extensionUri);
+			//AddConnection.createOrShow(context.extensionUri);
+			ConnectionPanel.render(context.extensionUri);
+			//AddConnection.createOrShow(context.extensionUri);
+			
 		})
 	);
 		

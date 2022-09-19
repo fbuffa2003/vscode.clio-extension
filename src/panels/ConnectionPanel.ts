@@ -4,8 +4,8 @@ import { ClioExecutor } from "../Common/clioExecutor";
 import { CreatioInstance } from "../service/CreatioInstance";
 import { getUri } from "../utilities/getUri";
 
-export class HelloWorldPanel {
-	public static currentPanel: HelloWorldPanel | undefined;
+export class ConnectionPanel {
+	public static currentPanel: ConnectionPanel | undefined;
 	private readonly _panel: WebviewPanel;
 	private _disposables: Disposable[] = [];
 	private static _envName : string | undefined;
@@ -42,14 +42,14 @@ export class HelloWorldPanel {
 	 *
 	 * @param extensionUri The URI of the directory containing the extension.
 	 */
-	public static render(extensionUri: Uri, node: CreatioInstance) {
+	public static render(extensionUri: Uri) {
 
-		if (HelloWorldPanel.currentPanel) {
+		if (ConnectionPanel.currentPanel) {
 		// If the webview panel already exists reveal it
-		HelloWorldPanel.currentPanel._panel.reveal(ViewColumn.One);
+		ConnectionPanel.currentPanel._panel.reveal(ViewColumn.One);
 		} else {
 
-			HelloWorldPanel._envName = node.label;
+			ConnectionPanel._envName = "";
 			
 			// If a webview panel does not already exist create and show a new one
 			const panel = window.createWebviewPanel(
@@ -63,14 +63,6 @@ export class HelloWorldPanel {
 				{
 					// Enable JavaScript in the webview
 					enableScripts: true,
-					localResourceRoots: [
-						vscode.Uri.joinPath(extensionUri, "webview-ui"),
-						vscode.Uri.joinPath(extensionUri, "webview-ui","build"),
-						vscode.Uri.joinPath(extensionUri, "webview-ui", "src"),
-						vscode.Uri.joinPath(extensionUri, "webview-ui","src", "assets"),
-						vscode.Uri.joinPath(extensionUri, "webview-ui","src", "assets","fonts"),
-						vscode.Uri.joinPath(extensionUri, "webview-ui","src", "assets","images")
-					],
 				},
 				
 			);
@@ -80,7 +72,7 @@ export class HelloWorldPanel {
 				dark: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'creatio-circle-white.svg')
 			};
 			
-			HelloWorldPanel.currentPanel = new HelloWorldPanel(panel, extensionUri);
+			ConnectionPanel.currentPanel = new ConnectionPanel(panel, extensionUri);
 		}
 	}
 
@@ -88,7 +80,7 @@ export class HelloWorldPanel {
 	 * Cleans up and disposes of webview resources when the webview panel is closed.
 	 */
 	public dispose() {
-		HelloWorldPanel.currentPanel = undefined;
+		ConnectionPanel.currentPanel = undefined;
 
 		// Dispose of the current webview panel
 		this._panel.dispose();
@@ -120,8 +112,11 @@ export class HelloWorldPanel {
 		const runtimeUri = getUri(webview, extensionUri, ["webview-ui", "build", "runtime.js"]);
 		const polyfillsUri = getUri(webview, extensionUri, ["webview-ui", "build", "polyfills.js"]);
 		const scriptUri = getUri(webview, extensionUri, ["webview-ui", "build", "main.js"]);
-		const imagesUri = getUri(webview, extensionUri, ["webview-ui", "build","assets", "images"]);
+		const imagesUri = getUri(webview, extensionUri, ["resources", "icon"]);
 		const fontsUri = getUri(webview, extensionUri, ["webview-ui", "build","assets", "fonts"]);
+		
+		//https://microsoft.github.io/vscode-codicons/dist/codicon.html
+		const codiconsUri = getUri(webview, extensionUri, ["node_modules","@vscode/codicons", "dist","codicon.css"]);
 
 		// Tip: Install the es6-string-html VS Code extension to enable code highlighting below
 		return /*html*/ `
@@ -131,13 +126,18 @@ export class HelloWorldPanel {
 				<meta charset="UTF-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 				<link rel="stylesheet" type="text/css" href="${stylesUri}">
-				<title>Marketplace catalog</title>
+				<link rel="stylesheet" type="text/css" href="${codiconsUri}">
+				<title>Add new connection</title>
 			</head>
 			<body>
-				<app-root environmentName="${HelloWorldPanel._envName}" pageName="myPage" imagesUri="${imagesUri}"></app-root>
+				<app-root environmentName="${ConnectionPanel._envName}" pageName="connection" imagesUri="${imagesUri}"></app-root>
 				<script type="module" src="${runtimeUri}"></script>
 				<script type="module" src="${polyfillsUri}"></script>
 				<script type="module" src="${scriptUri}"></script>
+				<div class="icon" style="visibility: hidden">
+					<i class="codicon codicon-account"></i>
+					<img src="${imagesUri}/creatio-square.svg">
+				</div>
 			</body>
 		</html>
 		`;
@@ -154,44 +154,9 @@ export class HelloWorldPanel {
 		webview.onDidReceiveMessage(
 		async (message: any) => {
 			const command = message.command;
-			const environmentName = message.environmentName;
-
 			switch (command) {
-			case "getCatalog":
-				// Code that should run in response to the hello message command
-				vscode.window.withProgress(
-					{
-					location : vscode.ProgressLocation.Notification,
-					title: "Getting Data"
-					},
-					async(progress, token)=>{
-						const result = await this._clio.ExecuteClioCommand('clio catalog');
-						const msg = {
-							"getCatalog": result
-						};
-		
-						//raising event, angular subscribes to it
-						this._panel.webview.postMessage(msg);
-						progress.report({ 
-							increment: 100, 
-							message: "Done" 
-						});
-					}
-				);
-
-
-
-				// //Getting data from Clio
-				// const result = await this._clio.ExecuteClioCommand('clio catalog');
-				
-				// //forming event message
-				// const msg = {
-				// 	"getCatalog": result
-				// };
-
-				// //raising event, angular subscribes to it
-				// this._panel.webview.postMessage(msg);
-				return;
+				case "regWebApp":
+					vscode.commands.executeCommand("ClioSQL.RegisterWebApp", message.data);
 			}
 		},
 		undefined,
