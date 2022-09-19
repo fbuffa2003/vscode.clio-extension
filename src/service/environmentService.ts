@@ -19,9 +19,9 @@ export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstan
 		const removedInstance = this.instances.find(i=> i.id === instance.id);
 		if (removedInstance) {
 			var removedIndex = this.instances.indexOf(removedInstance);
-			this.instances.splice(removedIndex, 1);
-			this.refresh();
+			this.instances.splice(removedIndex);
 		}
+		this.refresh();
 	}
 
 	public findInstanceByName(name: String): CreatioInstance | undefined {
@@ -71,6 +71,9 @@ export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstan
 		this.instances.push(node);
 		node.onDidStatusUpdate((instance: CreatioInstance)=>{
 			this.handleUpdateNode(instance);
+		});
+		node.onDeleted((instance: CreatioInstance)=>{
+			this.handleDeleteNode(instance);
 		});
 		this.refresh();
 	}
