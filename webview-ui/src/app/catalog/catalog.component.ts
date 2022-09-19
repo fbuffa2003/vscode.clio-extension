@@ -1,13 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { vscode } from "./../utilities/vscode";
 import { provideVSCodeDesignSystem, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow } from "@vscode/webview-ui-toolkit";
 
-
-provideVSCodeDesignSystem().register(
-	vsCodeButton(), vsCodeCheckbox(), 
-	vsCodeDataGrid(), vsCodeDataGridRow(), vsCodeDataGridCell()
-);
 
 @Component({
 	selector: "app-catalog",
@@ -17,6 +11,10 @@ provideVSCodeDesignSystem().register(
 export class CatalogComponent implements OnInit {
 	
 	public catalog : Array<CatalogItem> = new Array<CatalogItem>();
+
+	private imageUri;
+	public environmentName;
+	public circleImageUri;
 
 	@HostListener("window:message", ["$event"])
 	onMessage(ev: any) {
@@ -32,8 +30,6 @@ export class CatalogComponent implements OnInit {
 	 */
 	private onGetCatalog(catalog: string){
 		const lines: string[] = catalog.split("\r\n");
-		
-		debugger;
 		lines.forEach(line=>{
 			const m = line.match(/\d{4,6}/);
 			if(m){
@@ -43,20 +39,20 @@ export class CatalogComponent implements OnInit {
 				this.catalog?.push(item);
 			}
 		});
-
-		debugger;
 	}
 
-	environmentName: string | undefined;
-	constructor(private _activatedRoute: ActivatedRoute) {
-		this._activatedRoute.paramMap.subscribe((params) => {
-			this.environmentName = params.get("environmentName") ?? "";
-		});
-		
+	constructor() {
+		provideVSCodeDesignSystem().register(
+			vsCodeButton(), vsCodeCheckbox(), 
+			vsCodeDataGrid(), vsCodeDataGridRow(), vsCodeDataGridCell()
+		);
+
+		this.imageUri = history.state.imageUri;
+		this.environmentName = history.state.environmentName;
+		this.circleImageUri = this.imageUri+'/'+"creatio-square.svg";
+		console.log(`catalog.component.ts environmentName: ${this.environmentName}`);
 	}
 	ngOnInit(): void {
-
-		debugger;
 		//Ask extension to run clio catalog
 		vscode.postMessage({
 			command: "getCatalog",
@@ -64,7 +60,6 @@ export class CatalogComponent implements OnInit {
 		});
 	}
 }
-
 
 export class CatalogItem{
 	
@@ -76,6 +71,3 @@ export class CatalogItem{
 		this.name = name;
 	}
 }
-
-
-

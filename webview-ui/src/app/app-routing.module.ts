@@ -5,15 +5,15 @@ import { ConnectionComponent } from './connection/connection.component';
 
 const routes: Routes = [
 	{
-		path: 'catalog/:environmentName' , 
+		path: 'catalog' , 
 		title : 'catalog',
 		component: CatalogComponent
 	},
-	{
-		path: 'connection/:environmentName' , 
-		title : 'connection',
-		component: ConnectionComponent
-	},
+	// {
+	// 	path: 'connection/:environmentName' , 
+	// 	title : 'connection',
+	// 	component: ConnectionComponent
+	// },
 	{
 		path: 'connection' , 
 		title : 'connection',

@@ -1,15 +1,21 @@
-<h1>Environment: {{environmentName}}</h1>
+<div class="header">
+	<img class="logo-img"src={{circleImageUri}} alt="logo">
+	<span class="logo-text">Install an app on {{environmentName}}</span>
+</div>
 
-<div *ngIf="catalog" style="max-width: 800px">
-	<vscode-data-grid aria-label="Catalog"  grid-template-columns="100px 1fr 100px">
-		<vscode-data-grid-row row-type="header">
+<div *ngIf="catalog" style="max-width: 800px" >
+	<vscode-data-grid aria-label="Catalog"  grid-template-columns="100px 1fr 100px" generate-Header="sticky" >
+		<vscode-data-grid-row row-type="sticky-header">
 			<vscode-data-grid-cell cell-type="columnheader" grid-column="1">App Id</vscode-data-grid-cell>
 			<vscode-data-grid-cell cell-type="columnheader" grid-column="2">App Name</vscode-data-grid-cell>
-			<vscode-data-grid-cell cell-type="columnheader" grid-column="3">Action</vscode-data-grid-cell>
+			<vscode-data-grid-cell cell-type="columnheader" grid-column="3"></vscode-data-grid-cell>
 		</vscode-data-grid-row>
 		<vscode-data-grid-row *ngFor="let item of catalog">
 			<vscode-data-grid-cell grid-column="1">{{item.id}}</vscode-data-grid-cell>
-			<vscode-data-grid-cell grid-column="2">{{item.name}}</vscode-data-grid-cell>
+			<vscode-data-grid-cell grid-column="2">
+				<span *ngIf="item.id==23425" class="codicon codicon-star" style="color: yellow;"></span>
+				{{item.name}}
+			</vscode-data-grid-cell>
 			<vscode-button>Install</vscode-button>
 		</vscode-data-grid-row>
 	</vscode-data-grid>

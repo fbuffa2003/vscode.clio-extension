@@ -22,11 +22,7 @@ export class AddConnection
 		}
 
 		const options :vscode.WebviewOptions = {
-			enableScripts : true,
-			localResourceRoots: [
-				vscode.Uri.joinPath(extensionUri, "media")
-			],
-			
+			enableScripts : true
 		};
 
 		// Otherwise, create a new panel.
@@ -35,15 +31,6 @@ export class AddConnection
 			"Add new connection",
 			column || vscode.ViewColumn.One,
 			options
-			// {
-			// 	// Enable javascript in the webview
-			// 	enableScripts: true,
-
-			// 	// And restrict the webview to only loading content from our extension's `media` directory.
-			// 	localResourceRoots: [
-			// 		vscode.Uri.joinPath(extensionUri, "media")
-			// 	],
-			// }
 		);
 		panel.title = "Add new Connection";
 
@@ -129,7 +116,8 @@ export class AddConnection
 		// // Use a nonce to only allow specific scripts to be run
 		const nonce = getNonce();
 		
-		return `<!DOCTYPE html>
+		return /*html*/`
+		<!DOCTYPE html>
 				<html lang="en">
 					<head>
 						<meta charset="UTF-8">

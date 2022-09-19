@@ -9,9 +9,7 @@ export class HelloWorldPanel {
 	private readonly _panel: WebviewPanel;
 	private _disposables: Disposable[] = [];
 	private static _envName : string | undefined;
-
 	private _clio: ClioExecutor;
-
 
 	/**
 	 * The HelloWorldPanel class private constructor (called only from the render method).
@@ -62,15 +60,7 @@ export class HelloWorldPanel {
 				// Extra panel configurations
 				{
 					// Enable JavaScript in the webview
-					enableScripts: true,
-					localResourceRoots: [
-						vscode.Uri.joinPath(extensionUri, "webview-ui"),
-						vscode.Uri.joinPath(extensionUri, "webview-ui","build"),
-						vscode.Uri.joinPath(extensionUri, "webview-ui", "src"),
-						vscode.Uri.joinPath(extensionUri, "webview-ui","src", "assets"),
-						vscode.Uri.joinPath(extensionUri, "webview-ui","src", "assets","fonts"),
-						vscode.Uri.joinPath(extensionUri, "webview-ui","src", "assets","images")
-					],
+					enableScripts: true
 				},
 				
 			);
@@ -120,21 +110,28 @@ export class HelloWorldPanel {
 		const runtimeUri = getUri(webview, extensionUri, ["webview-ui", "build", "runtime.js"]);
 		const polyfillsUri = getUri(webview, extensionUri, ["webview-ui", "build", "polyfills.js"]);
 		const scriptUri = getUri(webview, extensionUri, ["webview-ui", "build", "main.js"]);
-		const imagesUri = getUri(webview, extensionUri, ["webview-ui", "build","assets", "images"]);
-		const fontsUri = getUri(webview, extensionUri, ["webview-ui", "build","assets", "fonts"]);
+		
+		const imagesUri = getUri(webview, extensionUri, ["resources", "icon"]);
+		//https://microsoft.github.io/vscode-codicons/dist/codicon.html
+		const codiconsUri = getUri(webview, extensionUri, ["node_modules","@vscode/codicons", "dist","codicon.css"]);
 
 		// Tip: Install the es6-string-html VS Code extension to enable code highlighting below
 		return /*html*/ `
 		<!DOCTYPE html>
 		<html lang="en">
-			<head>
-				<meta charset="UTF-8" />
-				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-				<link rel="stylesheet" type="text/css" href="${stylesUri}">
-				<title>Marketplace catalog</title>
-			</head>
+		<head>
+			<meta charset="UTF-8" />
+			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+			<link rel="stylesheet" type="text/css" href="${stylesUri}">
+			<link rel="stylesheet" type="text/css" href="${codiconsUri}">
+			<title>Marketplace apps</title>
+		</head>
 			<body>
-				<app-root environmentName="${HelloWorldPanel._envName}" pageName="myPage" imagesUri="${imagesUri}"></app-root>
+				<div class="hidden">
+				<i class="codicon codicon-account"></i>
+				<img src="${imagesUri}/creatio-square.svg">
+			</div>
+				<app-root environmentName="${HelloWorldPanel._envName}" pageName="catalog" imagesUri="${imagesUri}"></app-root>
 				<script type="module" src="${runtimeUri}"></script>
 				<script type="module" src="${polyfillsUri}"></script>
 				<script type="module" src="${scriptUri}"></script>
@@ -178,19 +175,6 @@ export class HelloWorldPanel {
 						});
 					}
 				);
-
-
-
-				// //Getting data from Clio
-				// const result = await this._clio.ExecuteClioCommand('clio catalog');
-				
-				// //forming event message
-				// const msg = {
-				// 	"getCatalog": result
-				// };
-
-				// //raising event, angular subscribes to it
-				// this._panel.webview.postMessage(msg);
 				return;
 			}
 		},

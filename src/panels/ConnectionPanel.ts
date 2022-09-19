@@ -10,9 +10,6 @@ export class ConnectionPanel {
 	private _disposables: Disposable[] = [];
 	private static _envName : string | undefined;
 
-	private _clio: ClioExecutor;
-
-
 	/**
 	 * The HelloWorldPanel class private constructor (called only from the render method).
 	 *
@@ -21,8 +18,7 @@ export class ConnectionPanel {
 	 */
 	private constructor(panel: WebviewPanel, extensionUri: Uri) {
 		this._panel = panel;
-		this._clio = new ClioExecutor();
-
+		
 		// Set an event listener to listen for when the panel is disposed (i.e. when the user closes
 		// the panel or when the panel is closed programmatically)
 		this._panel.onDidDispose(this.dispose, null, this._disposables);
@@ -31,9 +27,7 @@ export class ConnectionPanel {
 		this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri);
 
 		// Set an event listener to listen for messages passed from the webview context
-		this._setWebviewMessageListener(this._panel.webview);
-
-		
+		this._setWebviewMessageListener(this._panel.webview);		
 	}
 
 	/**
@@ -112,9 +106,8 @@ export class ConnectionPanel {
 		const runtimeUri = getUri(webview, extensionUri, ["webview-ui", "build", "runtime.js"]);
 		const polyfillsUri = getUri(webview, extensionUri, ["webview-ui", "build", "polyfills.js"]);
 		const scriptUri = getUri(webview, extensionUri, ["webview-ui", "build", "main.js"]);
-		const imagesUri = getUri(webview, extensionUri, ["resources", "icon"]);
-		const fontsUri = getUri(webview, extensionUri, ["webview-ui", "build","assets", "fonts"]);
 		
+		const imagesUri = getUri(webview, extensionUri, ["resources", "icon"]);
 		//https://microsoft.github.io/vscode-codicons/dist/codicon.html
 		const codiconsUri = getUri(webview, extensionUri, ["node_modules","@vscode/codicons", "dist","codicon.css"]);
 

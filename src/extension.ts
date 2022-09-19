@@ -184,7 +184,6 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("ClioSQL.InstallMarketplaceApp", async (node: CreatioInstance)=>{
 			//InstallMarketplaceApp.createOrShow(context.extensionUri);
 			HelloWorldPanel.render(context.extensionUri, node);
-
 			HelloWorldPanel.currentPanel?.sendMessage();
 		})
 	);
