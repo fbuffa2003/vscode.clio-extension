@@ -7,6 +7,7 @@ import { Clio } from './commands/Clio';
 import { IFlushDbArgs } from './commands/FlushDbCommand';
 import { IRegisterWebAppArgs } from './commands/RegisterWebAppCommand';
 import { TextEditor } from 'vscode';
+import { HelloWorldPanel } from './panels/HelloWorldPanel';
 
 
 export function activate(context: vscode.ExtensionContext) {
@@ -143,8 +144,11 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 		
 	context.subscriptions.push(
-		vscode.commands.registerCommand("ClioSQL.InstallMarketplaceApp", ()=>{
-			InstallMarketplaceApp.createOrShow(context.extensionUri);
+		vscode.commands.registerCommand("ClioSQL.InstallMarketplaceApp", async (node: CreatioInstance)=>{
+			//InstallMarketplaceApp.createOrShow(context.extensionUri);
+			HelloWorldPanel.render(context.extensionUri, node);
+
+			HelloWorldPanel.currentPanel?.sendMessage();
 		})
 	);
 
@@ -164,6 +168,5 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		})
 	);
-
 }
 export function deactivate() {}

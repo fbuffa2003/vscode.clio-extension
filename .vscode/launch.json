@@ -29,6 +29,14 @@
 				"${workspaceFolder}/out/test/**/*.js"
 			],
 			"preLaunchTask": "${defaultBuildTask}"
-		}
+		},
+		{
+			"type": "pwa-msedge",
+			"name": "http://localhost:4200/",
+			"request": "launch",
+			"url": "http://localhost:4200/",
+			"webRoot": "${workspaceFolder}/webview-ui"
+		},
+		
 	]
 }

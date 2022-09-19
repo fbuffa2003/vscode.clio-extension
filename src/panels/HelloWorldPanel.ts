@@ -1,11 +1,17 @@
 import * as vscode from "vscode";
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
+import { ClioExecutor } from "../Common/clioExecutor";
+import { CreatioInstance } from "../service/CreatioInstance";
 import { getUri } from "../utilities/getUri";
 
 export class HelloWorldPanel {
 	public static currentPanel: HelloWorldPanel | undefined;
 	private readonly _panel: WebviewPanel;
 	private _disposables: Disposable[] = [];
+	private static _envName : string | undefined;
+
+	private _clio: ClioExecutor;
+
 
 	/**
 	 * The HelloWorldPanel class private constructor (called only from the render method).
@@ -15,6 +21,7 @@ export class HelloWorldPanel {
 	 */
 	private constructor(panel: WebviewPanel, extensionUri: Uri) {
 		this._panel = panel;
+		this._clio = new ClioExecutor();
 
 		// Set an event listener to listen for when the panel is disposed (i.e. when the user closes
 		// the panel or when the panel is closed programmatically)
@@ -25,6 +32,8 @@ export class HelloWorldPanel {
 
 		// Set an event listener to listen for messages passed from the webview context
 		this._setWebviewMessageListener(this._panel.webview);
+
+		
 	}
 
 	/**
@@ -33,34 +42,45 @@ export class HelloWorldPanel {
 	 *
 	 * @param extensionUri The URI of the directory containing the extension.
 	 */
-	public static render(extensionUri: Uri) {
+	public static render(extensionUri: Uri, node: CreatioInstance) {
+
 		if (HelloWorldPanel.currentPanel) {
 		// If the webview panel already exists reveal it
 		HelloWorldPanel.currentPanel._panel.reveal(ViewColumn.One);
 		} else {
-		// If a webview panel does not already exist create and show a new one
-		const panel = window.createWebviewPanel(
-			// Panel view type
-			"showHelloWorld",
-			// Panel title
-			"Marketplace catalog",
-			// The editor column the panel should be displayed in
-			ViewColumn.One,
+
+			HelloWorldPanel._envName = node.label;
 			
-			// Extra panel configurations
-			{
-				// Enable JavaScript in the webview
-				enableScripts: true,
+			// If a webview panel does not already exist create and show a new one
+			const panel = window.createWebviewPanel(
+				// Panel view type
+				"showHelloWorld",
+				// Panel title
+				"Marketplace catalog",
+				// The editor column the panel should be displayed in
+				ViewColumn.One,
+				// Extra panel configurations
+				{
+					// Enable JavaScript in the webview
+					enableScripts: true,
+					localResourceRoots: [
+						vscode.Uri.joinPath(extensionUri, "webview-ui"),
+						vscode.Uri.joinPath(extensionUri, "webview-ui","build"),
+						vscode.Uri.joinPath(extensionUri, "webview-ui", "src"),
+						vscode.Uri.joinPath(extensionUri, "webview-ui","src", "assets"),
+						vscode.Uri.joinPath(extensionUri, "webview-ui","src", "assets","fonts"),
+						vscode.Uri.joinPath(extensionUri, "webview-ui","src", "assets","images")
+					],
+				},
 				
-			},
-		);
-	
-		panel.iconPath = {
-			light: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'creatio-circle-white.svg'),
-			dark: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'creatio-circle-white.svg')
-		};
+			);
 		
-		HelloWorldPanel.currentPanel = new HelloWorldPanel(panel, extensionUri);
+			panel.iconPath = {
+				light: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'creatio-circle-white.svg'),
+				dark: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'creatio-circle-white.svg')
+			};
+			
+			HelloWorldPanel.currentPanel = new HelloWorldPanel(panel, extensionUri);
 		}
 	}
 
@@ -100,6 +120,8 @@ export class HelloWorldPanel {
 		const runtimeUri = getUri(webview, extensionUri, ["webview-ui", "build", "runtime.js"]);
 		const polyfillsUri = getUri(webview, extensionUri, ["webview-ui", "build", "polyfills.js"]);
 		const scriptUri = getUri(webview, extensionUri, ["webview-ui", "build", "main.js"]);
+		const imagesUri = getUri(webview, extensionUri, ["webview-ui", "build","assets", "images"]);
+		const fontsUri = getUri(webview, extensionUri, ["webview-ui", "build","assets", "fonts"]);
 
 		// Tip: Install the es6-string-html VS Code extension to enable code highlighting below
 		return /*html*/ `
@@ -112,7 +134,7 @@ export class HelloWorldPanel {
 				<title>Marketplace catalog</title>
 			</head>
 			<body>
-				<app-root environmentName="test" pageName="myPage"></app-root>
+				<app-root environmentName="${HelloWorldPanel._envName}" pageName="myPage" imagesUri="${imagesUri}"></app-root>
 				<script type="module" src="${runtimeUri}"></script>
 				<script type="module" src="${polyfillsUri}"></script>
 				<script type="module" src="${scriptUri}"></script>
@@ -130,21 +152,37 @@ export class HelloWorldPanel {
 	 */
 	private _setWebviewMessageListener(webview: Webview) {
 		webview.onDidReceiveMessage(
-		(message: any) => {
+		async (message: any) => {
 			const command = message.command;
-			const text = message.text;
+			const environmentName = message.environmentName;
 
 			switch (command) {
-			case "hello":
+			case "getCatalog":
 				// Code that should run in response to the hello message command
-				window.showInformationMessage(text);
+				window.showInformationMessage(`WebView requested ${message.command} for environment ${environmentName}`);
+				
+				//Getting data from Clio
+				const result = await this._clio.ExecuteClioCommand('clio catalog');
+				
+				//forming event message
+				const msg = {
+					"getCatalog": result
+				};
+
+				//raising event, angular subscribes to it
+				this._panel.webview.postMessage(msg);
 				return;
-			// Add more switch case statements here as more webview message commands
-			// are created within the webview context (i.e. inside media/main.js)
 			}
 		},
 		undefined,
 		this._disposables
 		);
+	}
+
+	public sendMessage(){
+		const msg = {
+			"myData":"my data will be here"
+		};
+		this._panel.webview.postMessage(msg);
 	}
 }

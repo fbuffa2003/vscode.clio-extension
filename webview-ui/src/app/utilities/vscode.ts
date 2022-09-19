@@ -72,6 +72,8 @@ class VSCodeAPIWrapper {
       return newState;
     }
   }
+
+  
 }
 
 // Exports class singleton to prevent multiple invocations of acquireVsCodeApi.
