@@ -107,7 +107,7 @@ export class CreatioInstance extends vscode.TreeItem {
 	}
 
 	public async installGate(): Promise<void> {
-		this.clioExecutor.executeCommandByTerminal(`installgate -e "${this.label}"`);
+		this.clioExecutor.executeCommandByTerminal(`installgate "${this.label}"`);
 	}
 
 	public async executeSql(sqlText: String): Promise<String> {

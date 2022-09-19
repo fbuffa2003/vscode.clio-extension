@@ -68,11 +68,11 @@ export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstan
 	 */
 	public async addNewNode(node : CreatioInstance){
 		await node.checkHealth();
-
+		this.instances.push(node);
 		node.onDidStatusUpdate((instance: CreatioInstance)=>{
 			this.handleUpdateNode(instance);
 		});
-		this.instances.push(node);
+		this.refresh();
 	}
 
 	public async updateNode(node: CreatioInstance) {

@@ -64,25 +64,43 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push( 
 		vscode.commands.registerCommand('ClioSQL.restart', async (node: CreatioInstance) => {
-			if(node){
-				await node.restartWebApp();
-			}
+			vscode.window
+				.showWarningMessage("Do you want restart environment \"" + node.label + "\"?", "Yes", "No",)
+				.then(answer => {
+					if (answer === "Yes") {
+						if(node){
+							node.restartWebApp();
+						}
+					}
+				});
 		})
 	);
 
 	context.subscriptions.push( 
 		vscode.commands.registerCommand('ClioSQL.Unreg', async (node: CreatioInstance) => {
-			if(node){
-				await node.UnregWebApp();
-			}
+			vscode.window
+				.showWarningMessage("Do you want delete environment \"" + node.label + "\"?", "Yes", "No",)
+				.then(answer => {
+					if (answer === "Yes") {
+						if(node){
+							node.UnregWebApp();
+						}
+					}
+				});
 		})
 	);
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ClioSQL.flushDb', async (node: CreatioInstance) => {
-			if(node){
-				await node.flushDb();
-			}
+			vscode.window
+				.showWarningMessage("Do you want flush redis db on environment \"" + node.label + "\"?", "Yes", "No",)
+				.then(answer => {
+					if (answer === "Yes") {
+						if(node){
+							node.flushDb();
+						}
+					}
+				});
 		})
 	);
 
@@ -97,9 +115,15 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ClioSQL.InstallGate', async (node: CreatioInstance) => {
-			if(node){
-				await node.installGate();
-			}
+			vscode.window
+				.showInformationMessage("Do you want install clio api on environment \"" + node.label + "\"?", "Yes", "No",)
+				.then(answer => {
+					if (answer === "Yes") {
+						if(node){
+							node.installGate();
+						}
+					}
+				});
 		})
 	);
 	
@@ -155,23 +179,5 @@ export function activate(context: vscode.ExtensionContext) {
 			InstallMarketplaceApp.createOrShow(context.extensionUri);
 		})
 	);
-
-	context.subscriptions.push(
-		vscode.commands.registerCommand("ClioSQL.TestCommand", async ()=>{
-			const clio = new Clio();
-			
-			const args = {environmentName: "zoom"} as IFlushDbArgs;
-			if(clio.flushDb.canExecute(args)){
-				const result = await clio.flushDb.executeAsync(args);
-				
-				if(result.success){
-					vscode.window.showInformationMessage(`Flushdb : ${result.message}`);
-				} else if(!result.success){
-					vscode.window.showErrorMessage(`Flushdb : ${result.message}`);
-				}
-			}
-		})
-	);
-
 }
 export function deactivate() {}

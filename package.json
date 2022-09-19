@@ -120,11 +120,6 @@
 					"submenu": "ClioSQL.OverflowMenu",
 					"when": "viewItem == CreatioInstance",
 					"group": "inline@5"
-				},
-				{
-					"submenu": "ClioSQL.OverflowMenu",
-					"when": "viewItem == CreatioInstance",
-					"group": "inline@6"
 				}
 			],
 			"editor/title": [
