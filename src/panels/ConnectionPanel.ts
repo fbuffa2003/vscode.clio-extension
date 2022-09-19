@@ -130,14 +130,14 @@ export class ConnectionPanel {
 				<title>Add new connection</title>
 			</head>
 			<body>
+				<div class="hidden">
+					<i class="codicon codicon-account"></i>
+					<img src="${imagesUri}/creatio-square.svg">
+				</div>
 				<app-root environmentName="${ConnectionPanel._envName}" pageName="connection" imagesUri="${imagesUri}"></app-root>
 				<script type="module" src="${runtimeUri}"></script>
 				<script type="module" src="${polyfillsUri}"></script>
 				<script type="module" src="${scriptUri}"></script>
-				<div class="icon" style="visibility: hidden">
-					<i class="codicon codicon-account"></i>
-					<img src="${imagesUri}/creatio-square.svg">
-				</div>
 			</body>
 		</html>
 		`;
