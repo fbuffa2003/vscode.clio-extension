@@ -7,7 +7,7 @@
 - Execute data-service requests
 - Start a process
 
-## [0.0.1] Initial release  - Sep 20, 2022
+## [0.0.6] Initial release  - Sep 20, 2022
 
 ### Added
 

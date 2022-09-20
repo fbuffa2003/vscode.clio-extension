@@ -30,3 +30,6 @@ vsc-extension-quickstart.md
 **/.eslintrc.json
 **/*.map
 **/*.ts
+
+# video gif file
+**/clio_explorer_demo.gif
