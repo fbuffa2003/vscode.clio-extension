@@ -1,4 +1,5 @@
 # Clio explorer extension for VSCode
+"Working with a cli is great, but sometimes you just want a button"
 
 ## Introduction
 
