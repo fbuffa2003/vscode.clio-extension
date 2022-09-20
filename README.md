@@ -9,6 +9,8 @@ If you don't have a [clio] cli make sure to run
 ```ps
 dotnet tool install clio -g
 ```
+![alt text](./resources/clio_explorer_demo.gif)
+
 
 <!-- Named links -->
 [clio]:https://github.com/Advance-Technologies-Foundation/clio
