@@ -19,7 +19,7 @@ export class ConnectionComponent implements OnInit {
 		userName: "",
 		password: "",
 		url: "",
-		maintainer: "",
+		maintainer: "Customer",
 		isNetCore: false,
 		isSafe: false,
 		isDeveloperMode: false

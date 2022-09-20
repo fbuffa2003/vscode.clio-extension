@@ -18,12 +18,6 @@
 			"preLaunchTask": "${defaultBuildTask}"
 		},
 		{
-			"name": "WV - Run Extension",
-			"type": "extensionHost",
-			"request": "attach",
-		},
-
-		{
 			"name": "Extension Tests",
 			"type": "extensionHost",
 			"request": "launch",
@@ -42,12 +36,6 @@
 			"request": "launch",
 			"url": "http://localhost:4200/",
 			"webRoot": "${workspaceFolder}/webview-ui"
-		},
-		{
-			"type": "pwa-msedge",
-			"name": "ws://127.0.0.1:56078/1abc095a-7f3b-469b-8e2a-127b65e2b6ce",
-			"request": "launch",
-			"url": "ws://127.0.0.1:56078/1abc095a-7f3b-469b-8e2a-127b65e2b6ce"
 		}
 	]
 }

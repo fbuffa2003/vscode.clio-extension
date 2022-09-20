@@ -1,9 +1,17 @@
 # Change Log
 
-All notable changes to the "ClioSQL" extension will be documented in this file.
+## Upcoming release
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+- Display SQL request in a webView table
+- Install marketplace app
+- Execute data-service requests
+- Start a process
 
-## [Unreleased]
+## [0.0.1] Initial release  - Sep 20, 2022
 
-- Initial release
+### Added
+
+- Add and remove connection
+- Clear redis
+- Restart webapp
+- Execute sql

@@ -1,9 +1,9 @@
 {
-	"name": "ClioExplorer",
-	"displayName": "clio-explorer",
-	"description": "Clio explorer",
+	"name": "clio-explorer",
+	"displayName": "Clio explorer",
+	"description": "Control your Creatio environments, and perform clio actions for them\nWorking with a cli is great, but sometimes you just want a button.",
 	"version": "0.0.1",
-	"publisher": "Advance Technologies Foundation",
+	"publisher": "AdvanceTechnologiesFoundation",
 	"license": "MIT",
 	"icon": "resources/creatio-triangle.png",
 	"engines": {
