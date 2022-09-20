@@ -1,7 +1,7 @@
 {
 	"name": "clio-explorer",
 	"displayName": "Clio explorer",
-	"description": "Control your Creatio environments, and perform clio actions on them. Working with a cli is great, but sometimes you just want a button.",
+	"description": "Control your Creatio environments, and perform clio actions on them",
 	"version": "0.0.6",
 	"publisher": "AdvanceTechnologiesFoundation",
 	"license": "MIT",
