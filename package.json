@@ -56,11 +56,6 @@
 		"menus": {
 			"ClioSQL.OverflowMenu": [
 				{
-					"command": "ClioSQL.InstallMarketplaceApp",
-					"when": "viewItem == CreatioInstance",
-					"group": "group-1@1"
-				},
-				{
 
 					"command": "ClioSQL.InstallPackage",
 					"when": "viewItem == CreatioInstance",
@@ -97,10 +92,10 @@
 				{
 					"command": "ClioSQL.AddConnection",
 					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "navigation@3"
+					"group": "navigation@1"
 				},
 				{
-					"command": "ClioSQL.UpdateClioCli",
+					"command": "ClioSQL.OverflowHeaderMenu",
 					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
 					"group": "navigation@4"
 				}
@@ -152,6 +147,11 @@
 		"submenus": [
 			{
 				"id": "ClioSQL.OverflowMenu",
+				"label": "More",
+				"icon": "$(search-details)"
+			},
+			{
+				"id": "ClioSQL.OverflowHeaderMenu",
 				"label": "More",
 				"icon": "$(search-details)"
 			}

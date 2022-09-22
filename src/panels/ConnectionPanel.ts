@@ -50,7 +50,7 @@ export class ConnectionPanel {
 				// Panel view type
 				"showHelloWorld",
 				// Panel title
-				"Marketplace catalog",
+				"New connection",
 				// The editor column the panel should be displayed in
 				ViewColumn.One,
 				// Extra panel configurations
