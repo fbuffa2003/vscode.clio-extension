@@ -11,8 +11,9 @@
 
 ### Added
 
-- CreatioClient a native http client
-- Added `Update clio` button to the top right corner 
+- Added `Install/Update clio` option
+- Added `Restore configuration` option
+- Added `Install package` option
 
 ### Changed
 

@@ -165,7 +165,7 @@ export class CreatioInstance extends vscode.TreeItem {
 		if (isArgValid) {
 			const result = await this.clio.restoreConfiguration.executeAsync(args);
 			if (result.success) {
-				vscode.window.showInformationMessage(`Restored configuration : ${result.message}`);
+				vscode.window.showInformationMessage(`Restore configuration : ${result.message}`);
 			} else if (!result.success) {
 				vscode.window.showErrorMessage(`Restore configuration : ${result.message}`);
 			}

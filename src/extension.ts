@@ -68,7 +68,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push( 
 		vscode.commands.registerCommand('ClioSQL.restart', async (node: CreatioInstance) => {
 			vscode.window
-				.showWarningMessage("Do you want restart environment \"" + node.label + "\"?", "Yes", "No",)
+				.showWarningMessage("Would you like to restart environment \"" + node.label + "\"?", "Yes", "No",)
 				.then(answer => {
 					if (answer === "Yes") {
 						if(node){
@@ -82,7 +82,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push( 
 		vscode.commands.registerCommand('ClioSQL.Unreg', async (node: CreatioInstance) => {
 			vscode.window
-				.showWarningMessage("Do you want delete environment \"" + node.label + "\"?", "Yes", "No",)
+				.showWarningMessage("Would you like to delete environment \"" + node.label + "\"?", "Yes", "No",)
 				.then(answer => {
 					if (answer === "Yes") {
 						if(node){
@@ -96,7 +96,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push( 
 		vscode.commands.registerCommand('ClioSQL.RestoreConfiguration', async (node: CreatioInstance) => {
 			vscode.window
-				.showWarningMessage("Do you want restore configuration \"" + node.label + "\"?", "Yes", "No",)
+				.showWarningMessage("Would you like to restore configuration \"" + node.label + "\"?", "Yes", "No",)
 				.then(answer => {
 					if (answer === "Yes") {
 						if(node){
@@ -110,7 +110,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ClioSQL.flushDb', async (node: CreatioInstance) => {
 			vscode.window
-				.showWarningMessage("Do you want flush redis db on environment \"" + node.label + "\"?", "Yes", "No",)
+				.showWarningMessage("Would you like to flush redis db on environment \"" + node.label + "\"?", "Yes", "No",)
 				.then(answer => {
 					if (answer === "Yes") {
 						if(node){
@@ -135,6 +135,14 @@ export function activate(context: vscode.ExtensionContext) {
 			
 			const executor = new ClioExecutor();
 			const result = await executor.ExecuteClioCommand("dotnet tool update clio -g");
+			vscode.window.showInformationMessage(result as string);			
+		})
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ClioSQL.UninstallClioCli', async () => {
+			
+			const executor = new ClioExecutor();
+			const result = await executor.ExecuteClioCommand("dotnet tool uninstall clio -g");
 			vscode.window.showInformationMessage(result as string);			
 		})
 	);
@@ -166,7 +174,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ClioSQL.InstallGate', async (node: CreatioInstance) => {
 			vscode.window
-				.showInformationMessage("Do you want install clio api on environment \"" + node.label + "\"?", "Yes", "No",)
+				.showInformationMessage("Would you like to install clio api on environment \"" + node.label + "\"?", "Yes", "No",)
 				.then(answer => {
 					if (answer === "Yes") {
 						if(node){

@@ -88,6 +88,18 @@
 					"group": "group-4@2"
 				}
 			],
+			"ClioSQL.OverflowHeaderMenu":[
+				{
+					"command": "ClioSQL.UpdateClioCli",
+					"title": "Install/Update clio",
+					"icon": "$(code)"
+				},
+				{
+					"command": "ClioSQL.UninstallClioCli",
+					"title": "Uninstall clio",
+					"icon": "$(code)"
+				}
+			],
 			"view/title": [
 				{
 					"command": "ClioSQL.AddConnection",
@@ -95,9 +107,8 @@
 					"group": "navigation@1"
 				},
 				{
-					"command": "ClioSQL.OverflowHeaderMenu",
-					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "navigation@4"
+					"submenu": "ClioSQL.OverflowHeaderMenu",
+					"group": "navigation@1"
 				}
 			],
 			"view/item/context": [
@@ -275,7 +286,12 @@
 			},
 			{
 				"command": "ClioSQL.UpdateClioCli",
-				"title": "Update clio",
+				"title": "Install/Update clio",
+				"icon": "$(code)"
+			},
+			{
+				"command": "ClioSQL.UninstallClioCli",
+				"title": "Uninstall clio",
 				"icon": "$(code)"
 			}
 		]
