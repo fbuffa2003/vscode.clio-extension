@@ -44,7 +44,13 @@ export class EnvironmentService implements vscode.TreeDataProvider<CreatioInstan
 			type ObjectKey = keyof typeof environments;
 			const keyName = key as ObjectKey;
 			const environment = environments[keyName];
-			let instance: CreatioInstance = new CreatioInstance(key, environment['Uri'], vscode.TreeItemCollapsibleState.Collapsed);
+			const userName :string = environment['Login'];
+			const password : string = environment['Password'];
+			const isNetCore : boolean = environment['IsNetCore'];
+
+			let instance: CreatioInstance = new CreatioInstance(
+				key, environment['Uri'], userName, password, isNetCore,
+				vscode.TreeItemCollapsibleState.Collapsed);
 
 			instance.onDidStatusUpdate((instance: CreatioInstance)=>{
 				this.handleUpdateNode(instance);

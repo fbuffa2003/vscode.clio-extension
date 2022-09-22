@@ -7,7 +7,7 @@ import { ISqlArgs } from '../commands/SqlCommand';
 import { IHealthCheckArgs } from '../commands/HealthCheckCommand';
 import { IFlushDbArgs } from '../commands/FlushDbCommand';
 import { HealthStatus } from './environmentService';
-
+import {CreatioClient} from '../common/CreatioClient/CreatioClient';
 
 export class CreatioInstance extends vscode.TreeItem {
 
@@ -17,6 +17,7 @@ export class CreatioInstance extends vscode.TreeItem {
 	readonly onDeleted: vscode.Event<CreatioInstance> = this._onDeleted.event;
 	private readonly clioExecutor: ClioExecutor;
 	private readonly clio: Clio;
+	private readonly creatioClient: CreatioClient;
 
 	contextValue = 'CreatioInstance';
 	private healthStatus: HealthStatus = HealthStatus.unknown;
@@ -24,6 +25,9 @@ export class CreatioInstance extends vscode.TreeItem {
 	constructor(
 		public readonly label: string,
 		public readonly description: string,
+		public readonly username: string,
+		public readonly password: string,
+		public readonly isNetCore: boolean,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState
 	) {
 		super(label, collapsibleState);
@@ -33,6 +37,7 @@ export class CreatioInstance extends vscode.TreeItem {
 		this.id = randomUUID();
 		this.clioExecutor = new ClioExecutor();
 		this.clio = new Clio();
+		this.creatioClient = new CreatioClient(new URL(description), username, password, isNetCore);
 	}
 
 	//#region Public methods
@@ -62,16 +67,47 @@ export class CreatioInstance extends vscode.TreeItem {
 	 * Restarts web app
 	 */
 	public async restartWebApp(): Promise<void> {
-		this.clioExecutor.executeCommandByTerminal(`restart -e "${this.label}"`);
+		
+		// TODO: Lets discuss this approach.
+		// I am using HttpClient instead of clio.
+		const result = await this.creatioClient.RestartApp();
+		const body = JSON.parse(result.body);
+		if(result.statusCode === 200){
+			const success: boolean = body['success'] as boolean;
+			if(success){
+				vscode.window.showInformationMessage(`Restart successfully completed`);
+			}
+		}else{
+			const error: string = body['errorInfo'] as string;
+			vscode.window.showInformationMessage(`Restart completed with ${error}`);
+		}
+
+		//this.clioExecutor.executeCommandByTerminal(`restart -e "${this.label}"`);
 	}
 
 	/**
 	 * Flushes redis
 	 */
 	public async flushDb(): Promise<void> {
+		// TODO: Lets discuss this approach.
+		// I am using HttpClient instead of clio.
 		const args: IFlushDbArgs = {
 			environmentName: this.label
 		};
+		const result = await this.creatioClient.FlushDb();
+
+		const body = JSON.parse(result.body);
+		if(result.statusCode === 200){
+			const success: boolean = body['success'] as boolean;
+			if(success){
+				vscode.window.showInformationMessage(`Flush redis successfully completed ${success}`);
+			}
+		}else{
+			const error: string = body['errorInfo'] as string;
+			vscode.window.showInformationMessage(`Flush redis completed with ${error}`);
+		}
+
+		/*
 		const isArgValid = this.clio.flushDb.canExecute(args);
 		if (isArgValid) {
 			const result = await this.clio.flushDb.executeAsync(args);
@@ -81,6 +117,7 @@ export class CreatioInstance extends vscode.TreeItem {
 				vscode.window.showErrorMessage(`Flushdb : ${result.message}`);
 			}
 		}
+		*/
 	}
 
 	/**

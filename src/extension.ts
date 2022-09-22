@@ -150,11 +150,15 @@ export function activate(context: vscode.ExtensionContext) {
 
 			const result = await clio.registerWebApp.executeAsync(commandArgs);
 			if(result.success){
-				envService.addNewNode(new CreatioInstance(args.name, args.url, vscode.TreeItemCollapsibleState.Collapsed));
+				envService.addNewNode(new CreatioInstance(
+					args.name, args.url, args.username, args.password, args.isNetCore, 
+					vscode.TreeItemCollapsibleState.Collapsed));
 				AddConnection.kill();
 				vscode.window.showInformationMessage(result.message.toString());
 			} else {
-				envService.addNewNode(new CreatioInstance(args.name, args.url, vscode.TreeItemCollapsibleState.Collapsed));
+				envService.addNewNode(new CreatioInstance(args.name, args.url, 
+					args.username, args.password, args.isNetCore,
+					vscode.TreeItemCollapsibleState.Collapsed));
 				vscode.window.showErrorMessage(result.message.toString(), "OK")
 				.then(answer => {
 					AddConnection.kill();
