@@ -76,9 +76,14 @@
 					"group": "group-2@3"
 				},
 				{
-					"command": "ClioSQL.InstallGate",
+					"command": "ClioSQL.InstallPackage",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-2@4"
+				},
+				{
+					"command": "ClioSQL.InstallGate",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-2@5"
 				},
 				{
 					"command": "ClioSQL.flushDb",
@@ -242,6 +247,14 @@
 			{
 				"command": "ClioSQL.HealthCheck",
 				"title": "Health check",
+				"icon": {
+					"light": "resources/icon/Health.svg",
+					"dark": "resources/icon/Health.svg"
+				}
+			},
+			{
+				"command": "ClioSQL.InstallPackage",
+				"title": "Install package",
 				"icon": {
 					"light": "resources/icon/Health.svg",
 					"dark": "resources/icon/Health.svg"

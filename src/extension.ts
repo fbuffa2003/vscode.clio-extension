@@ -126,6 +126,30 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
+		vscode.commands.registerCommand('ClioSQL.InstallPackage', async (node: CreatioInstance) => {
+			
+			const options: vscode.OpenDialogOptions = {
+				canSelectMany: false,
+				openLabel: 'Select Creatio package',
+				filters: {
+				   'Creatio packages': ['gz', 'zip'],
+				   'All files': ['*']
+			   }
+		   };
+		   
+		   vscode.window.showOpenDialog(options).then(fileUri => {
+			   if (fileUri && fileUri[0]) {
+				var filePath = fileUri[0].fsPath
+				if(node){
+					node.installPackage(filePath);
+				}
+			   }
+		   });
+		
+		})
+	);
+
+	context.subscriptions.push(
 		vscode.commands.registerCommand('ClioSQL.InstallGate', async (node: CreatioInstance) => {
 			vscode.window
 				.showInformationMessage("Do you want install clio api on environment \"" + node.label + "\"?", "Yes", "No",)
