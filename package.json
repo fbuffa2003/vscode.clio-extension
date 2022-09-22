@@ -61,39 +61,36 @@
 					"group": "group-1@1"
 				},
 				{
-					"command": "ClioSQL.GenerateModels",
+
+					"command": "ClioSQL.InstallPackage",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-2@1"
 				},
 				{
-					"command": "ClioSQL.RestoreWorkspace",
+					"command": "ClioSQL.RestoreConfiguration",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-2@2"
 				},
 				{
+
 					"command": "ClioSQL.HealthCheck",
-					"when": "viewItem == CreatioInstance",
-					"group": "group-2@3"
-				},
-				{
-					"command": "ClioSQL.InstallPackage",
-					"when": "viewItem == CreatioInstance",
-					"group": "group-2@4"
-				},
-				{
-					"command": "ClioSQL.InstallGate",
-					"when": "viewItem == CreatioInstance",
-					"group": "group-2@5"
-				},
-				{
-					"command": "ClioSQL.flushDb",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-3@1"
 				},
 				{
-					"command": "ClioSQL.restart",
+					"command": "ClioSQL.InstallGate",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-3@2"
+				},
+				{
+					"command": "ClioSQL.flushDb",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-4@1"
+				},
+				{
+					"command": "ClioSQL.restart",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-4@2"
 				}
 			],
 			"view/title": [
@@ -222,6 +219,14 @@
 				"icon": {
 					"light": "resources/icon/RestoreLocalServer.svg",
 					"dark": "resources/icon/RestoreLocalServer.svg"
+				}
+			},
+			{
+				"command": "ClioSQL.RestoreConfiguration",
+				"title": "Restore configuration",
+				"icon": {
+					"light": "resources/icon/RestoreConfiguration.svg",
+					"dark": "resources/icon/RestoreConfiguration.svg"
 				}
 			},
 			{

@@ -5,6 +5,7 @@ import { HealthCheck, IHealthCheckArgs, IHealthCheckResponse } from './HealthChe
 import { IRegisterWebAppArgs, IRegisterWebAppResponse, RegisterWebApp } from './RegisterWebAppCommand';
 import { ISqlArgs, ISqlResponse, Sql } from './SqlCommand';
 import { UnregWebApp } from './UnregWebApp';
+import { RestoreConfiguration, IRestoreConfigurationArgs, IRestoreConfigurationResponse} from './RestoreConfiguration';
 import { InstallGate } from './InstallGate';
 
 
@@ -28,6 +29,12 @@ export class Clio {
 	 * - See _Delete the existing environment_ {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/README.md#delete-the-existing-environment **documentation**}
 	 */
 	public readonly unregWebApp: ICommand<IFlushDbArgs,IFlushDbResponse> = new UnregWebApp(this.executor);
+
+	/**
+	 * Command abstraction to restore configuration web app
+	 * - See _Delete the existing environment_ {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/README.md#restore-configuration **documentation**}
+	 */
+	public readonly restoreConfiguration: ICommand<IRestoreConfigurationArgs, IRestoreConfigurationResponse> = new RestoreConfiguration(this.executor);
 	
 	/**
 	 * Command abstraction to execute sql scripts

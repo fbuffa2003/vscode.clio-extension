@@ -93,6 +93,20 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
+	context.subscriptions.push( 
+		vscode.commands.registerCommand('ClioSQL.RestoreConfiguration', async (node: CreatioInstance) => {
+			vscode.window
+				.showWarningMessage("Do you want restore configuration \"" + node.label + "\"?", "Yes", "No",)
+				.then(answer => {
+					if (answer === "Yes") {
+						if(node){
+							node.RestoreConfiguration();
+						}
+					}
+				});
+		})
+	);
+
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ClioSQL.flushDb', async (node: CreatioInstance) => {
 			vscode.window
