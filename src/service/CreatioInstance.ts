@@ -8,6 +8,7 @@ import { IHealthCheckArgs } from '../commands/HealthCheckCommand';
 import { IFlushDbArgs } from '../commands/FlushDbCommand';
 import { HealthStatus } from './environmentService';
 import {CreatioClient} from '../common/CreatioClient/CreatioClient';
+import { unwatchFile } from 'fs';
 
 export class CreatioInstance extends vscode.TreeItem {
 
@@ -52,6 +53,18 @@ export class CreatioInstance extends vscode.TreeItem {
 			environmentName: this.label
 		};
 
+		//TODO: Lets discuss this approach
+		const webAppPingResult = await this.creatioClient.PingWebApp();
+		const webHostPingResult = await this.creatioClient.PingWebHost();
+
+		if(webAppPingResult.statusCode === 200 && webHostPingResult.statusCode === 200){
+			this.setHealthStatus(HealthStatus.healthy);
+		}else{
+			this.setHealthStatus(HealthStatus.unHealthy);
+		}
+
+
+		/*
 		const isValidArgs = this.clio.healthCheck.canExecute(args);
 		if (isValidArgs.success) {
 			const result = await this.clio.healthCheck.executeAsync(args);
@@ -61,6 +74,7 @@ export class CreatioInstance extends vscode.TreeItem {
 				this.setHealthStatus(HealthStatus.unHealthy);
 			}
 		}
+		*/
 	}
 
 	/**

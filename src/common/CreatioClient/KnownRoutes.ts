@@ -181,6 +181,32 @@ export class KnownRoutes {
 		this._ExecuteSqlScript = v;
 	}
 	
+	
+	private _PingWebHost : string = "/0/api/HealthCheck/Ping";
+	/**
+	 * - /0/api/HealthCheck/Ping
+	 */
+	public get PingWebHost() : string {
+		return this._PingWebHost;
+	}
+	private set PingWebHost(v : string) {
+		this._PingWebHost = v;
+	}
+	
+	
+	private _PingWebApp : string = "/api/HealthCheck/Ping";
+	/**
+	 * - /api/HealthCheck/Ping
+	 */
+	public get PingWebApp() : string {
+		return this._PingWebApp;
+	}
+	private set PingWebApp(v : string) {
+		this._PingWebApp = v;
+	}
+	
+
+
 
 	/**
 	 *

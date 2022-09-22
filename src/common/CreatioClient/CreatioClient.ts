@@ -17,14 +17,23 @@ export class CreatioClient {
 		) {}
 
 	public async GetAsync(options: IRequestOptions): Promise<IResponse>{
+		
+		if(this.CookieValues.length === 0){
+			await this.Login();
+		}
+		const headers : OutgoingHttpHeaders = {
+			"Accept-Encoding":"gzip, deflate, br",
+		};
+
 		const firstRequest =  await this.execute(
 			options.path,
-			HttpMethod.GET);
+			HttpMethod.GET, headers);
 		if(firstRequest.statusCode === 401){
 			await this.Login();
-			return  await this.execute(
+			const result =  await this.execute(
 				options.path,
-				HttpMethod.GET);
+				HttpMethod.GET, headers);
+			return result;
 		} else {
 			return firstRequest;
 		}
@@ -232,8 +241,23 @@ export class CreatioClient {
 	}
 
 
+	public async PingWebApp(): Promise<IResponse>{
+		const options : IRequestOptions = {
+			path: new KnownRoutes(this.isNetCore).PingWebApp,
+		};
+		return this.GetAsync(options);
+	}
+
+	public async PingWebHost() : Promise<IResponse> {
+		const options : IRequestOptions = {
+			path: new KnownRoutes(this.isNetCore).PingWebHost,
+		};
+		return this.GetAsync(options);
+	}
+
 	//#region Method : Private
 	private async Login() : Promise<IResponse> {
+		this.CookieValues = [];
 		const postData = {
 			UserName:this.username,
 			UserPassword: this.password
@@ -282,21 +306,33 @@ export class CreatioClient {
 						body: Buffer.concat(chunks).toString(),
 						statusCode: res.statusCode
 					} as IResponse);
-				})
+				});
 
 				res.on("error", (error) =>{
-					reject({
+					resolve({
 						body: error.message, 
 						statusCode: res.statusCode
 					} as IResponse);
 				});
-			}
+			};
 
 			const request : ClientRequest = this.resolveClient(options, callBack);
 			if(data){
 				request.write(JSON.stringify(data));
 			}
 			request.end();
+			
+			request.on("error",(error)=>{
+				
+
+				resolve({
+					body : error.message,
+					statusCode: (error as any).errno as unknown as number
+				} as IResponse);
+
+			});
+
+
 		});
 	}
 
@@ -338,7 +374,7 @@ export class CreatioClient {
 			let str = "";
 			this.CookieValues.forEach(cookie=>{
 				str+= `${cookie.key}=${cookie.value};`;
-			})
+			});
 			
 			if(str!==""){
 				h.Cookie = str;
@@ -441,7 +477,7 @@ export interface IBusinessProcess{
 	}
 }
 
-export type ProcessParameter = {
+export interface IProcessParameter {
 	dataValueType: DataValueType,
 	typeName: string
 	direction?: ParameterDirection
@@ -469,7 +505,7 @@ export interface IProcessSchema  extends IResponse{
 				typeName: string,
 				useBackgroundMode?: boolean
 			}[],
-			parameters: ProcessParameter[]
+			parameters: IProcessParameter[]
 		}
 	}
 	useBackgroundMode: boolean
