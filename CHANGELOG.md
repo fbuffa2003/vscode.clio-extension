@@ -2,10 +2,22 @@
 
 ## Upcoming release
 
-- Display SQL request in a webView table
+- Display SQL request in a table
 - Install marketplace app
 - Execute data-service requests
 - Start a process
+
+## [0.0.7] Initial release  - Sep 22, 2022
+
+### Added
+
+- CreatioClient a native http client
+- Added `Update clio` button to the top right corner 
+
+### Changed
+
+- FlushDb, Restart, Ping command to utilize CreatioClient
+
 
 ## [0.0.6] Initial release  - Sep 20, 2022
 

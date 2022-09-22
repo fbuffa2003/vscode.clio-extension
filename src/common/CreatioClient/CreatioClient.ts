@@ -255,6 +255,18 @@ export class CreatioClient {
 		return this.GetAsync(options);
 	}
 
+	public async ExecuteSqlScript(sqlText: string): Promise<IResponse>{
+		const options : IRequestOptions = {
+			path: new KnownRoutes(this.isNetCore).ExecuteSqlScript,
+			data: {script:sqlText}
+		};
+		const response = await this.PostAsync(options);
+		const json = JSON.parse(JSON.parse(response.body));
+
+		return response;
+	}
+
+
 	//#region Method : Private
 	private async Login() : Promise<IResponse> {
 		this.CookieValues = [];

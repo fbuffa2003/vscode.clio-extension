@@ -162,6 +162,11 @@ export class CreatioInstance extends vscode.TreeItem {
 	}
 
 	public async executeSql(sqlText: String): Promise<String> {
+		
+		const rresult = await this.creatioClient.ExecuteSqlScript(sqlText as string);
+		const json = JSON.parse(JSON.parse(rresult.body));
+		return JSON.stringify(json);
+
 		const args: ISqlArgs = {
 			sqlText: sqlText,
 			environmentName: this.label

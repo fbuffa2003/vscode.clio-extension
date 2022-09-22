@@ -9,6 +9,7 @@ import { IRegisterWebAppArgs } from './commands/RegisterWebAppCommand';
 import { TextEditor } from 'vscode';
 import { HelloWorldPanel } from './panels/HelloWorldPanel';
 import { ConnectionPanel } from './panels/ConnectionPanel';
+import { ClioExecutor } from './Common/clioExecutor';
 
 
 export function activate(context: vscode.ExtensionContext) {
@@ -112,6 +113,15 @@ export function activate(context: vscode.ExtensionContext) {
 				await node.openInBrowser();
 				
 			}
+		})
+	);
+	
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ClioSQL.UpdateClioCli', async () => {
+			
+			const executor = new ClioExecutor();
+			const result = await executor.ExecuteClioCommand("dotnet tool update clio -g");
+			vscode.window.showInformationMessage(result as string);			
 		})
 	);
 
