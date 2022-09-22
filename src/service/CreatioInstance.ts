@@ -6,6 +6,7 @@ import { Clio } from '../commands/Clio';
 import { ISqlArgs } from '../commands/SqlCommand';
 import { IHealthCheckArgs } from '../commands/HealthCheckCommand';
 import { IFlushDbArgs } from '../commands/FlushDbCommand';
+import { IRestoreConfigurationArgs } from '../commands/RestoreConfiguration';
 import { HealthStatus } from './environmentService';
 import {CreatioClient} from '../common/CreatioClient/CreatioClient';
 import { unwatchFile } from 'fs';
@@ -149,6 +150,24 @@ export class CreatioInstance extends vscode.TreeItem {
 				vscode.window.showInformationMessage(`Unreg web app : ${result.message}`);
 			} else if (!result.success) {
 				vscode.window.showErrorMessage(`Unreg web app : ${result.message}`);
+			}
+		}
+	}
+	//RestoreConfiguration
+	/**
+	 * Restore configuration
+	 */
+	 public async RestoreConfiguration(): Promise<void> {
+		const args: IRestoreConfigurationArgs = {
+			environmentName: this.label
+		};
+		const isArgValid = this.clio.restoreConfiguration.canExecute(args);
+		if (isArgValid) {
+			const result = await this.clio.restoreConfiguration.executeAsync(args);
+			if (result.success) {
+				vscode.window.showInformationMessage(`Restored configuration : ${result.message}`);
+			} else if (!result.success) {
+				vscode.window.showErrorMessage(`Restore configuration : ${result.message}`);
 			}
 		}
 	}
