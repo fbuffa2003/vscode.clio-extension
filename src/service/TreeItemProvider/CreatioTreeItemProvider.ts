@@ -12,8 +12,7 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 	
 	private _onDidStatusUpdate: vscode.EventEmitter<CreatioTreeItem> = new vscode.EventEmitter<CreatioTreeItem>();
 	readonly onDidStatusUpdate: vscode.Event<CreatioTreeItem> = this._onDidStatusUpdate.event;
-
-
+	
 	private environments = new Array<Environment>();
 
 	getTreeItem(element: CreatioTreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {

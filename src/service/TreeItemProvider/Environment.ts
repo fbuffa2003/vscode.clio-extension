@@ -20,15 +20,16 @@ export class Environment extends CreatioTreeItem {
 	public readonly connectionSettings : IConnectionSettings;
 	private creatioClient: CreatioClient;
 	private readonly clioExecutor: ClioExecutor = new ClioExecutor();
-	private readonly clio: Clio = new Clio();
 	public contextValue = 'CreatioInstance';
 	constructor( label: string, connectionSettings :IConnectionSettings)
 	{
-		super(label, "", ItemType.creatioInstance, vscode.TreeItemCollapsibleState.Collapsed);
+		super(label, connectionSettings.uri.toString(), 
+			ItemType.creatioInstance, undefined, vscode.TreeItemCollapsibleState.Collapsed);
+
 		this.connectionSettings = connectionSettings;
-		this.items.push(new PackageList());
-		this.items.push(new ProcessList());
-		this.items.push(new EntityList());
+		this.items.push(new PackageList(this));
+		this.items.push(new ProcessList(this));
+		this.items.push(new EntityList(this));
 		this.creatioClient = new CreatioClient(connectionSettings.uri, connectionSettings.login, connectionSettings.password, connectionSettings.isNetCore);
 		this.setHealthStatus(HealthStatus.unknown);
 		this.checkHealth();

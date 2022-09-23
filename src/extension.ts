@@ -8,6 +8,11 @@ import { ClioExecutor } from './Common/clioExecutor';
 import { CreatioTreeItemProvider } from './service/TreeItemProvider/CreatioTreeItemProvider';
 import { Environment, IConnectionSettings } from './service/TreeItemProvider/Environment';
 import { CatalogPanel } from './panels/CatalogPanel';
+import { CreatioTreeItem } from './service/TreeItemProvider/CreatioTreeItem';
+import { PackageList } from './service/TreeItemProvider/PackageList';
+import { ProcessList } from './service/TreeItemProvider/ProcessList';
+import { EntityList } from './service/TreeItemProvider/EntityList';
+import { IGetPackagesArgs } from './commands/GetPackagesCommand';
 
 
 export function activate(context: vscode.ExtensionContext) {
@@ -15,7 +20,37 @@ export function activate(context: vscode.ExtensionContext) {
 	const executor = new ClioExecutor();
 
 	const treeProvider = new CreatioTreeItemProvider();
-	vscode.window.registerTreeDataProvider('vscode-clio-extension.creatioExplorer', treeProvider);
+	//vscode.window.registerTreeDataProvider('vscode-clio-extension.creatioExplorer', treeProvider);
+	const treeView = vscode.window.createTreeView("vscode-clio-extension.creatioExplorer", {
+		treeDataProvider: treeProvider
+	});
+
+	treeView.onDidCollapseElement(async (event: vscode.TreeViewExpansionEvent<CreatioTreeItem>) => {
+		return;
+	});
+	
+	treeView.onDidExpandElement(async (event: vscode.TreeViewExpansionEvent<CreatioTreeItem>)=>{
+		if(event.element instanceof Environment){
+			return;
+		}
+		
+		if(event.element instanceof PackageList){
+			await (event.element as PackageList).getPackages();
+			treeProvider.refresh();
+		}
+
+		
+		if(event.element instanceof ProcessList){
+			return;
+		}
+
+		if(event.element instanceof EntityList){
+			return;
+		}
+	});
+
+
+
 
 	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.ExecuteSql', async (doc) => {
 		let commandsDocument = vscode.window.activeTextEditor?.document;
