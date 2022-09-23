@@ -129,6 +129,11 @@
 					"group": "inline@4"
 				},
 				{
+					"command": "ClioSQL.DownloadPackage",
+					"when": "viewItem == CreatioPackage",
+					"group": "inline@1"
+				},
+				{
 					"submenu": "ClioSQL.OverflowMenu",
 					"when": "viewItem == CreatioInstance",
 					"group": "inline@5"
@@ -294,6 +299,11 @@
 				"command": "ClioSQL.UninstallClioCli",
 				"title": "Uninstall clio",
 				"icon": "$(code)"
+			},
+			{
+				"command": "ClioSQL.DownloadPackage",
+				"title": "Download package",
+				"icon": "$(cloud-download)"
 			}
 		],
 		"colors": [

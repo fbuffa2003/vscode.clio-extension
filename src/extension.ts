@@ -9,7 +9,7 @@ import { CreatioTreeItemProvider } from './service/TreeItemProvider/CreatioTreeI
 import { Environment, IConnectionSettings } from './service/TreeItemProvider/Environment';
 import { CatalogPanel } from './panels/CatalogPanel';
 import { CreatioTreeItem } from './service/TreeItemProvider/CreatioTreeItem';
-import { PackageList } from './service/TreeItemProvider/PackageList';
+import { Package, PackageList } from './service/TreeItemProvider/PackageList';
 import { ProcessList } from './service/TreeItemProvider/ProcessList';
 import { EntityList } from './service/TreeItemProvider/EntityList';
 import { IGetPackagesArgs } from './commands/GetPackagesCommand';
@@ -283,6 +283,13 @@ export function activate(context: vscode.ExtensionContext) {
 			CatalogPanel.currentPanel?.sendMessage();
 		})
 	);
+	
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.DownloadPackage", async (node: Package)=>{
+			node.download();
+		})
+	);
+
 
 	//#endregion
 }

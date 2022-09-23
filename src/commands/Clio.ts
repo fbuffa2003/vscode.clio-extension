@@ -8,6 +8,7 @@ import { UnregWebApp } from './UnregWebApp';
 import { RestoreConfiguration, IRestoreConfigurationArgs, IRestoreConfigurationResponse} from './RestoreConfiguration';
 import { InstallGate } from './InstallGate';
 import { GetPackages, IGetPackagesArgs, IGetPackagesResponse } from './GetPackagesCommand';
+import { DownloadPackage, IDownloadPackageArgs, IDownloadPackageResponse } from './DownloadPackageCommand';
 
 
 export class Clio {
@@ -88,6 +89,12 @@ export class Clio {
 	 * - See _clio get package list_ {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/README.md#get-package-list **documentation**}
 	 */
 	public readonly getPackages : ICommand<IGetPackagesArgs, IGetPackagesResponse> = new GetPackages(this.executor);
+	
+	/**
+	 * Command abstraction to open a Creation instance in a browser
+	 * - See _clio pull package_ {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/README.md#pull-package-from-remote-application **documentation**}
+	 */
+	public readonly downloadPackage : ICommand<IDownloadPackageArgs, IDownloadPackageResponse> = new DownloadPackage(this.executor);
 	
 
 
