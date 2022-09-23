@@ -1,40 +1,23 @@
 import * as vscode from 'vscode';
-import {EnvironmentService} from './service/environmentService';
-import { CreatioInstance } from "./service/CreatioInstance";
-import { AddConnection, FormData } from './panels/AddConnection';
 import { InstallMarketplaceApp } from './panels/MarketplaceApp';
 import { Clio } from './commands/Clio';
-import { IFlushDbArgs } from './commands/FlushDbCommand';
 import { IRegisterWebAppArgs } from './commands/RegisterWebAppCommand';
 import { TextEditor } from 'vscode';
-import { HelloWorldPanel } from './panels/HelloWorldPanel';
-import { ConnectionPanel } from './panels/ConnectionPanel';
+import { ConnectionPanel, FormData } from './panels/ConnectionPanel';
 import { ClioExecutor } from './Common/clioExecutor';
+import { CreatioTreeItemProvider } from './service/TreeItemProvider/CreatioTreeItemProvider';
+import { Environment, IConnectionSettings } from './service/TreeItemProvider/Environment';
+import { CatalogPanel } from './panels/CatalogPanel';
 
 
 export function activate(context: vscode.ExtensionContext) {
 	const clio = new Clio();
-	const envService = new EnvironmentService();
-	vscode.window.registerTreeDataProvider('vscode-clio-extension.creatioExplorer', envService);
+	const executor = new ClioExecutor();
 
-	let showSqlDocument = vscode.commands.registerCommand('ClioSQL.OpenSqlDocument', (node: vscode.TreeItem) => {
-		vscode.workspace.openTextDocument({
-			language: 'sql',
-			content: `-- connection_env:${node.label}\r\n`
-		}).then(doc=>{
-			let w = vscode.window.showTextDocument(doc).then((textEditor: TextEditor) => {
-				const lineNumber = 1;
-				const characterNumberOnLine = 1;
-				const position = new vscode.Position(lineNumber, characterNumberOnLine);
-				const newSelection = new vscode.Selection(position, position);
-				textEditor.selection = newSelection;
-			  });
-			vscode.commands.executeCommand("workbench.action.editor.changeLanguageMode", "sql");
-		});
-	});
-	context.subscriptions.push(showSqlDocument);
-	
-	const executeSqlCommand = vscode.commands.registerCommand('ClioSQL.ExecuteSql', async (node: vscode.TextDocument) => {
+	const treeProvider = new CreatioTreeItemProvider();
+	vscode.window.registerTreeDataProvider('vscode-clio-extension.creatioExplorer', treeProvider);
+
+	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.ExecuteSql', async (doc) => {
 		let commandsDocument = vscode.window.activeTextEditor?.document;
 		let text : String = commandsDocument?.getText() as string;
 		let sqlText: String[] = text.split(/^-- connection_env:.*/, 2);
@@ -48,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 		const sqlCmd = sqlText[1].replace('\r','').replace('\n','').trim();		
-		const result = await envService.findInstanceByName(envName)?.executeSql(sqlCmd);
+		const result = await treeProvider.findInstanceByName(envName)?.executeSql(sqlCmd);
 		
 		await vscode.commands.executeCommand("workbench.action.editorLayoutTwoRows");
 				
@@ -61,130 +44,22 @@ export function activate(context: vscode.ExtensionContext) {
 				viewColumn: vscode.ViewColumn.Two
 			});
 		});
-	});
-	context.subscriptions.push(executeSqlCommand);
-	
+	}));
 
-	context.subscriptions.push( 
-		vscode.commands.registerCommand('ClioSQL.restart', async (node: CreatioInstance) => {
-			vscode.window
-				.showWarningMessage("Would you like to restart environment \"" + node.label + "\"?", "Yes", "No",)
-				.then(answer => {
-					if (answer === "Yes") {
-						if(node){
-							node.restartWebApp();
-						}
-					}
-				});
-		})
-	);
-
-	context.subscriptions.push( 
-		vscode.commands.registerCommand('ClioSQL.Unreg', async (node: CreatioInstance) => {
-			vscode.window
-				.showWarningMessage("Would you like to delete environment \"" + node.label + "\"?", "Yes", "No",)
-				.then(answer => {
-					if (answer === "Yes") {
-						if(node){
-							node.UnregWebApp();
-						}
-					}
-				});
-		})
-	);
-
-	context.subscriptions.push( 
-		vscode.commands.registerCommand('ClioSQL.RestoreConfiguration', async (node: CreatioInstance) => {
-			vscode.window
-				.showWarningMessage("Would you like to restore configuration \"" + node.label + "\"?", "Yes", "No",)
-				.then(answer => {
-					if (answer === "Yes") {
-						if(node){
-							node.RestoreConfiguration();
-						}
-					}
-				});
-		})
-	);
-
-	context.subscriptions.push(
-		vscode.commands.registerCommand('ClioSQL.flushDb', async (node: CreatioInstance) => {
-			vscode.window
-				.showWarningMessage("Would you like to flush redis db on environment \"" + node.label + "\"?", "Yes", "No",)
-				.then(answer => {
-					if (answer === "Yes") {
-						if(node){
-							node.flushDb();
-						}
-					}
-				});
-		})
-	);
-
-	context.subscriptions.push(
-		vscode.commands.registerCommand('ClioSQL.Open', async (node: CreatioInstance) => {
-			if(node){
-				await node.openInBrowser();
-				
-			}
-		})
-	);
-	
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ClioSQL.UpdateClioCli', async () => {
-			
-			const executor = new ClioExecutor();
 			const result = await executor.ExecuteClioCommand("dotnet tool update clio -g");
-			vscode.window.showInformationMessage(result as string);			
+			vscode.window.showInformationMessage(result as string);
 		})
 	);
+
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ClioSQL.UninstallClioCli', async () => {
-			
-			const executor = new ClioExecutor();
 			const result = await executor.ExecuteClioCommand("dotnet tool uninstall clio -g");
-			vscode.window.showInformationMessage(result as string);			
+			vscode.window.showInformationMessage(result as string);
 		})
 	);
 
-	context.subscriptions.push(
-		vscode.commands.registerCommand('ClioSQL.InstallPackage', async (node: CreatioInstance) => {
-			
-			const options: vscode.OpenDialogOptions = {
-				canSelectMany: false,
-				openLabel: 'Select Creatio package',
-				filters: {
-				   'Creatio packages': ['gz', 'zip'],
-				   'All files': ['*']
-			   }
-		   };
-		   
-		   vscode.window.showOpenDialog(options).then(fileUri => {
-			   if (fileUri && fileUri[0]) {
-				var filePath = fileUri[0].fsPath
-				if(node){
-					node.installPackage(filePath);
-				}
-			   }
-		   });
-		
-		})
-	);
-
-	context.subscriptions.push(
-		vscode.commands.registerCommand('ClioSQL.InstallGate', async (node: CreatioInstance) => {
-			vscode.window
-				.showInformationMessage("Would you like to install clio api on environment \"" + node.label + "\"?", "Yes", "No",)
-				.then(answer => {
-					if (answer === "Yes") {
-						if(node){
-							node.installGate();
-						}
-					}
-				});
-		})
-	);
-		
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.RegisterWebApp", async (args: FormData )=>{
 
@@ -199,32 +74,167 @@ export function activate(context: vscode.ExtensionContext) {
 				environmentName: args.name
 			};
 			const isArgValid = clio.registerWebApp.canExecute(commandArgs);
-
 			if(!isArgValid.success){
 				vscode.window.showErrorMessage(isArgValid.message.toString());
+				return;
 			}
 
 			const result = await clio.registerWebApp.executeAsync(commandArgs);
 			if(result.success){
-				envService.addNewNode(new CreatioInstance(
-					args.name, args.url, args.username, args.password, args.isNetCore, 
-					vscode.TreeItemCollapsibleState.Collapsed));
-				AddConnection.kill();
+				treeProvider.addNewNode(args.name, {
+					uri: new URL(args.url),
+					login: args.username,
+					password: args.password,
+					maintainer: args.maintainer,
+					isNetCore: args.isNetCore,
+					isSafe: args.isSafe,
+					isDeveloperMode: args.isDeveloperModeEnabled
+				} as IConnectionSettings);
+
+				ConnectionPanel.kill();
 				vscode.window.showInformationMessage(result.message.toString());
 			} else {
-				envService.addNewNode(new CreatioInstance(args.name, args.url, 
-					args.username, args.password, args.isNetCore,
-					vscode.TreeItemCollapsibleState.Collapsed));
+				treeProvider.addNewNode(args.name, {
+					uri: new URL(args.url),
+					login: args.username,
+					password: args.password,
+					maintainer: args.maintainer,
+					isNetCore: args.isNetCore,
+					isSafe: args.isSafe,
+					isDeveloperMode: args.isDeveloperModeEnabled
+				} as IConnectionSettings);
 				vscode.window.showErrorMessage(result.message.toString(), "OK")
 				.then(answer => {
-					AddConnection.kill();
+					ConnectionPanel.kill();
 				});
 			}
 		})
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('ClioSQL.HealthCheck', async (node: CreatioInstance) => {
+		vscode.commands.registerCommand("ClioSQL.AddConnection", ()=>{
+			ConnectionPanel.render(context.extensionUri);
+		})
+	);
+
+
+	//#region Commands : Environment
+
+	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.OpenSqlDocument', (node: Environment) => {
+		vscode.workspace.openTextDocument({
+			language: 'sql',
+			content: `-- connection_env:${node.label}\r\n`
+		}).then(doc=>{
+			let w = vscode.window.showTextDocument(doc).then((textEditor: TextEditor) => {
+				const lineNumber = 1;
+				const characterNumberOnLine = 1;
+				const position = new vscode.Position(lineNumber, characterNumberOnLine);
+				const newSelection = new vscode.Selection(position, position);
+				textEditor.selection = newSelection;
+			  });
+			vscode.commands.executeCommand("workbench.action.editor.changeLanguageMode", "sql");
+		});
+	}));
+	
+	context.subscriptions.push( 
+		vscode.commands.registerCommand('ClioSQL.restart', async (node: Environment) => {
+			vscode.window
+				.showWarningMessage("Would you like to restart environment \"" + node.label + "\"?", "Yes", "No",)
+				.then(answer => {
+					if (answer === "Yes") {
+						if(node){
+							node.restartWebApp();
+						}
+					}
+				});
+		})
+	);
+
+	context.subscriptions.push( 
+		vscode.commands.registerCommand('ClioSQL.UnregisterWebApp', async (node: Environment) => {
+			vscode.window
+				.showWarningMessage("Would you like to delete environment \"" + node.label + "\"?", "Yes", "No",)
+				.then(answer => {
+					if (answer === "Yes") {
+						if(node){node.unregisterWebApp();}
+					}
+				});
+			})
+	);
+
+	context.subscriptions.push( 
+		vscode.commands.registerCommand('ClioSQL.RestoreConfiguration', async (node: Environment) => {
+			vscode.window
+				.showWarningMessage("Would you like to restore configuration \"" + node.label + "\"?", "Yes", "No",)
+				.then(answer => {
+					if (answer === "Yes") {
+						if(node){node.restoreConfiguration();}
+					}
+				});
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ClioSQL.flushDb', async (node: Environment) => {
+			vscode.window
+				.showWarningMessage("Would you like to flush redis db on environment \"" + node.label + "\"?", "Yes", "No",)
+				.then(answer => {
+					if (answer === "Yes") {
+						if(node){
+							node.flushDb();
+						}
+					}
+				});
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ClioSQL.Open', async (node: Environment) => {
+			if(node){
+				await node.openInBrowser();
+			}
+		})
+	);
+	
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ClioSQL.InstallPackage', async (node: Environment) => {
+			
+			const options: vscode.OpenDialogOptions = {
+				canSelectMany: false,
+				openLabel: 'Select Creatio package',
+				filters: {
+					'creatioPackages': ['gz', 'zip'],
+					'allFiles': ['*']
+				}
+			};
+		
+			vscode.window.showOpenDialog(options).then(fileUri => {
+				if (fileUri && fileUri[0]) {
+					var filePath = fileUri[0].fsPath;
+					if(node){
+						node.installPackage(filePath);
+					}
+				}
+			});
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ClioSQL.InstallGate', async (node: Environment) => {
+			vscode.window
+				.showInformationMessage("Would you like to install clio api on environment \"" + node.label + "\"?", "Yes", "No",)
+				.then(answer => {
+					if (answer === "Yes") {
+						if(node){
+							node.installGate();
+						}
+					}
+				});
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ClioSQL.HealthCheck', async (node: Environment) => {
 			if(node){
 				await node.checkHealth();
 			}
@@ -232,37 +242,13 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("ClioSQL.AddConnection", ()=>{
-			//AddConnection.createOrShow(context.extensionUri);
-			ConnectionPanel.render(context.extensionUri);
-			//AddConnection.createOrShow(context.extensionUri);
-			
-		})
-	);
-		
-	context.subscriptions.push(
-		vscode.commands.registerCommand("ClioSQL.InstallMarketplaceApp", async (node: CreatioInstance)=>{
+		vscode.commands.registerCommand("ClioSQL.InstallMarketplaceApp", async (node: Environment)=>{
 			//InstallMarketplaceApp.createOrShow(context.extensionUri);
-			HelloWorldPanel.render(context.extensionUri, node);
-			HelloWorldPanel.currentPanel?.sendMessage();
+			CatalogPanel.render(context.extensionUri, node);
+			CatalogPanel.currentPanel?.sendMessage();
 		})
 	);
 
-	context.subscriptions.push(
-		vscode.commands.registerCommand("ClioSQL.TestCommand", async ()=>{
-			const clio = new Clio();
-			
-			const args = {environmentName: "zoom"} as IFlushDbArgs;
-			if(clio.flushDb.canExecute(args)){
-				const result = await clio.flushDb.executeAsync(args);
-				
-				if(result.success){
-					vscode.window.showInformationMessage(`Flushdb : ${result.message}`);
-				} else if(!result.success){
-					vscode.window.showErrorMessage(`Flushdb : ${result.message}`);
-				}
-			}
-		})
-	);
+	//#endregion
 }
 export function deactivate() {}

@@ -1,7 +1,5 @@
 import * as vscode from "vscode";
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
-import { ClioExecutor } from "../Common/clioExecutor";
-import { CreatioInstance } from "../service/CreatioInstance";
 import { getUri } from "../utilities/getUri";
 
 export class ConnectionPanel {
@@ -11,7 +9,7 @@ export class ConnectionPanel {
 	private static _envName : string | undefined;
 
 	/**
-	 * The HelloWorldPanel class private constructor (called only from the render method).
+	 * The CatalogPanel class private constructor (called only from the render method).
 	 *
 	 * @param panel A reference to the webview panel
 	 * @param extensionUri The URI of the directory containing the extension
@@ -68,6 +66,11 @@ export class ConnectionPanel {
 			
 			ConnectionPanel.currentPanel = new ConnectionPanel(panel, extensionUri);
 		}
+	}
+	
+	public static kill() {
+		ConnectionPanel.currentPanel?.dispose();
+		ConnectionPanel.currentPanel = undefined;
 	}
 
 	/**
@@ -138,7 +141,7 @@ export class ConnectionPanel {
 
 	/**
 	 * Sets up an event listener to listen for messages passed from the webview context and
-	 * executes code based on the message that is recieved.
+	 * executes code based on the message that is received.
 	 *
 	 * @param webview A reference to the extension webview
 	 * @param context A reference to the extension context
@@ -163,4 +166,52 @@ export class ConnectionPanel {
 		};
 		this._panel.webview.postMessage(msg);
 	}
+}
+
+
+
+/**
+ * Data Model
+ */
+ export interface FormData{
+
+	/**
+	 * Connection Name
+	 */
+	name: string;
+
+	/**
+	 * Connection url
+	 */
+	url : string;
+
+	/**
+	 * Username for the connection
+	 */
+	username: string;
+
+	/**
+	 * Password for the connection
+	 */
+	password: string;
+
+	/**
+	 * Maintainer for the connection
+	 */
+	maintainer: string;
+
+	/**
+	 * Indicates that connection to a NetCore Creatio instance
+	 */
+	isNetCore: boolean;
+
+	/**
+	 * Will ask for confirmation for every command
+	 */
+	isSafe: boolean;
+
+	/**
+	 * Will unlock packages
+	 */
+	isDeveloperModeEnabled: boolean;
 }

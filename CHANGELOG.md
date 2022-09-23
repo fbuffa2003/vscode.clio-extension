@@ -4,8 +4,13 @@
 
 - Display SQL request in a table
 - Install marketplace app
-- Execute data-service requests
-- Start a process
+- Package list
+
+## [0.0.8] Initial release  - Sep 22, 2022
+
+## Added
+
+
 
 ## [0.0.7] Initial release  - Sep 22, 2022
 

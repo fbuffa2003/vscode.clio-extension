@@ -1,18 +1,18 @@
 import * as vscode from "vscode";
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
 import { ClioExecutor } from "../Common/clioExecutor";
-import { CreatioInstance } from "../service/CreatioInstance";
+import { Environment } from "../service/TreeItemProvider/Environment";
 import { getUri } from "../utilities/getUri";
 
-export class HelloWorldPanel {
-	public static currentPanel: HelloWorldPanel | undefined;
+export class CatalogPanel {
+	public static currentPanel: CatalogPanel | undefined;
 	private readonly _panel: WebviewPanel;
 	private _disposables: Disposable[] = [];
 	private static _envName : string | undefined;
 	private _clio: ClioExecutor;
 
 	/**
-	 * The HelloWorldPanel class private constructor (called only from the render method).
+	 * The CatalogPanel class private constructor (called only from the render method).
 	 *
 	 * @param panel A reference to the webview panel
 	 * @param extensionUri The URI of the directory containing the extension
@@ -40,19 +40,19 @@ export class HelloWorldPanel {
 	 *
 	 * @param extensionUri The URI of the directory containing the extension.
 	 */
-	public static render(extensionUri: Uri, node: CreatioInstance) {
+	public static render(extensionUri: Uri, node: Environment) {
 
-		if (HelloWorldPanel.currentPanel) {
+		if (CatalogPanel.currentPanel) {
 		// If the webview panel already exists reveal it
-		HelloWorldPanel.currentPanel._panel.reveal(ViewColumn.One);
+		CatalogPanel.currentPanel._panel.reveal(ViewColumn.One);
 		} else {
 
-			HelloWorldPanel._envName = node.label;
+			CatalogPanel._envName = node.label;
 			
 			// If a webview panel does not already exist create and show a new one
 			const panel = window.createWebviewPanel(
 				// Panel view type
-				"showHelloWorld",
+				"showCatalogPanel",
 				// Panel title
 				"Marketplace catalog",
 				// The editor column the panel should be displayed in
@@ -70,7 +70,7 @@ export class HelloWorldPanel {
 				dark: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'creatio-circle-white.svg')
 			};
 			
-			HelloWorldPanel.currentPanel = new HelloWorldPanel(panel, extensionUri);
+			CatalogPanel.currentPanel = new CatalogPanel(panel, extensionUri);
 		}
 	}
 
@@ -78,7 +78,7 @@ export class HelloWorldPanel {
 	 * Cleans up and disposes of webview resources when the webview panel is closed.
 	 */
 	public dispose() {
-		HelloWorldPanel.currentPanel = undefined;
+		CatalogPanel.currentPanel = undefined;
 
 		// Dispose of the current webview panel
 		this._panel.dispose();
@@ -131,7 +131,7 @@ export class HelloWorldPanel {
 				<i class="codicon codicon-account"></i>
 				<img src="${imagesUri}/creatio-square.svg">
 			</div>
-				<app-root environmentName="${HelloWorldPanel._envName}" pageName="catalog" imagesUri="${imagesUri}"></app-root>
+				<app-root environmentName="${CatalogPanel._envName}" pageName="catalog" imagesUri="${imagesUri}"></app-root>
 				<script type="module" src="${runtimeUri}"></script>
 				<script type="module" src="${polyfillsUri}"></script>
 				<script type="module" src="${scriptUri}"></script>
@@ -142,7 +142,7 @@ export class HelloWorldPanel {
 
 	/**
 	 * Sets up an event listener to listen for messages passed from the webview context and
-	 * executes code based on the message that is recieved.
+	 * executes code based on the message that is received.
 	 *
 	 * @param webview A reference to the extension webview
 	 * @param context A reference to the extension context

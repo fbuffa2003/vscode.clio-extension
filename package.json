@@ -56,7 +56,6 @@
 		"menus": {
 			"ClioSQL.OverflowMenu": [
 				{
-
 					"command": "ClioSQL.InstallPackage",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-2@1"
@@ -108,7 +107,9 @@
 				},
 				{
 					"submenu": "ClioSQL.OverflowHeaderMenu",
+					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
 					"group": "navigation@1"
+					
 				}
 			],
 			"view/item/context": [
@@ -123,7 +124,7 @@
 					"group": "inline@3"
 				},
 				{
-					"command": "ClioSQL.Unreg",
+					"command": "ClioSQL.UnregisterWebApp",
 					"when": "viewItem == CreatioInstance",
 					"group": "inline@4"
 				},
@@ -209,8 +210,8 @@
 				}
 			},
 			{
-				"command": "ClioSQL.Unreg",
-				"title": "Unreg web app",
+				"command": "ClioSQL.UnregisterWebApp",
+				"title": "Unregister web app",
 				"icon": {
 					"light": "resources/icon/trash.svg",
 					"dark": "resources/icon/trash.svg"
@@ -293,6 +294,53 @@
 				"command": "ClioSQL.UninstallClioCli",
 				"title": "Uninstall clio",
 				"icon": "$(code)"
+			}
+		],
+		"colors": [
+			{
+				"id": "creatio.startIcon",
+				"description": "Color for the start icon tree item in the custom view.",
+				"defaults": {
+					"dark": "#00ff00",
+					"light": "#00ff00",
+					"highContrast": "#00ff00"
+				}
+			},
+			{
+				"id": "creatio.blue",
+				"description": "Color for the business process item in the tree view.",
+				"defaults": {
+					"dark": "#007acc",
+					"light": "#007acc",
+					"highContrast": "#007acc"
+				}
+			},
+			{
+				"id": "creatio.orangePrimary",
+				"description": "Color for the business process item in the tree view.",
+				"defaults": {
+					"dark": "#ed522f",
+					"light": "#ed522f",
+					"highContrast": "#ed522f"
+				}
+			},
+			{
+				"id": "creatio.orangeSecondary",
+				"description": "Color for the business process item in the tree view.",
+				"defaults": {
+					"dark": "#77574f",
+					"light": "#77574f",
+					"highContrast": "#77574f"
+				}
+			},
+			{
+				"id": "creatio.orangeTertiary",
+				"description": "Color for the business process item in the tree view.",
+				"defaults": {
+					"dark": "#6d5d2e",
+					"light": "#6d5d2e",
+					"highContrast": "#6d5d2e"
+				}
 			}
 		]
 	},
