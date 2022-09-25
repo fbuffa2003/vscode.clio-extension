@@ -9,7 +9,7 @@ import { CreatioTreeItemProvider } from './service/TreeItemProvider/CreatioTreeI
 import { Environment, IConnectionSettings } from './service/TreeItemProvider/Environment';
 import { CatalogPanel } from './panels/CatalogPanel';
 import { CreatioTreeItem } from './service/TreeItemProvider/CreatioTreeItem';
-import { Package, PackageList } from './service/TreeItemProvider/PackageList';
+import { Package, PackageList, WorkSpaceItem } from './service/TreeItemProvider/PackageList';
 import { ProcessList } from './service/TreeItemProvider/ProcessList';
 import { EntityList } from './service/TreeItemProvider/EntityList';
 import { IGetPackagesArgs } from './commands/GetPackagesCommand';
@@ -50,8 +50,6 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 	});
-
-
 
 
 	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.ExecuteSql', async (doc) => {
@@ -306,6 +304,14 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("ClioSQL.LockPackage", async (node: Package)=>{
 			await node.lock();
 			treeProvider.refresh();
+		})
+	);
+	//#endregion
+
+	//#region Commands : schema
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.ShowSchemaContent", async (node: WorkSpaceItem)=>{
+			node.showContent();
 		})
 	);
 	//#endregion

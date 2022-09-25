@@ -222,7 +222,42 @@ export class KnownRoutes {
 		this._GetPackageProperties = v;
 	}
 	
+	
+	private _GetWorkspaceItems : string = "/ServiceModel/WorkspaceExplorerService.svc/GetWorkspaceItems";
+	public get GetWorkspaceItems() : string {
+		return this.getRoute(this._GetWorkspaceItems);
+	}
+	private set GetWorkspaceItems(v : string) {
+		this._GetWorkspaceItems = v;
+	}
+	
 
+	
+	private _GetClientUnitSchema : string = "/ServiceModel/ClientUnitSchemaDesignerService.svc/GetSchema";
+	public get GetClientUnitSchema() : string {
+		return this.getRoute(this._GetClientUnitSchema);
+	}
+	private set GetClientUnitSchema(v : string) {
+		this._GetClientUnitSchema = v;
+	}
+	
+	
+	private _GetSourceCodeSchema : string = "/ServiceModel/SourceCodeSchemaDesignerService.svc/GetSchema";
+	public get GetSourceCodeSchema() : string {
+		return this.getRoute(this._GetSourceCodeSchema);
+	}
+	private set GetSourceCodeSchema(v : string) {
+		this._GetSourceCodeSchema = v;
+	}
+	
+	private _GetSqlSchema : string = "/ServiceModel/SqlScriptSchemaDesignerService.svc/GetSchema";
+	public get GetSqlSchema() : string {
+		return this.getRoute(this._GetSqlSchema);
+	}
+	private set GetSqlSchema(v : string) {
+		this._GetSqlSchema = v;
+	}
+	
 
 
 	/**

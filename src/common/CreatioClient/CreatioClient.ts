@@ -4,6 +4,7 @@ import { request as httpRequest } from "http";
 import { request as httpsRequest} from "https";
 import { ColumnUsage, DataValueType, HttpMethod, ParameterDirection, ProcessDataValueType } from "./enums";
 import { KnownRoutes } from "./KnownRoutes";
+import { ItemType } from "../../service/TreeItemProvider/ItemType";
 
 export class CreatioClient {
 
@@ -272,15 +273,14 @@ export class CreatioClient {
 			data: {}
 		};
 		const response = await this.PostAsync(options);
-				
 		const result: IPackages = {
 			statusCode : response.statusCode,
 			body: response.body,
 			packages: JSON.parse(response.body)['packages']
 		};
-		
 		return result;
 	}
+
 
 	public async GetPackageProperties(packageUId: string){
 		const options : IRequestOptions = {
@@ -293,7 +293,51 @@ export class CreatioClient {
 	}
 
 
+	public async GetWorkspaceItems(): Promise<Array<IWorkSpaceItem>>{
+		const options : IRequestOptions = {
+			path: new KnownRoutes(this.isNetCore).GetWorkspaceItems,
+			data: {}
+		};
+		const response = await this.PostAsync(options);
+		const json = JSON.parse(response.body);
 
+		return json['items'] as Array<IWorkSpaceItem>;
+	}
+
+	public async GetSchemaAsync(itemType: ItemType, schemaUId : string, useFullHierarchy : boolean) {
+		
+		let route : string;
+		switch(itemType){
+			case ItemType.clientModuleSchema: {
+				route = new KnownRoutes(this.isNetCore).GetClientUnitSchema;
+				break;
+			}
+			case ItemType.sourceCodeSchema: {
+				route = new KnownRoutes(this.isNetCore).GetSourceCodeSchema;
+				break;
+			}
+			case ItemType.sqlScriptSchema: {
+				route = new KnownRoutes(this.isNetCore).GetSqlSchema;
+				break;
+			}
+			default:{
+				throw Error("Unknown schema type");
+			}
+		}
+		
+		
+		const options : IRequestOptions = {
+			path: route,
+			data: {
+				schemaUId:schemaUId,
+				useFullHierarchy:useFullHierarchy
+			}
+		};
+		const response = await this.PostAsync(options);
+		const json = JSON.parse(response.body);
+
+		return json['schema']['body'] as string;
+	}
 
 	//#region Method : Private
 	private async Login() : Promise<IResponse> {
@@ -482,10 +526,6 @@ export class CreatioClient {
 }
 
 
-
-
-
-
 export interface IPackages extends IResponse{
 	packages : Array<IPackage>
 }
@@ -504,8 +544,6 @@ export interface IPackage{
 	uId: string,
 	version: string
 }
-
-
 
 export interface IProcessList extends IResponse {
 	processes: Array<IBusinessProcess>;
@@ -632,4 +670,19 @@ export interface EntitySchemaColumn  {
 	status: number
 	isIndexed: boolean
 	isWeakReference: boolean
+}
+
+export interface IWorkSpaceItem{
+	id: string,
+	isChanged: boolean,
+	isLocked: boolean,
+	isReadOnly: boolean,
+	modifiedOn: Date,
+	name: string,
+	packageName: string,
+	packageRepository: string | undefined,
+	packageUId: string
+	title: string | undefined,
+	type: number,
+	uId: string
 }

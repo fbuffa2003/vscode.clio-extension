@@ -5,5 +5,17 @@ export enum ItemType {
 	processList,
 	processItem,
 	entityList,
-	entityItem
+	entityItem,
+	
+	sqlScriptSchema,
+	dataSchema,
+	dll,
+	entitySchema,
+	clientModuleSchema,
+	sourceCodeSchema,
+	businessProcessSchema,
+	caseSchema,
+	userTaskSchema,
+	webServiceSchema,
+	addOnSchema
 }

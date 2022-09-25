@@ -158,8 +158,8 @@ export class CatalogPanel {
 				// Code that should run in response to the hello message command
 				vscode.window.withProgress(
 					{
-					location : vscode.ProgressLocation.Notification,
-					title: "Getting Data"
+						location : vscode.ProgressLocation.Notification,
+						title: "Getting Data"
 					},
 					async(progress, token)=>{
 						const result = await this._clio.ExecuteClioCommand('clio catalog');

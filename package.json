@@ -143,7 +143,11 @@
 					"when": "viewItem == CreatioPackageUnLocked",
 					"group": "inline@2"
 				},
-
+				{
+					"command": "ClioSQL.ShowSchemaContent",
+					"when": "viewItem =~ /Schema|dll/",
+					"group": "inline@2"
+				},
 				{
 					"submenu": "ClioSQL.OverflowMenu",
 					"when": "viewItem == CreatioInstance",
@@ -325,6 +329,11 @@
 				"command": "ClioSQL.LockPackage",
 				"title": "Unlock package",
 				"icon": "$(lock)"
+			},
+			{
+				"command": "ClioSQL.ShowSchemaContent",
+				"title": "Show Content",
+				"icon": "$(code)"
 			}
 		],
 		"colors": [

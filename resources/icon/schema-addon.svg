@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fit="" height="100%" width="100%" preserveAspectRatio="xMidYMid meet" focusable="false">
+	<defs>
+		<style>
+			.we-item-entity-b{fill:none;stroke:#006ce0;stroke-linecap:round;stroke-linejoin:round}
+		</style>
+	</defs>
+	<path fill="none" d="M0 0h16v16H0z"></path>
+	<path d="M1.5 4.35 7.98 1.5l6.52 2.85L8 7.2ZM14.5 4.58v6.8L8 14.5V7.54Z" class="we-item-entity-b"></path>
+	<path fill="none" stroke="#006ce0" stroke-linecap="round" stroke-linejoin="round" d="M1.5 4.58v6.8L8 14.5V7.54Z"></path>
+</svg>
