@@ -266,6 +266,34 @@ export class CreatioClient {
 		return response;
 	}
 
+	public async GetPackages() : Promise<IPackages>{
+		const options : IRequestOptions = {
+			path: new KnownRoutes(this.isNetCore).GetPackages,
+			data: {}
+		};
+		const response = await this.PostAsync(options);
+				
+		const result: IPackages = {
+			statusCode : response.statusCode,
+			body: response.body,
+			packages: JSON.parse(response.body)['packages']
+		};
+		
+		return result;
+	}
+
+	public async GetPackageProperties(packageUId: string){
+		const options : IRequestOptions = {
+			path: new KnownRoutes(this.isNetCore).GetPackageProperties,
+			data: {packageUId}
+		};
+		const response = await this.PostAsync(options);
+		const json = JSON.parse(response.body);
+		return response;
+	}
+
+
+
 
 	//#region Method : Private
 	private async Login() : Promise<IResponse> {
@@ -451,6 +479,30 @@ export class CreatioClient {
 		return schema
 	}
 	//#endregion
+}
+
+
+
+
+
+
+export interface IPackages extends IResponse{
+	packages : Array<IPackage>
+}
+export interface IPackage{
+	createdBy: string,
+	createdOn: Date,
+	description: string,
+	id: string,
+	isReadOnly: boolean,
+	maintainer: string,
+	modifiedBy: string,
+	modifiedOn: Date,
+	name: string
+	position: number,
+	type: number,
+	uId: string,
+	version: string
 }
 
 

@@ -1,15 +1,15 @@
-import { ClioExecutor } from '../Common/clioExecutor';
-import { BaseCommand, ICanExecuteValidationResult, ICommand, ICommandArgs, ICommandResponse } from './BaseCommand';
+import { ClioExecutor } from '../../Common/clioExecutor';
+import { BaseCommand, ICanExecuteValidationResult, ICommand, ICommandArgs, ICommandResponse } from '../BaseCommand';
 
 /**
  * Get packages arguments
  */
-export interface IGetPackagesArgs extends ICommandArgs{}
+export interface IGetPackagesDevArgs extends ICommandArgs{}
 
 /**
  * Get packages response
  */
-export interface IGetPackagesResponse extends ICommandResponse{
+export interface IGetPackagesDevResponse extends ICommandResponse{
 	data: Array<IPackageModel>
 }
 
@@ -20,7 +20,7 @@ export interface IPackageModel{
 	uId: string
 }
 
-export class GetPackages extends BaseCommand implements ICommand<IGetPackagesArgs, IGetPackagesResponse> {
+export class GetPackagesDev extends BaseCommand implements ICommand<IGetPackagesDevArgs, IGetPackagesDevResponse> {
 	
 	/**
 	 * Constructor
@@ -34,7 +34,7 @@ export class GetPackages extends BaseCommand implements ICommand<IGetPackagesArg
 	 * @param args 
 	 * @returns Result of validation
 	 */
-	canExecute(args: IGetPackagesArgs): ICanExecuteValidationResult {
+	canExecute(args: IGetPackagesDevArgs): ICanExecuteValidationResult {
 		
 		//Validate that the environment name is set
 		if(!args.environmentName){
@@ -56,7 +56,7 @@ export class GetPackages extends BaseCommand implements ICommand<IGetPackagesArg
 	 * @param args Arguments to pass to clio
 	 * @returns Result of the operation
 	 */
-	async executeAsync(args: IGetPackagesArgs): Promise<IGetPackagesResponse> {
+	async executeAsync(args: IGetPackagesDevArgs): Promise<IGetPackagesDevResponse> {
 		
 		if(!this._validationResult.success){
 			throw new Error("Make sure to call canExecute before calling execute");
@@ -65,7 +65,7 @@ export class GetPackages extends BaseCommand implements ICommand<IGetPackagesArg
 		return this.convertResult(result);
 	}
 
-	private convertResult(clioResult : String) : IGetPackagesResponse{
+	private convertResult(clioResult : String) : IGetPackagesDevResponse{
 
 		const lines = clioResult.split('\r\n');
 		const data = new Array<IPackageModel>();
@@ -81,6 +81,6 @@ export class GetPackages extends BaseCommand implements ICommand<IGetPackagesArg
 			success: true,
 			message : "All good",
 			data : data
-		} as IGetPackagesResponse;
+		} as IGetPackagesDevResponse;
 	}
 }

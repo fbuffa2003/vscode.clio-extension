@@ -205,6 +205,23 @@ export class KnownRoutes {
 		this._PingWebApp = v;
 	}
 	
+	
+	private _GetPackages : string = "/ServiceModel/PackageService.svc/GetPackages";
+	public get GetPackages() : string {
+		return this.getRoute(this._GetPackages);
+	}
+	private set GetPackages(v : string) {
+		this._GetPackages = v;
+	}
+	
+	private _GetPackageProperties : string = "/ServiceModel/PackageService.svc/GetPackageProperties";
+	public get GetPackageProperties() : string {
+		return this.getRoute(this._GetPackageProperties);
+	}
+	private set GetPackageProperties(v : string) {
+		this._GetPackageProperties = v;
+	}
+	
 
 
 

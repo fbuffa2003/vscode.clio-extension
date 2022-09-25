@@ -35,7 +35,9 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 		
 		if(event.element instanceof PackageList){
-			await (event.element as PackageList).getPackages();
+			//TODO: Change to clio when available
+			//await (event.element as PackageList).getPackages()
+			await (event.element as PackageList).getPackagesDev();
 			treeProvider.refresh();
 		}
 
@@ -290,7 +292,23 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-
 	//#endregion
+
+
+	//#region Commands : Package
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.UnlockPackage", async (node: Package)=>{
+			await node.unlock();
+			treeProvider.refresh();
+		})
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.LockPackage", async (node: Package)=>{
+			await node.lock();
+			treeProvider.refresh();
+		})
+	);
+	//#endregion
+
 }
 export function deactivate() {}

@@ -1,17 +1,23 @@
+import { link } from 'fs';
 import path = require('path');
 import * as vscode from 'vscode';
 import { IDownloadPackageArgs, IDownloadPackageResponse } from '../../commands/DownloadPackageCommand';
 import { IGetPackagesArgs } from '../../commands/GetPackagesCommand';
+import { IUnlockPkgArgs } from '../../commands/UnLockPkgCommand';
+import { IPackage } from '../../common/CreatioClient/CreatioClient';
 import { CreatioTreeItem } from "./CreatioTreeItem";
 import { Environment } from './Environment';
 import { ItemType } from "./ItemType";
 
 export class PackageList extends CreatioTreeItem {
-	readonly itemColor: vscode.ThemeColor = new vscode.ThemeColor("creatio.orangePrimary");
+
 	public contextValue = 'CreatioPackageList';
 	constructor(parent: CreatioTreeItem ) {
 		super("Packages", "", ItemType.packageList, parent,vscode.TreeItemCollapsibleState.Collapsed);
-		this.iconPath = new vscode.ThemeIcon("folder", this.itemColor);
+		this.iconPath = {
+			light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'unlocked-package.svg'),
+			dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'unlocked-package.svg')
+		};
 	}
 
 	/**
@@ -26,30 +32,105 @@ export class PackageList extends CreatioTreeItem {
 			const pkgs = await this.clio.getPackages.executeAsync(args);
 
 			pkgs.data.forEach(pkg => {
-				this.items.push(
-					new Package(pkg.name, pkg.version, pkg.maintainer, this)
-				);
+				const p = new Package(pkg.name, pkg.version, pkg.maintainer, pkg.uId, 0, true, this);
+				p.onLockStatusUpdate((target: Package)=>{
+					this.handleLockStatusUpdate(target);
+				});
+				this.items.push(p);
 			});
+
+			await this.sort();
 		}
 	}
+
+	public async getPackagesDev(): Promise<void>{
+		const args : IGetPackagesArgs = {
+			environmentName :  this.parent?.label as string
+		};
+		const pkgs = await (this.parent as Environment).creatioClient.GetPackages();
+		pkgs.packages.forEach(pkg => {
+			const p = new Package(pkg.name, pkg.version, pkg.maintainer, pkg.uId, pkg.type, pkg.isReadOnly, this);
+			
+			p.onLockStatusUpdate((target: Package)=>{
+				this.handleLockStatusUpdate(target);
+			});
+
+			this.items.push(p);
+		});
+		
+		await this.sort();
+	}
+
+	private async sort(): Promise<void>{
+
+		const sortedPkg = new Array<Package>();
+		const unlockedPkgs =(this.items as Array<Package>).filter(p=> !p.isReadOnly)
+		.sort((a,b) => 0 - (a.name > b.name ? -1 : 1));
+		
+		const lockedPkgs = (this.items as Array<Package>).filter(p=> p.isReadOnly)
+		.sort((a,b) => 0 - (a.name > b.name ? -1 : 1));
+
+		sortedPkg.push(...unlockedPkgs, ...lockedPkgs);
+		this.items = sortedPkg;
+	}
+
+	private handleLockStatusUpdate(pkg : Package) {
+		this.sort();
+		console.log("Sort done");
+	}
+
 }
 
 export class Package extends CreatioTreeItem {
+	
+	protected _onLockStatusUpdate: vscode.EventEmitter<Package> = new vscode.EventEmitter<Package>();
+	readonly onLockStatusUpdate: vscode.Event<Package> = this._onLockStatusUpdate.event;
+
 	public contextValue = 'CreatioPackage';
 	public readonly name : string;
 	public readonly version : string;
 	public readonly maintainer: string;
-	readonly itemColor: vscode.ThemeColor = new vscode.ThemeColor("creatio.orangeSecondary");
-	constructor(
-		name: string, version: string, maintainer: string, 
-		parent: CreatioTreeItem) {
+	public readonly uId: string;
+	public readonly pkgType: number;
+		
+	private _isReadOnly : boolean;
+	public get isReadOnly() : boolean {
+		return this._isReadOnly;
+	}
+	private set isReadOnly(v : boolean) {
+		this._isReadOnly = v;
+	}
+	
+	public readonly packageProperties: IPackageProperties | undefined;
+	readonly itemColor: vscode.ThemeColor = new vscode.ThemeColor("creatio.orangeSecondary");	
+	constructor(name: string, version: string, maintainer: string, uId:string, 
+		pkgType: number, isReadOnly: boolean,parent: CreatioTreeItem) 
+		{
 		super(name, version, ItemType.packageItem, parent, vscode.TreeItemCollapsibleState.None);
 		this.name = name;
 		this.version = version;
 		this.maintainer  = maintainer;
 		this.tooltip = this.maintainer;
-		this.iconPath = new vscode.ThemeIcon("folder", this.itemColor);
+		this.uId = uId;
+		this.pkgType = pkgType;
+		this._isReadOnly = isReadOnly;
+		
+		if(this.isReadOnly){
+			this.contextValue = "CreatioPackageLocked";
+			this.iconPath = {
+				light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'locked-package.svg'),
+				dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'locked-package.svg')
+			};
+		}else{
+			this.contextValue = "CreatioPackageUnLocked";
+			this.iconPath = {
+				light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'unlocked-package.svg'),
+				dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'unlocked-package.svg')
+			};
+		}
 	}
+
+	
 
 	public download(){
 		const envName = this.parent?.parent?.label;
@@ -97,4 +178,64 @@ export class Package extends CreatioTreeItem {
 			}
 		});
 	}
+
+	public async GetPackageProperties(){
+		const properties = await (this.parent?.parent as Environment).creatioClient.GetPackageProperties(this.uId);
+	}
+
+	public async unlock(){
+		const args : IUnlockPkgArgs= {
+			pkgName: this.name,
+			environmentName: this.parent?.parent?.label as string
+		};
+
+		if((this.parent?.parent as Environment).clio.unlockPackage.canExecute(args).success){
+			const result = await(this.parent?.parent as Environment).clio.unlockPackage.executeAsync(args);
+
+			if(result.success){
+				vscode.window.showInformationMessage(result.message as string);
+				
+				this.isReadOnly = false;
+				this.contextValue = "CreatioPackageUnLocked";
+				this.iconPath = {
+					light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'unlocked-package.svg'),
+					dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'unlocked-package.svg')
+				};
+				this._onLockStatusUpdate.fire(this);
+
+			}else{
+				vscode.window.showErrorMessage(result.message as string);
+			}
+		}
+	}
+
+	public async lock(){
+		this.isReadOnly = true;
+		this.contextValue = "CreatioPackageLocked";
+		this.iconPath = {
+			light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'locked-package.svg'),
+			dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'locked-package.svg')
+		};
+		this._onLockStatusUpdate.fire(this);
+		vscode.window.showErrorMessage("Lock package command is not implemented");
+	}
+}
+
+
+export interface IPackageProperties{
+
+	createdBy: string,
+	createdOn: Date,
+	description: string,
+	id: string,
+	maintainer: string,
+	modifiedBy: string,
+	modifiedOn: Date,
+	name: string,
+	position: number,
+	type: number,
+	uId: string,
+	version: string,
+	dependsOnPackages: Array<IPackageProperties>,
+	dependentPackages: Array<IPackageProperties>
 }

@@ -18,7 +18,7 @@ export class Environment extends CreatioTreeItem {
 
 	private healthStatus: HealthStatus = HealthStatus.unknown;
 	public readonly connectionSettings : IConnectionSettings;
-	private creatioClient: CreatioClient;
+	public creatioClient: CreatioClient;
 	private readonly clioExecutor: ClioExecutor = new ClioExecutor();
 	public contextValue = 'CreatioInstance';
 	constructor( label: string, connectionSettings :IConnectionSettings)
@@ -131,7 +131,6 @@ export class Environment extends CreatioTreeItem {
 	public async installPackage(filePath: String): Promise<void> {
 		this.clioExecutor.executeCommandByTerminal(`push-pkg "${filePath}" -e "${this.label}"`);
 	}
-
 
 	public async executeSql(sqlText: String): Promise<String> {
 		

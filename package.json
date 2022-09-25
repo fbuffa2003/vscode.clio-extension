@@ -130,9 +130,20 @@
 				},
 				{
 					"command": "ClioSQL.DownloadPackage",
-					"when": "viewItem == CreatioPackage",
+					"when": "viewItem == CreatioPackageLocked || viewItem == CreatioPackageUnLocked",
 					"group": "inline@1"
 				},
+				{
+					"command": "ClioSQL.UnlockPackage",
+					"when": "viewItem == CreatioPackageLocked",
+					"group": "inline@2"
+				},
+				{
+					"command": "ClioSQL.LockPackage",
+					"when": "viewItem == CreatioPackageUnLocked",
+					"group": "inline@2"
+				},
+
 				{
 					"submenu": "ClioSQL.OverflowMenu",
 					"when": "viewItem == CreatioInstance",
@@ -304,6 +315,16 @@
 				"command": "ClioSQL.DownloadPackage",
 				"title": "Download package",
 				"icon": "$(cloud-download)"
+			},
+			{
+				"command": "ClioSQL.UnlockPackage",
+				"title": "Unlock package",
+				"icon": "$(unlock)"
+			},
+			{
+				"command": "ClioSQL.LockPackage",
+				"title": "Unlock package",
+				"icon": "$(lock)"
 			}
 		],
 		"colors": [
