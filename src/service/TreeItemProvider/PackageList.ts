@@ -321,46 +321,50 @@ export class WorkSpaceItem extends CreatioTreeItem{
 		}
 
 	public async showContent(): Promise<void>{
-		
-			let language = '';
-			switch(this.itemType){
-				case ItemType.clientModuleSchema:{
-					language = 'javascript';
-					break;
-				}
-				case ItemType.sqlScriptSchema:{
-					language = 'sql';
-					break;
-				}
-				case ItemType.sourceCodeSchema:{
-						language = 'csharp';
-						break;
-					};
-				default : {
-					language = 'plaintext';
-				}
+	
+		let language = '';
+		switch(this.itemType){
+			case ItemType.clientModuleSchema:{
+				language = 'javascript';
+				break;
 			}
-			let schema : string;
-			
-			vscode.window.withProgress({
-					location : vscode.ProgressLocation.Notification,
-					title: "Getting schema content"
-				},
-				async(progress, token)=>{
-					schema = await (this.parent?.parent?.parent as Environment)
-						.creatioClient.GetSchemaAsync(this.itemType, this.uId, false);
+			case ItemType.sqlScriptSchema:{
+				language = 'sql';
+				break;
+			}
+			case ItemType.sourceCodeSchema:{
+					language = 'csharp';
+					break;
+				};
+			default : {
+				language = 'plaintext';
+			}
+		}
+		//let schema : string = '';
+		
+		vscode.window.withProgress({
+				location : vscode.ProgressLocation.Notification,
+				title: "Getting schema content"
+			},
+			async(progress, token)=>{
+				const schema = await (this.parent?.parent?.parent as Environment)
+					.creatioClient.GetSchemaAsync(this.itemType, this.uId, false);
 
-					progress.report({ 
-						increment: 100, 
-						message: "Done" 
-					});
-				}
-			).then(()=>{
-				vscode.workspace.openTextDocument({
-					language: language,
-					content: schema
+					vscode.window.showTextDocument(
+						await vscode.workspace.openTextDocument({
+							language: language,
+							content: schema
+						}), 
+						vscode.ViewColumn.One, 
+						true
+					);
+
+				progress.report({ 
+					increment: 100, 
+					message: "Done" 
 				});
-			});
+			}
+		);
 	}
 
 	private setIcon(){

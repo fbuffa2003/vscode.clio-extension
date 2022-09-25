@@ -145,7 +145,7 @@
 				},
 				{
 					"command": "ClioSQL.ShowSchemaContent",
-					"when": "viewItem =~ /Schema|dll/",
+					"when": "viewItem =~ /sqlScriptSchema|clientModuleSchema|sourceCodeSchema/",
 					"group": "inline@2"
 				},
 				{

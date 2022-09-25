@@ -12,8 +12,6 @@ import { CreatioTreeItem } from './service/TreeItemProvider/CreatioTreeItem';
 import { Package, PackageList, WorkSpaceItem } from './service/TreeItemProvider/PackageList';
 import { ProcessList } from './service/TreeItemProvider/ProcessList';
 import { EntityList } from './service/TreeItemProvider/EntityList';
-import { IGetPackagesArgs } from './commands/GetPackagesCommand';
-
 
 export function activate(context: vscode.ExtensionContext) {
 	const clio = new Clio();
