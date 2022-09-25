@@ -10,6 +10,8 @@
 
 ## Added
 
+- Sow list of packages for an environment
+- Removed .angular folder from extension vsix file
 
 
 ## [0.0.7] Initial release  - Sep 22, 2022
