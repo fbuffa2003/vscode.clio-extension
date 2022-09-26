@@ -12,6 +12,7 @@ import { CreatioTreeItem } from './service/TreeItemProvider/CreatioTreeItem';
 import { Package, PackageList, WorkSpaceItem } from './service/TreeItemProvider/PackageList';
 import { ProcessList } from './service/TreeItemProvider/ProcessList';
 import { EntityList } from './service/TreeItemProvider/EntityList';
+import { SqlPanel } from './panels/SqlPanel';
 
 export function activate(context: vscode.ExtensionContext) {
 	const clio = new Clio();
@@ -70,7 +71,12 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 		const sqlCmd = sqlText[1].replace('\r','').replace('\n','').trim();		
 		const result = await treeProvider.findInstanceByName(envName)?.executeSql(sqlCmd);
-		
+		await vscode.commands.executeCommand("workbench.action.editorLayoutTwoRows");
+		//Show my panel;
+		SqlPanel.render(context.extensionUri, envName as string);
+		SqlPanel.currentPanel?.sendMessage(result);
+
+		/*
 		await vscode.commands.executeCommand("workbench.action.editorLayoutTwoRows");
 				
 		vscode.workspace.openTextDocument({
@@ -82,6 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
 				viewColumn: vscode.ViewColumn.Two
 			});
 		});
+		*/
 	}));
 
 	context.subscriptions.push(
@@ -282,7 +289,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.InstallMarketplaceApp", async (node: Environment)=>{
 			CatalogPanel.render(context.extensionUri, node);
-			CatalogPanel.currentPanel?.sendMessage();
+			//CatalogPanel.currentPanel?.sendMessage();
 		})
 	);
 	

@@ -4,8 +4,8 @@ import { ClioExecutor } from "../Common/clioExecutor";
 import { Environment } from "../service/TreeItemProvider/Environment";
 import { getUri } from "../utilities/getUri";
 
-export class CatalogPanel {
-	public static currentPanel: CatalogPanel | undefined;
+export class SqlPanel {
+	public static currentPanel: SqlPanel | undefined;
 	private readonly _panel: WebviewPanel;
 	private _disposables: Disposable[] = [];
 	private static _envName : string | undefined;
@@ -40,23 +40,23 @@ export class CatalogPanel {
 	 *
 	 * @param extensionUri The URI of the directory containing the extension.
 	 */
-	public static render(extensionUri: Uri, node: Environment) {
+	public static render(extensionUri: Uri, envName: string) {
 
-		if (CatalogPanel.currentPanel) {
+		if (SqlPanel.currentPanel) {
 			// If the webview panel already exists reveal it
-			CatalogPanel.currentPanel._panel.reveal(ViewColumn.One);
+			SqlPanel.currentPanel._panel.reveal(ViewColumn.Two);
 		} else {
 
-			CatalogPanel._envName = node.label;
+			SqlPanel._envName = envName;
 			
 			// If a webview panel does not already exist create and show a new one
 			const panel = window.createWebviewPanel(
 				// Panel view type
-				"showCatalogPanel",
+				"showSqlPanel",
 				// Panel title
-				"Marketplace catalog",
+				"CLIO SQL",
 				// The editor column the panel should be displayed in
-				ViewColumn.One,
+				ViewColumn.Two,
 				// Extra panel configurations
 				{
 					// Enable JavaScript in the webview
@@ -66,11 +66,11 @@ export class CatalogPanel {
 			);
 		
 			panel.iconPath = {
-				light: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'creatio-circle-white.svg'),
-				dark: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'creatio-circle-white.svg')
+				light: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'schema-sql.svg'),
+				dark: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'schema-sql.svg')
 			};
 			
-			CatalogPanel.currentPanel = new CatalogPanel(panel, extensionUri);
+			SqlPanel.currentPanel = new SqlPanel(panel, extensionUri);
 		}
 	}
 
@@ -78,7 +78,7 @@ export class CatalogPanel {
 	 * Cleans up and disposes of webview resources when the webview panel is closed.
 	 */
 	public dispose() {
-		CatalogPanel.currentPanel = undefined;
+		SqlPanel.currentPanel = undefined;
 
 		// Dispose of the current webview panel
 		this._panel.dispose();
@@ -131,7 +131,7 @@ export class CatalogPanel {
 				<i class="codicon codicon-account"></i>
 				<img src="${imagesUri}/creatio-square.svg">
 			</div>
-				<app-root environmentName="${CatalogPanel._envName}" pageName="catalog" imagesUri="${imagesUri}"></app-root>
+				<app-root environmentName="${SqlPanel._envName}" pageName="sql-table" imagesUri="${imagesUri}"></app-root>
 				<script type="module" src="${runtimeUri}"></script>
 				<script type="module" src="${polyfillsUri}"></script>
 				<script type="module" src="${scriptUri}"></script>
@@ -205,5 +205,7 @@ export class CatalogPanel {
 		);
 	}
 
-	
+	public sendMessage(jsonData: any){
+		this._panel.webview.postMessage(JSON.parse(jsonData));
+	}
 }

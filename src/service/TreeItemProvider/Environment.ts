@@ -134,10 +134,11 @@ export class Environment extends CreatioTreeItem {
 
 	public async executeSql(sqlText: String): Promise<String> {
 		
-		// const rresult = await this.creatioClient.ExecuteSqlScript(sqlText as string);
-		// const json = JSON.parse(JSON.parse(rresult.body));
-		// return JSON.stringify(json);
+		const rresult = await this.creatioClient.ExecuteSqlScript(sqlText as string);
+		const json = JSON.parse(JSON.parse(rresult.body));
+		return JSON.stringify(json);
 
+		//TODO: lines below are temporarely commented out untill clio-cli can return json
 		const args: ISqlArgs = {
 			sqlText: sqlText,
 			environmentName: this.label

@@ -6,6 +6,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CatalogComponent } from './catalog/catalog.component';
 import { ConnectionComponent } from './connection/connection.component';
+import { SqlTableComponent } from './sql-table/sql-table.component';
 
 
 
@@ -13,7 +14,8 @@ import { ConnectionComponent } from './connection/connection.component';
   declarations: [
     AppComponent,
     CatalogComponent,
-    ConnectionComponent
+    ConnectionComponent,
+    SqlTableComponent
   ],
   imports: [
     BrowserModule,
