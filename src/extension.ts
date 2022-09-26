@@ -281,7 +281,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.InstallMarketplaceApp", async (node: Environment)=>{
-			//InstallMarketplaceApp.createOrShow(context.extensionUri);
 			CatalogPanel.render(context.extensionUri, node);
 			CatalogPanel.currentPanel?.sendMessage();
 		})

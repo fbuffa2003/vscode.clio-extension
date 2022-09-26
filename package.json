@@ -91,6 +91,11 @@
 					"command": "ClioSQL.restart",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-4@2"
+				},
+				{
+					"command": "ClioSQL.InstallMarketplaceApp",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-5@1"
 				}
 			],
 			"ClioSQL.OverflowHeaderMenu":[
@@ -213,7 +218,7 @@
 			},
 			{
 				"command": "ClioSQL.InstallMarketplaceApp",
-				"title": "Instal marketplace app",
+				"title": "Install marketplace app",
 				"icon": {
 					"light": "resources/icon/Add.svg",
 					"dark": "resources/icon/Add.svg"

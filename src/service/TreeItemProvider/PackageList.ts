@@ -235,8 +235,8 @@ export class Package extends CreatioTreeItem {
 				if(isValid.success){
 					vscode.window.withProgress(
 						{
-						location : vscode.ProgressLocation.Notification,
-						title: `Downloading package ${this.name}`
+							location : vscode.ProgressLocation.Notification,
+							title: `Downloading package ${this.name}`
 						},
 						async(progress, token)=>{
 							const result = await this.clio.downloadPackage.executeAsync(args);

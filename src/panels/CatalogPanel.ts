@@ -154,28 +154,50 @@ export class CatalogPanel {
 			const environmentName = message.environmentName;
 
 			switch (command) {
-			case "getCatalog":
-				// Code that should run in response to the hello message command
-				vscode.window.withProgress(
-					{
-						location : vscode.ProgressLocation.Notification,
-						title: "Getting Data"
-					},
-					async(progress, token)=>{
-						const result = await this._clio.ExecuteClioCommand('clio catalog');
-						const msg = {
-							"getCatalog": result
-						};
-		
-						//raising event, angular subscribes to it
-						this._panel.webview.postMessage(msg);
-						progress.report({ 
-							increment: 100, 
-							message: "Done" 
-						});
-					}
-				);
-				return;
+				case "getCatalog":{
+					// Code that should run in response to the hello message command
+					vscode.window.withProgress(
+						{
+							location : vscode.ProgressLocation.Notification,
+							title: "Getting Data"
+						},
+						async(progress, token)=>{
+							const result = await this._clio.ExecuteClioCommand('clio catalog');
+							const msg = {
+								"getCatalog": result
+							};
+			
+							//raising event, angular subscribes to it
+							this._panel.webview.postMessage(msg);
+							progress.report({ 
+								increment: 100, 
+								message: "Done" 
+							});
+						}
+					);
+					break;
+				}
+				case "install":{
+					console.log(command);
+					const appId = message.appId;
+				
+					vscode.window.withProgress(
+						{
+							location : vscode.ProgressLocation.Notification,
+							title: `Installing app with id ${appId}`
+						},
+						async(progress, token)=>{
+							const clioExecutor = new ClioExecutor();
+							clioExecutor.executeCommandByTerminal(`install --id ${appId} -e ${environmentName}`);
+							//const result = await this._clio.ExecuteClioCommand(`clio install --id ${appId} -e ${environmentName}`);
+							progress.report({ 
+								increment: 100,
+								message: "Done"
+							});
+							//vscode.window.showInformationMessage(result as string);
+						}
+					);
+				}
 			}
 		},
 		undefined,

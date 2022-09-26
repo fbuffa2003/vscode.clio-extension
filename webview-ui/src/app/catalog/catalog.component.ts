@@ -1,6 +1,6 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, Input } from '@angular/core';
 import { vscode } from "./../utilities/vscode";
-import { provideVSCodeDesignSystem, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow } from "@vscode/webview-ui-toolkit";
+import { provideVSCodeDesignSystem, TextField, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow, vsCodeTextField } from "@vscode/webview-ui-toolkit";
 
 
 @Component({
@@ -10,11 +10,13 @@ import { provideVSCodeDesignSystem, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid
 })
 export class CatalogComponent implements OnInit {
 	
-	public catalog : Array<CatalogItem> = new Array<CatalogItem>();
+	public unFilteredCatalog : Array<CatalogItem> = new Array<CatalogItem>();
+	public catalog : Array<CatalogItem> = this.unFilteredCatalog;
 
 	private imageUri;
 	public environmentName;
 	public circleImageUri;
+
 
 	@HostListener("window:message", ["$event"])
 	onMessage(ev: any) {
@@ -36,14 +38,15 @@ export class CatalogComponent implements OnInit {
 				let id = Number.parseInt(m[0]);
 				let name = line.substring(m[0].length, line.length-m[0].length).trim();
 				let item = new CatalogItem(id, name);
-				this.catalog?.push(item);
+				this.unFilteredCatalog?.push(item);
 			}
 		});
+		this.catalog = this.unFilteredCatalog;
 	}
 
 	constructor() {
 		provideVSCodeDesignSystem().register(
-			vsCodeButton(), vsCodeCheckbox(), 
+			vsCodeButton(), vsCodeCheckbox(), vsCodeTextField(),
 			vsCodeDataGrid(), vsCodeDataGridRow(), vsCodeDataGridCell()
 		);
 
@@ -59,6 +62,22 @@ export class CatalogComponent implements OnInit {
 			environmentName: this.environmentName
 		});
 	}
+
+	public search(inputEl : HTMLElement ): void{
+		const searchData = (inputEl as TextField).value;
+		this.catalog = this.unFilteredCatalog.filter(c=> c.name.toLowerCase().includes(searchData.toLowerCase()));
+	}
+
+	public install(appId: number){
+		console.log(`Installing app with id : ${appId}`);
+		//Ask extension to run clio catalog
+		vscode.postMessage({
+			command: "install",
+			environmentName: this.environmentName,
+			appId: appId
+		});
+	}
+
 }
 
 export class CatalogItem{
