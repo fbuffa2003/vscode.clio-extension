@@ -27,9 +27,9 @@ export class Environment extends CreatioTreeItem {
 			ItemType.creatioInstance, undefined, vscode.TreeItemCollapsibleState.Collapsed);
 
 		this.connectionSettings = connectionSettings;
-		// this.items.push(new PackageList(this));
+		this.items.push(new PackageList(this));
 		// this.items.push(new ProcessList(this));
-		this.items.push(new EntityList(this));
+		// this.items.push(new EntityList(this));
 		this.creatioClient = new CreatioClient(connectionSettings.uri, connectionSettings.login, connectionSettings.password, connectionSettings.isNetCore);
 		this.setHealthStatus(HealthStatus.unknown);
 		this.checkHealth();
