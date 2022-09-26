@@ -24,7 +24,12 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	treeView.onDidCollapseElement(async (event: vscode.TreeViewExpansionEvent<CreatioTreeItem>) => {
-		return;
+		if(event.element instanceof PackageList){
+			//TODO: Change to clio when available
+			//await (event.element as PackageList).getPackages()
+			(event.element as PackageList).items = [];
+			treeProvider.refresh();
+		}
 	});
 	
 	treeView.onDidExpandElement(async (event: vscode.TreeViewExpansionEvent<CreatioTreeItem>)=>{
