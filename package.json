@@ -53,6 +53,12 @@
 				}
 			]
 		},
+		"viewsWelcome": [
+			{
+				"view": "vscode-clio-extension.creatioExplorer",
+				"contents": "You don't have any configured environment, try adding one\n [Add new connection](command:ClioSQL.AddConnection)"
+			}
+		],
 		"menus": {
 			"ClioSQL.OverflowMenu": [
 				{
