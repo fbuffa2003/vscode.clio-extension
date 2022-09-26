@@ -4,15 +4,16 @@
 
 - Display SQL request in a table
 - Install marketplace app
-- Package list
+- Edit existing connection
 
 ## [0.0.8] Initial release  - Sep 22, 2022
 
-## Added
+### Added
 
 - Sow list of packages for an environment
+- Lock / Unlock package
+- Preview (readonly) CS, JS and SQL schemas
 - Removed .angular folder from extension vsix file
-
 
 ## [0.0.7] Initial release  - Sep 22, 2022
 
@@ -25,7 +26,6 @@
 ### Changed
 
 - FlushDb, Restart, Ping command to utilize CreatioClient
-
 
 ## [0.0.6] Initial release  - Sep 20, 2022
 
