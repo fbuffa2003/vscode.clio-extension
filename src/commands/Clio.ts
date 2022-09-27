@@ -11,6 +11,7 @@ import { GetPackages, IGetPackagesArgs, IGetPackagesResponse } from './GetPackag
 import { DownloadPackage, IDownloadPackageArgs, IDownloadPackageResponse } from './DownloadPackageCommand';
 import { GetPackagesDev, IGetPackagesDevArgs, IGetPackagesDevResponse } from './Dev/GetPackagesCommandDev';
 import { IUnlockPkgArgs, IUnlockPkgResponse, UnlockPkg } from './UnLockPkgCommand';
+import { ILockPkgArgs, ILockPkgResponse, LockPkg } from './LockPkgCommand';
 
 
 export class Clio {
@@ -103,6 +104,7 @@ export class Clio {
 	 * - See _clio pull package_ {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/README.md#pull-package-from-remote-application **documentation**}
 	 */
 	public readonly unlockPackage : ICommand<IUnlockPkgArgs, IUnlockPkgResponse> = new UnlockPkg(this.executor);
+	public readonly lockPackage : ICommand<ILockPkgArgs, ILockPkgResponse> = new LockPkg(this.executor);
 	
 
 

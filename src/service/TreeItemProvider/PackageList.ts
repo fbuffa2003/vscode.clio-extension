@@ -228,7 +228,7 @@ export class Package extends CreatioTreeItem {
 				const args : IDownloadPackageArgs = {
 					environmentName : envName as String,
 					packageName : this.name,
-					destinationPath : path.join(folderPath, `${this.name}.gz`)
+					destinationPath : path.join(folderPath, `${this.name}.zip -r true`)
 				};
 
 				const isValid = this.clio.downloadPackage.canExecute(args);
@@ -288,15 +288,32 @@ export class Package extends CreatioTreeItem {
 		}
 	}
 
+	
 	public async lock(){
-		this.isReadOnly = true;
+		
+		const args : IUnlockPkgArgs= {
+			pkgName: this.name,
+			environmentName: this.parent?.parent?.label as string
+		};
+		
+		if((this.parent?.parent as Environment).clio.unlockPackage.canExecute(args).success){
+			const result = await(this.parent?.parent as Environment).clio.unlockPackage.executeAsync(args);
+
+			if(result.success){
+				vscode.window.showInformationMessage(result.message as string);
+				
+				this.isReadOnly = true;
 		this.contextValue = "CreatioPackageLocked";
 		this.iconPath = {
 			light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'locked-package.svg'),
 			dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'locked-package.svg')
 		};
 		this._onLockStatusUpdate.fire(this);
-		vscode.window.showErrorMessage("Lock package command is not implemented");
+
+			}else{
+				vscode.window.showErrorMessage(result.message as string);
+			}
+		}
 	}
 }
 
