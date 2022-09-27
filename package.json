@@ -96,6 +96,11 @@
 					"command": "ClioSQL.InstallMarketplaceApp",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-5@1"
+				},
+				{
+					"command": "ClioSQL.ShowFeatures",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-5@1"
 				}
 			],
 			"ClioSQL.OverflowHeaderMenu":[
@@ -344,6 +349,11 @@
 			{
 				"command": "ClioSQL.ShowSchemaContent",
 				"title": "Show Content",
+				"icon": "$(file-code)"
+			},
+			{
+				"command": "ClioSQL.ShowFeatures",
+				"title": "Show features",
 				"icon": "$(code)"
 			}
 		],

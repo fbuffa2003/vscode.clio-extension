@@ -80,10 +80,10 @@ export class PackageList extends CreatioTreeItem {
 
 		const sortedPkg = new Array<Package>();
 		const unlockedPkgs =(this.items as Array<Package>).filter(p=> !p.isReadOnly)
-		.sort((a,b) => 0 - (a.name > b.name ? -1 : 1));
+		.sort((a,b) => 0 - (a.name.toLowerCase() > b.name.toLowerCase() ? -1 : 1));
 		
 		const lockedPkgs = (this.items as Array<Package>).filter(p=> p.isReadOnly)
-		.sort((a,b) => 0 - (a.name > b.name ? -1 : 1));
+		.sort((a,b) => 0 - (a.name.toLowerCase() > b.name.toLowerCase()? -1 : 1));
 
 		sortedPkg.push(...unlockedPkgs, ...lockedPkgs);
 		this.items = sortedPkg;

@@ -7,6 +7,7 @@ import { AppComponent } from './app.component';
 import { CatalogComponent } from './catalog/catalog.component';
 import { ConnectionComponent } from './connection/connection.component';
 import { SqlTableComponent } from './sql-table/sql-table.component';
+import { FeaturesComponent } from './features/features.component';
 
 
 
@@ -15,7 +16,8 @@ import { SqlTableComponent } from './sql-table/sql-table.component';
     AppComponent,
     CatalogComponent,
     ConnectionComponent,
-    SqlTableComponent
+    SqlTableComponent,
+    FeaturesComponent
   ],
   imports: [
     BrowserModule,

@@ -100,20 +100,7 @@ export const  ProcessDataValueType = {
 	'a33c9252-d401-453e-949d-169157067ed9' : DataValueType.FileLocatorDataValueType,
 }
 
-/**
- * See {@link https://www.w3schools.com/tags/ref_httpmethods.asp  HTTP Request Methods}
- */
-export enum HttpMethod{
-	GET,
-	POST,
-	PUT,
-	HEAD,
-	DELETE,
-	PATCH,
-	OPTIONS,
-	CONNECT,
-	TRACE
-}
+
 
 
 export enum ColumnUsage{

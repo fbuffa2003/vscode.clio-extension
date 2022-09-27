@@ -7,7 +7,7 @@ import { EntityList } from './EntityList';
 import { CreatioTreeItem } from "./CreatioTreeItem";
 import { ItemType } from "./ItemType";
 import { IHealthCheckArgs } from '../../commands/HealthCheckCommand';
-import { CreatioClient } from '../../common/CreatioClient/CreatioClient';
+import { CreatioClient, IFeature } from '../../common/CreatioClient/CreatioClient';
 import { ClioExecutor } from '../../Common/clioExecutor';
 import { IRestoreConfigurationArgs } from '../../commands/RestoreConfiguration';
 import { Clio } from '../../commands/Clio';
@@ -196,6 +196,9 @@ export class Environment extends CreatioTreeItem {
 		this._onDidStatusUpdate?.fire(this);
 	}
 
+	public async getFeatures(): Promise<IFeature[]>{
+		return this.creatioClient.GetFeatures();
+	}
 	
 	//#endregion
 }

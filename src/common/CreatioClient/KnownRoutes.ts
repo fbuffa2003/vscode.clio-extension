@@ -102,7 +102,6 @@ export class KnownRoutes {
 
 
 	private _ProcessSchemaParameter: string = "/DataService/json/SyncReply/ProcessSchemaParameter";
-
 	/**
 	 * - /DataService/json/SyncReply/ProcessSchemaParameter
 	 */

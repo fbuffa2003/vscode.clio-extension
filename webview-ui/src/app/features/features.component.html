@@ -1,0 +1,35 @@
+<div class="main-wrapper">
+	<vscode-data-grid aria-label="Basic" generate-header="none" grid-template-columns="50px 300px 100px 100px 150px 1fr">
+		<vscode-data-grid-row row-type="sticky-header">
+			<vscode-data-grid-cell cell-type="columnheader" grid-column="1"></vscode-data-grid-cell>
+			<vscode-data-grid-cell cell-type="columnheader" grid-column="2">Code</vscode-data-grid-cell>
+			<vscode-data-grid-cell cell-type="columnheader" grid-column="3">State</vscode-data-grid-cell>
+			<vscode-data-grid-cell cell-type="columnheader" grid-column="4">State for CU</vscode-data-grid-cell>
+			<vscode-data-grid-cell cell-type="columnheader" grid-column="5">Source</vscode-data-grid-cell>
+			<vscode-data-grid-cell cell-type="columnheader" grid-column="6">Description</vscode-data-grid-cell>
+		</vscode-data-grid-row>
+		<vscode-data-grid-row *ngFor="let row of data">
+			<vscode-data-grid-cell grid-column="1">
+				<vscode-text-field disabled>
+					<span slot="start" class="codicon codicon-chevron-right"></span>
+				</vscode-text-field>
+			</vscode-data-grid-cell>
+			<vscode-data-grid-cell grid-column="2">
+				{{row.Code}}
+			</vscode-data-grid-cell>
+			<vscode-data-grid-cell grid-column="3">
+				<vscode-checkbox [checked]="row.State"></vscode-checkbox>
+			</vscode-data-grid-cell>
+			<vscode-data-grid-cell grid-column="4">
+				<vscode-checkbox [checked]="row.StateForCurrentUser"></vscode-checkbox>
+			</vscode-data-grid-cell>
+			<vscode-data-grid-cell grid-column="5">GlobalAppSettings</vscode-data-grid-cell>
+			<vscode-data-grid-cell grid-column="6"></vscode-data-grid-cell>
+		</vscode-data-grid-row>
+	  </vscode-data-grid>
+</div>
+
+<!-- 
+<br /><br />
+<div class="main-wrapper" id="wrapper"></div> 
+-->

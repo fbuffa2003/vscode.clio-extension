@@ -2,9 +2,11 @@ import { ClientRequest, IncomingMessage, OutgoingHttpHeaders } from "http";
 import { RequestOptions } from "https";
 import { request as httpRequest } from "http";
 import { request as httpsRequest} from "https";
-import { ColumnUsage, DataValueType, HttpMethod, ParameterDirection, ProcessDataValueType } from "./enums";
+import { ColumnUsage, DataValueType, ParameterDirection, ProcessDataValueType } from "./enums";
 import { KnownRoutes } from "./KnownRoutes";
 import { ItemType } from "../../service/TreeItemProvider/ItemType";
+import { IRequestOptions, IResponse } from "../interfaces";
+import { HttpMethod } from "../Enums";
 
 export class CreatioClient {
 
@@ -241,7 +243,6 @@ export class CreatioClient {
 		return this.PostAsync(options);
 	}
 
-
 	public async PingWebApp(): Promise<IResponse>{
 		const options : IRequestOptions = {
 			path: new KnownRoutes(this.isNetCore).PingWebApp,
@@ -338,6 +339,122 @@ export class CreatioClient {
 
 		return json['schema']['body'] as string;
 	}
+
+	public async GetFeatures(): Promise<Array<IFeature>>{
+		const dataServiceRequest  = {
+			"rootSchemaName": "AppFeature",
+			"columns": {
+				"items": {
+					"Code": {
+						"expression": {
+							"columnPath": "Code"
+						}
+					},
+					"State": {
+						"expression": {
+							"columnPath": "State"
+						}
+					},
+					"StateForCurrentUser": {
+						"expression": {
+							"columnPath": "StateForCurrentUser"
+						}
+					},
+					"Source": {
+						"expression": {
+							"columnPath": "Source"
+						}
+					},
+					"Description": {
+						"expression": {
+							"columnPath": "Description"
+						}
+					},
+					"Id": {
+						"expression": {
+							"columnPath": "Id"
+						}
+					}
+				}
+			}
+		};
+
+		const options : IRequestOptions = {
+			path: new KnownRoutes(this.isNetCore).SelectQuery,
+			data: dataServiceRequest
+		};
+		const response = await this.PostAsync(options);
+		const features = JSON.parse(response.body)['rows'] as Array<IFeature>;
+		return features;
+	}
+
+	public async GetFeatureById(id: string): Promise<IFeature>{
+		const dataServiceRequest  = {
+			"rootSchemaName": "AppFeature",
+			"filters": {
+				"isEnabled": true,
+				"trimDateTimeParameterToDate": false,
+				"filterType": 1,
+				"comparisonType": 3,
+				"leftExpression": {
+					"expressionType": 0,
+					"columnPath": "Id"
+				},
+				"rightExpression": {
+					"expressionType": 2,
+					"parameter": {
+						"dataValueType": 1,
+						"value": `${id}`
+					}
+				}
+			},
+			"columns": {
+				"items": {
+					"Code": {
+						"expression": {
+							"columnPath": "Code"
+						}
+					},
+					"State": {
+						"expression": {
+							"columnPath": "State"
+						}
+					},
+					"StateForCurrentUser": {
+						"expression": {
+							"columnPath": "StateForCurrentUser"
+						}
+					},
+					"Source": {
+						"expression": {
+							"columnPath": "Source"
+						}
+					},
+					"Description": {
+						"expression": {
+							"columnPath": "Description"
+						}
+					},
+					"Id": {
+						"expression": {
+							"columnPath": "Id"
+						}
+					}
+				}
+			}
+		};
+
+		const options : IRequestOptions = {
+			path: new KnownRoutes(this.isNetCore).SelectQuery,
+			data: dataServiceRequest
+		};
+		const response = await this.PostAsync(options);
+		const features = JSON.parse(response.body)['rows'] as Array<IFeature>;
+		return features[0];
+	}
+
+
+
 
 	//#region Method : Private
 	private async Login() : Promise<IResponse> {
@@ -525,6 +642,15 @@ export class CreatioClient {
 	//#endregion
 }
 
+export interface IFeature {
+	Code: string,
+	State: boolean,
+	StateForCurrentUser: boolean
+	Source: string
+	Description: string,
+	Id: string
+}
+
 
 export interface IPackages extends IResponse{
 	packages : Array<IPackage>
@@ -549,15 +675,6 @@ export interface IProcessList extends IResponse {
 	processes: Array<IBusinessProcess>;
 }
 
-export interface IResponse{
-	body: string,
-	statusCode?: number
-}
-
-export interface IRequestOptions{
-	path: string,
-	data?: any
-}
 
 export interface IBusinessProcess{
 	Id: string;

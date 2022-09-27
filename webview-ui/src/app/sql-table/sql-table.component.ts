@@ -1,7 +1,5 @@
-import { ThisReceiver } from '@angular/compiler';
 import { Component, HostListener, OnInit, Output } from '@angular/core';
-import { DataGridRow } from '@microsoft/fast-foundation';
-import { DataGrid, GenerateHeaderOptions, provideVSCodeDesignSystem, vsCodeButton, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow } from '@vscode/webview-ui-toolkit';
+import { DataGrid, provideVSCodeDesignSystem, vsCodeButton, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow } from '@vscode/webview-ui-toolkit';
 
 @Component({
 	selector: 'app-sql-table',
@@ -11,14 +9,12 @@ import { DataGrid, GenerateHeaderOptions, provideVSCodeDesignSystem, vsCodeButto
 export class SqlTableComponent implements OnInit {
 
 	private readonly innerHtml = `<vscode-data-grid id='sql-data-grid' generate-header="sticky"></vscode-data-grid>`;
-	
 	public data : Array<any> = [];
 
 	@HostListener("window:message", ["$event"])
-	onMessage(ev: any) {
-		
-		console.log("SQL TABLE MESSAGE ARRAIVED");
-		console.log(ev.data);
+	onMessage(ev: any) {	
+		//console.log("SQL TABLE MESSAGE ARRAIVED");
+		//console.log(ev.data);
 		this.onGetJsonData(ev.data);
 	}
 	

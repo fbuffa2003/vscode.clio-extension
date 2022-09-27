@@ -13,6 +13,7 @@ import { Package, PackageList, WorkSpaceItem } from './service/TreeItemProvider/
 import { ProcessList } from './service/TreeItemProvider/ProcessList';
 import { EntityList } from './service/TreeItemProvider/EntityList';
 import { SqlPanel } from './panels/SqlPanel';
+import { FeaturesPanel } from './panels/FeaturesPanel';
 
 export function activate(context: vscode.ExtensionContext) {
 	const clio = new Clio();
@@ -54,7 +55,6 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 	});
-
 
 	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.ExecuteSql', async (doc) => {
 		let commandsDocument = vscode.window.activeTextEditor?.document;
@@ -181,6 +181,26 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	}));
 	
+	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.ShowFeatures', async (node: Environment) => {
+		vscode.window.withProgress(
+			{
+				location : vscode.ProgressLocation.Notification,
+				title: "Getting AppFeature data"
+			},
+			async(progress, token)=>{
+				const environmentName = node.label;
+				const result = await node.getFeatures();
+
+				FeaturesPanel.render(context.extensionUri, environmentName as string);
+				FeaturesPanel.currentPanel?.sendMessage(result);
+				
+				progress.report({
+					increment: 100,
+					message: "Done"
+				});
+			}
+		);
+	}));
 	context.subscriptions.push( 
 		vscode.commands.registerCommand('ClioSQL.restart', async (node: Environment) => {
 			vscode.window
