@@ -30,7 +30,8 @@ export class ConnectionComponent implements OnInit {
 			vsCodeButton(), vsCodeTextField(), vsCodeCheckbox(),vsCodeLink()
 			);
 		this.imageUri = history.state.imageUri;
-		this.circleImageUri = this.imageUri+'/'+"creatio-square.svg";
+		//this.circleImageUri = this.imageUri+'/'+"creatio-square.svg";
+		this.circleImageUri = this.imageUri+'/'+"Add.svg";
 	}
 
 	ngOnInit(): void {}

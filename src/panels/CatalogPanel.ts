@@ -109,12 +109,9 @@ export class CatalogPanel {
 		// The JS files from the Angular build output
 		const runtimeUri = getUri(webview, extensionUri, ["webview-ui", "build", "runtime.js"]);
 		const polyfillsUri = getUri(webview, extensionUri, ["webview-ui", "build", "polyfills.js"]);
-		const scriptUri = getUri(webview, extensionUri, ["webview-ui", "build", "main.js"]);
-		
+		const scriptUri = getUri(webview, extensionUri, ["webview-ui", "build", "main.js"]);	
 		const imagesUri = getUri(webview, extensionUri, ["resources", "icon"]);
-		//https://microsoft.github.io/vscode-codicons/dist/codicon.html
-		const codiconsUri = getUri(webview, extensionUri, ["node_modules","@vscode/codicons", "dist","codicon.css"]);
-
+		
 		// Tip: Install the es6-string-html VS Code extension to enable code highlighting below
 		return /*html*/ `
 		<!DOCTYPE html>
@@ -123,7 +120,6 @@ export class CatalogPanel {
 			<meta charset="UTF-8" />
 			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 			<link rel="stylesheet" type="text/css" href="${stylesUri}">
-			<link rel="stylesheet" type="text/css" href="${codiconsUri}">
 			<title>Marketplace apps</title>
 		</head>
 			<body>

@@ -109,11 +109,9 @@ export class ConnectionPanel {
 		const runtimeUri = getUri(webview, extensionUri, ["webview-ui", "build", "runtime.js"]);
 		const polyfillsUri = getUri(webview, extensionUri, ["webview-ui", "build", "polyfills.js"]);
 		const scriptUri = getUri(webview, extensionUri, ["webview-ui", "build", "main.js"]);
-		
 		const imagesUri = getUri(webview, extensionUri, ["resources", "icon"]);
-		//https://microsoft.github.io/vscode-codicons/dist/codicon.html
-		const codiconsUri = getUri(webview, extensionUri, ["node_modules","@vscode/codicons", "dist","codicon.css"]);
-
+	
+	
 		// Tip: Install the es6-string-html VS Code extension to enable code highlighting below
 		return /*html*/ `
 		<!DOCTYPE html>
@@ -122,13 +120,14 @@ export class ConnectionPanel {
 				<meta charset="UTF-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 				<link rel="stylesheet" type="text/css" href="${stylesUri}">
-				<link rel="stylesheet" type="text/css" href="${codiconsUri}">
+				
 				<title>Add new connection</title>
 			</head>
 			<body>
 				<div class="hidden">
 					<i class="codicon codicon-account"></i>
 					<img src="${imagesUri}/creatio-square.svg">
+					<img src="${imagesUri}/Add.svg">
 				</div>
 				<app-root environmentName="${ConnectionPanel._envName}" pageName="connection" imagesUri="${imagesUri}"></app-root>
 				<script type="module" src="${runtimeUri}"></script>

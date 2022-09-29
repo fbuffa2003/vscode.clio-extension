@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
 import { ClioExecutor } from "../Common/clioExecutor";
-import { Environment } from "../service/TreeItemProvider/Environment";
 import { getUri } from "../utilities/getUri";
 
 export class FeaturesPanel {
@@ -112,9 +111,7 @@ export class FeaturesPanel {
 		const scriptUri = getUri(webview, extensionUri, ["webview-ui", "build", "main.js"]);
 		
 		const imagesUri = getUri(webview, extensionUri, ["resources", "icon"]);
-		//https://microsoft.github.io/vscode-codicons/dist/codicon.html
-		const codiconsUri = getUri(webview, extensionUri, ["node_modules","@vscode/codicons", "dist","codicon.css"]);
-
+		
 		// Tip: Install the es6-string-html VS Code extension to enable code highlighting below
 		return /*html*/ `
 		<!DOCTYPE html>
@@ -123,7 +120,6 @@ export class FeaturesPanel {
 			<meta charset="UTF-8" />
 			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 			<link rel="stylesheet" type="text/css" href="${stylesUri}">
-			<link rel="stylesheet" type="text/css" href="${codiconsUri}">
 			<title>Marketplace apps</title>
 		</head>
 			<body>
