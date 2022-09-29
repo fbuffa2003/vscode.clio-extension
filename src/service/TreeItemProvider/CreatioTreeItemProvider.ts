@@ -5,14 +5,15 @@ import getAppDataPath from 'appdata-path';
 import { CreatioTreeItem } from './CreatioTreeItem';
 import { Environment, IConnectionSettings } from './Environment';
 
+
 export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioTreeItem>{
-	
+
 	private _onDidChangeTreeData: vscode.EventEmitter<CreatioTreeItem | undefined | void> = new vscode.EventEmitter<CreatioTreeItem | undefined | void>();
 	readonly onDidChangeTreeData: vscode.Event<CreatioTreeItem | undefined | void> = this._onDidChangeTreeData.event;
-	
+
 	private _onDidStatusUpdate: vscode.EventEmitter<CreatioTreeItem> = new vscode.EventEmitter<CreatioTreeItem>();
 	readonly onDidStatusUpdate: vscode.Event<CreatioTreeItem> = this._onDidStatusUpdate.event;
-	
+
 	private environments = new Array<Environment>();
 
 	getTreeItem(element: CreatioTreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
@@ -28,11 +29,11 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 			const map = this.getClioEnvironments();
 			for (let [key, value] of map.entries()) {
 				const instance = new Environment(key, value);
-				
+
 				instance.onDidStatusUpdate((instance: CreatioTreeItem)=>{
 					this.handleUpdateNode(instance);
 				});
-	
+
 				instance.onDeleted((instance: CreatioTreeItem)=>{
 					this.handleDeleteNode(instance);
 				});
@@ -41,6 +42,7 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 			}
 			return Promise.resolve(this.environments);
 		}
+
 		if(element instanceof CreatioTreeItem){
 			return Promise.resolve(element.items);
 		}
@@ -55,7 +57,7 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 	}
 
 	public async addNewNode(name: string , connectionSettings : IConnectionSettings){
-		
+
 		const newEnvironment = new Environment(name, connectionSettings);
 		newEnvironment.onDidStatusUpdate((instance: CreatioTreeItem)=>{
 			this.handleUpdateNode(instance);
@@ -77,10 +79,10 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 				encoding: "utf-8"
 			}
 		);
-		
+
 		const json = JSON.parse(file);
-		
-		
+
+
 		const environments = json['Environments'];
 		let keys : string[] = [];
 		Object.keys(environments).forEach(key =>{
@@ -88,12 +90,12 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 		});
 
 		const map = new Map<string, IConnectionSettings>();
-		
+
 		keys.forEach(key=>{
 			type ObjectKey = keyof typeof environments;
 			const keyName = key as ObjectKey;
 			const environment = environments[keyName];
-			
+
 			const env : IConnectionSettings = {
 				uri: new URL(environment['Uri']),
 				login: environment['Login'],

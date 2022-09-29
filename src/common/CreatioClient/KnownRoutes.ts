@@ -7,139 +7,139 @@ export class KnownRoutes {
 	public Login: string = "/ServiceModel/AuthService.svc/Login";
 
 
-	private _Logout: string = "/rest/MainMenuService/Logout";
+	private _logout: string = "/rest/MainMenuService/Logout";
 	/**
 	 * - /rest/MainMenuService/Logout
 	 */
 	public get Logout(): string {
-		return this.getRoute(this._Logout);
+		return this.getRoute(this._logout);
 	}
 	private set Logout(v: string) {
-		this._Logout = v;
+		this._logout = v;
 	}
 
 
 
-	private _GetCurrentUserInfo: string = "/ServiceModel/UserInfoService.svc/getCurrentUserInfo";
+	private _getCurrentUserInfo: string = "/ServiceModel/UserInfoService.svc/getCurrentUserInfo";
 	/**
 	 * - /ServiceModel/UserInfoService.svc/getCurrentUserInfo
 	 */
 	public get GetCurrentUserInfo(): string {
-		return this.getRoute(this._GetCurrentUserInfo);
+		return this.getRoute(this._getCurrentUserInfo);
 	}
 	private set GetCurrentUserInfo(v: string) {
-		this._GetCurrentUserInfo = v;
+		this._getCurrentUserInfo = v;
 	}
 
 
-	private _SelectQuery: string = "/DataService/json/SyncReply/SelectQuery";
+	private _selectQuery: string = "/DataService/json/SyncReply/SelectQuery";
 	/**
 	 * /DataService/json/SyncReply/SelectQuery
 	 */
 	public get SelectQuery(): string {
-		return this.getRoute(this._SelectQuery);
+		return this.getRoute(this._selectQuery);
 	}
 	private set SelectQuery(v: string) {
-		this._SelectQuery = v;
+		this._selectQuery = v;
 	}
 
-	private _InsertQuery: string = "/DataService/json/SyncReply/InsertQuery";
+	private _insertQuery: string = "/DataService/json/SyncReply/InsertQuery";
 	/**
 	 * - /DataService/json/SyncReply/InsertQuery
 	 */
 	public get InsertQuery(): string {
-		return this.getRoute(this._InsertQuery);
+		return this.getRoute(this._insertQuery);
 	}
 	private set InsertQuery(v: string) {
-		this._InsertQuery = v;
+		this._insertQuery = v;
 	}
 
-	private _DeleteQuery: string = "/DataService/json/SyncReply/DeleteQuery";
+	private _deleteQuery: string = "/DataService/json/SyncReply/DeleteQuery";
 	/**
 	 * - /DataService/json/SyncReply/DeleteQuery
 	 */
 	public get DeleteQuery(): string {
-		return this.getRoute(this._DeleteQuery);
+		return this.getRoute(this._deleteQuery);
 	}
 	private set DeleteQuery(v: string) {
-		this._DeleteQuery = v;
+		this._deleteQuery = v;
 	}
 
-	private _UpdateQuery: string = "/DataService/json/SyncReply/UpdateQuery";
+	private _updateQuery: string = "/DataService/json/SyncReply/UpdateQuery";
 	/**
 	 * - /DataService/json/SyncReply/UpdateQuery
 	 */
 	public get UpdateQuery(): string {
-		return this.getRoute(this._UpdateQuery);
+		return this.getRoute(this._updateQuery);
 	}
 	private set UpdateQuery(v: string) {
-		this._UpdateQuery = v;
+		this._updateQuery = v;
 	}
 
 
 
-	private _RunProcess: string = "/ServiceModel/ProcessEngineService.svc/RunProcess";
+	private _runProcess: string = "/ServiceModel/ProcessEngineService.svc/RunProcess";
 	/**
 	 * - /ServiceModel/ProcessEngineService.svc/RunProcess
 	 */
 	public get RunProcess(): string {
-		return this.getRoute(this._RunProcess);
+		return this.getRoute(this._runProcess);
 	}
 	private set RunProcess(v: string) {
-		this._RunProcess = v;
+		this._runProcess = v;
 	}
 
-	private _ProcessSchemaRequest: string = "/DataService/json/SyncReply/ProcessSchemaRequest";
+	private _processSchemaRequest: string = "/DataService/json/SyncReply/ProcessSchemaRequest";
 	/**
 	 * - /DataService/json/SyncReply/ProcessSchemaRequest
 	 */
 	public get ProcessSchemaRequest(): string {
-		return this.getRoute(this._ProcessSchemaRequest);
+		return this.getRoute(this._processSchemaRequest);
 	}
 	private set ProcessSchemaRequest(v: string) {
-		this._ProcessSchemaRequest = v;
+		this._processSchemaRequest = v;
 	}
 
 
-	private _ProcessSchemaParameter: string = "/DataService/json/SyncReply/ProcessSchemaParameter";
+	private _processSchemaParameter: string = "/DataService/json/SyncReply/ProcessSchemaParameter";
 	/**
 	 * - /DataService/json/SyncReply/ProcessSchemaParameter
 	 */
 	public get ProcessSchemaParameter(): string {
-		return this.getRoute(this._ProcessSchemaParameter);
+		return this.getRoute(this._processSchemaParameter);
 	}
 	private set ProcessSchemaParameter(v: string) {
-		this._ProcessSchemaParameter = v;
+		this._processSchemaParameter = v;
 	}
 
 
 
-	private _RuntimeEntitySchemaRequest: string = "/DataService/json/SyncReply/RuntimeEntitySchemaRequest";
+	private _runtimeEntitySchemaRequest: string = "/DataService/json/SyncReply/RuntimeEntitySchemaRequest";
 	/**
 	 * - /DataService/json/SyncReply/RuntimeEntitySchemaRequest
 	 */
 	public get RuntimeEntitySchemaRequest(): string {
-		return this.getRoute(this._RuntimeEntitySchemaRequest);
+		return this.getRoute(this._runtimeEntitySchemaRequest);
 	}
 	private set RuntimeEntitySchemaRequest(v: string) {
-		this._RuntimeEntitySchemaRequest = v;
+		this._runtimeEntitySchemaRequest = v;
 	}
 
 
-	private _EntitySchemaManagerRequest : string = "/DataService/json/SyncReply/EntitySchemaManagerRequest";
+	private _entitySchemaManagerRequest : string = "/DataService/json/SyncReply/EntitySchemaManagerRequest";
 	/**
 	 * - /DataService/json/SyncReply/EntitySchemaManagerRequest
 	 */
 	public get EntitySchemaManagerRequest() : string {
-		return this.getRoute(this._EntitySchemaManagerRequest);
+		return this.getRoute(this._entitySchemaManagerRequest);
 	}
 	private set EntitySchemaManagerRequest(v : string) {
-		this._EntitySchemaManagerRequest = v;
+		this._entitySchemaManagerRequest = v;
 	}
 
 
 	
-	private _RestartApp : string = "/ServiceModel/AppInstallerService.svc/RestartApp";
+	private _restartApp : string = "/ServiceModel/AppInstallerService.svc/RestartApp";
 	/**
 	 * - /ServiceModel/AppInstallerService.svc/RestartApp
 	 */
@@ -152,116 +152,115 @@ export class KnownRoutes {
 		}	
 	}
 	private set RestartApp(v : string) {
-		this._RestartApp = v;
+		this._restartApp = v;
 	}
 	
 
 	
-	private _ClearRedisDb : string = "/ServiceModel/AppInstallerService.svc/ClearRedisDb";
+	private _clearRedisDb : string = "/ServiceModel/AppInstallerService.svc/ClearRedisDb";
 	/**
 	 * - /ServiceModel/AppInstallerService.svc/ClearRedisDb
 	 */
 	public get ClearRedisDb() : string {
-		return this.getRoute(this._ClearRedisDb);
+		return this.getRoute(this._clearRedisDb);
 	}
 	private set ClearRedisDb(v : string) {
-		this._ClearRedisDb = v;
+		this._clearRedisDb = v;
 	}
 	
 	
-	private _ExecuteSqlScript : string = "/rest/CreatioApiGateway/ExecuteSqlScript";
+	private _executeSqlScript : string = "/rest/CreatioApiGateway/ExecuteSqlScript";
 	/**
 	 * - /rest/CreatioApiGateway/ExecuteSqlScript
 	 */
 	public get ExecuteSqlScript() : string {
-		return this.getRoute(this._ExecuteSqlScript);
+		return this.getRoute(this._executeSqlScript);
 	}
 	private set ExecuteSqlScript(v : string) {
-		this._ExecuteSqlScript = v;
+		this._executeSqlScript = v;
 	}
 	
 	
-	private _PingWebHost : string = "/0/api/HealthCheck/Ping";
+	private _pingWebHost : string = "/0/api/HealthCheck/Ping";
 	/**
 	 * - /0/api/HealthCheck/Ping
 	 */
 	public get PingWebHost() : string {
-		return this._PingWebHost;
+		return this._pingWebHost;
 	}
 	private set PingWebHost(v : string) {
-		this._PingWebHost = v;
+		this._pingWebHost = v;
 	}
 	
 	
-	private _PingWebApp : string = "/api/HealthCheck/Ping";
+	private _pingWebApp : string = "/api/HealthCheck/Ping";
 	/**
 	 * - /api/HealthCheck/Ping
 	 */
 	public get PingWebApp() : string {
-		return this._PingWebApp;
+		return this._pingWebApp;
 	}
 	private set PingWebApp(v : string) {
-		this._PingWebApp = v;
+		this._pingWebApp = v;
 	}
 	
 	
-	private _GetPackages : string = "/ServiceModel/PackageService.svc/GetPackages";
+	private _getPackages : string = "/ServiceModel/PackageService.svc/GetPackages";
 	public get GetPackages() : string {
-		return this.getRoute(this._GetPackages);
+		return this.getRoute(this._getPackages);
 	}
 	private set GetPackages(v : string) {
-		this._GetPackages = v;
+		this._getPackages = v;
 	}
 	
-	private _GetPackageProperties : string = "/ServiceModel/PackageService.svc/GetPackageProperties";
+	private _getPackageProperties : string = "/ServiceModel/PackageService.svc/GetPackageProperties";
 	public get GetPackageProperties() : string {
-		return this.getRoute(this._GetPackageProperties);
+		return this.getRoute(this._getPackageProperties);
 	}
 	private set GetPackageProperties(v : string) {
-		this._GetPackageProperties = v;
+		this._getPackageProperties = v;
 	}
 	
 	
-	private _GetWorkspaceItems : string = "/ServiceModel/WorkspaceExplorerService.svc/GetWorkspaceItems";
+	private _getWorkspaceItems : string = "/ServiceModel/WorkspaceExplorerService.svc/GetWorkspaceItems";
 	public get GetWorkspaceItems() : string {
-		return this.getRoute(this._GetWorkspaceItems);
+		return this.getRoute(this._getWorkspaceItems);
 	}
 	private set GetWorkspaceItems(v : string) {
-		this._GetWorkspaceItems = v;
+		this._getWorkspaceItems = v;
 	}
 	
 
 	
-	private _GetClientUnitSchema : string = "/ServiceModel/ClientUnitSchemaDesignerService.svc/GetSchema";
+	private _getClientUnitSchema : string = "/ServiceModel/ClientUnitSchemaDesignerService.svc/GetSchema";
 	public get GetClientUnitSchema() : string {
-		return this.getRoute(this._GetClientUnitSchema);
+		return this.getRoute(this._getClientUnitSchema);
 	}
 	private set GetClientUnitSchema(v : string) {
-		this._GetClientUnitSchema = v;
+		this._getClientUnitSchema = v;
 	}
 	
 	
-	private _GetSourceCodeSchema : string = "/ServiceModel/SourceCodeSchemaDesignerService.svc/GetSchema";
+	private _getSourceCodeSchema : string = "/ServiceModel/SourceCodeSchemaDesignerService.svc/GetSchema";
 	public get GetSourceCodeSchema() : string {
-		return this.getRoute(this._GetSourceCodeSchema);
+		return this.getRoute(this._getSourceCodeSchema);
 	}
 	private set GetSourceCodeSchema(v : string) {
-		this._GetSourceCodeSchema = v;
+		this._getSourceCodeSchema = v;
 	}
 	
-	private _GetSqlSchema : string = "/ServiceModel/SqlScriptSchemaDesignerService.svc/GetSchema";
+	private _getSqlSchema : string = "/ServiceModel/SqlScriptSchemaDesignerService.svc/GetSchema";
 	public get GetSqlSchema() : string {
-		return this.getRoute(this._GetSqlSchema);
+		return this.getRoute(this._getSqlSchema);
 	}
 	private set GetSqlSchema(v : string) {
-		this._GetSqlSchema = v;
+		this._getSqlSchema = v;
 	}
 	
-
 
 	/**
 	 *
-	 * @param isNetCore Indicates if routes are for netcore app
+	 * @param isNetCore Indicates if routes are for netCore app
 	 */
 	constructor(public isNetCore: boolean) {
 	}

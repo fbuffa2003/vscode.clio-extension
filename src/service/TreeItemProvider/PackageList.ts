@@ -1,11 +1,9 @@
-import { link } from 'fs';
 import path = require('path');
-import { title } from 'process';
 import * as vscode from 'vscode';
-import { IDownloadPackageArgs, IDownloadPackageResponse } from '../../commands/DownloadPackageCommand';
+import { IDownloadPackageArgs } from '../../commands/DownloadPackageCommand';
 import { IGetPackagesArgs } from '../../commands/GetPackagesCommand';
 import { IUnlockPkgArgs } from '../../commands/UnLockPkgCommand';
-import { IPackage, IWorkSpaceItem } from '../../common/CreatioClient/CreatioClient';
+import { IWorkSpaceItem } from '../../common/CreatioClient/CreatioClient';
 import { CreatioTreeItem } from "./CreatioTreeItem";
 import { Environment } from './Environment';
 import { ItemType } from "./ItemType";
@@ -13,7 +11,6 @@ import { ItemType } from "./ItemType";
 export class PackageList extends CreatioTreeItem {
 
 	public contextValue = 'CreatioPackageList';
-	
 	
 	private _WorkspaceItems : Array<IWorkSpaceItem> = new Array<IWorkSpaceItem>;
 	public get WorkspaceItems() : Array<IWorkSpaceItem> {
@@ -58,10 +55,20 @@ export class PackageList extends CreatioTreeItem {
 	}
 
 	public async getPackagesDev(): Promise<void>{
-		const args : IGetPackagesArgs = {
-			environmentName :  this.parent?.label as string
-		};
+		// const args : IGetPackagesArgs = {
+		// 	environmentName :  this.parent?.label as string
+		// };
+
 		const pkgs = await (this.parent as Environment).creatioClient.GetPackages();	
+
+		const body = JSON.parse(pkgs.body);
+		if(!body['success']){
+			vscode.window.showErrorMessage(
+				`${body['errorInfo']['errorCode']}: ${body['errorInfo']['message']}`
+			);
+			return;
+		}
+
 		this.WorkspaceItems = await (this.parent as Environment).creatioClient.GetWorkspaceItems();
 
 		pkgs.packages.forEach(pkg => {

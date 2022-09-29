@@ -623,21 +623,21 @@ export class CreatioClient {
 		let startElement = schema.innerMetadata.schema.flowElements.find(el=> el.typeName ==='Terrasoft.Core.Process.ProcessSchemaStartEvent');
 		if(startElement){
 			if(startElement.useBackgroundMode){
-				schema.useBackgroundMode = startElement.useBackgroundMode
+				schema.useBackgroundMode = startElement.useBackgroundMode;
 			}
 		}
 
 		//Convert GUID DataValueType to DataValueType enum
 		schema.innerMetadata.schema.parameters.forEach(el =>{
-			 let propName = (el.dataValueType as any);
-			 let value = (ProcessDataValueType as any)[propName]
+			 const propName = (el.dataValueType as any);
+			 const value = (ProcessDataValueType as any)[propName];
 			 el.dataValueType = value;
 
-			let resourceName = `Parameters.${el.name}.Caption`;
-			let caption = (schema.resources as any)[resourceName];
+			const resourceName = `Parameters.${el.name}.Caption`;
+			const caption = (schema.resources as any)[resourceName];
 			el.caption = caption;
 		});
-		return schema
+		return schema;
 	}
 	//#endregion
 }

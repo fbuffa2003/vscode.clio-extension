@@ -34,18 +34,34 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 	
+
+	treeView.onDidChangeSelection(async (event: vscode.TreeViewSelectionChangeEvent<CreatioTreeItem>)=>{
+		
+	});
+
 	treeView.onDidExpandElement(async (event: vscode.TreeViewExpansionEvent<CreatioTreeItem>)=>{
 		if(event.element instanceof Environment){
 			return;
 		}
 		
 		if(event.element instanceof PackageList){
-			//TODO: Change to clio when available
-			//await (event.element as PackageList).getPackages()
-			await (event.element as PackageList).getPackagesDev();
-			treeProvider.refresh();
+			vscode.window.withProgress(
+				{
+					location : vscode.ProgressLocation.Notification,
+					title: "Getting packages data"
+				},
+				async(progress, token)=>{
+					//TODO: Change to clio when available
+					await (event.element as PackageList).getPackagesDev();
+					treeProvider.refresh();
+					
+					progress.report({
+						increment: 100,
+						message: "Done"
+					});
+				}
+			);
 		}
-
 		
 		if(event.element instanceof ProcessList){
 			return;

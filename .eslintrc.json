@@ -1,24 +1,51 @@
 {
-    "root": true,
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-        "ecmaVersion": 6,
-        "sourceType": "module"
-    },
-    "plugins": [
-        "@typescript-eslint"
-    ],
-    "rules": {
-        "@typescript-eslint/naming-convention": "warn",
-        "@typescript-eslint/semi": "warn",
-        "curly": "warn",
-        "eqeqeq": "warn",
-        "no-throw-literal": "warn",
-        "semi": "off"
-    },
-    "ignorePatterns": [
-        "out",
-        "dist",
-        "**/*.d.ts"
-    ]
+	"root": true,
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"ecmaVersion": 6,
+		"sourceType": "module"
+	},
+	"plugins": [
+		"@typescript-eslint"
+	],
+	"rules": {
+		/* 
+		{@link https://typescript-eslint.io/rules/naming-convention/ | naming-convention}
+		{@link https://typescript-eslint.io/rules/naming-convention/#allowed-selectors-modifiers-and-types | allowed-selectors}
+		*/
+		"@typescript-eslint/naming-convention": [
+			"warn",
+			{
+				"selector": "property",
+				"modifiers": ["public"],
+				"format": ["PascalCase", "camelCase"]
+			},
+			{
+				"selector": "property",
+				"modifiers": ["private"],
+				"format": ["camelCase"],
+				"leadingUnderscore": "require"
+			},
+			/*
+			{@link https://typescript-eslint.io/rules/naming-convention/#how-does-the-rule-evaluate-a-names-format}
+			*/
+			{
+				"selector": "interface",
+				"format": ["PascalCase"],
+				"leadingUnderscore": "forbid",
+				"trailingUnderscore":"forbid",
+				"prefix":["I"]
+			}
+		],
+		"@typescript-eslint/semi": "warn",
+		"curly": "warn",
+		"eqeqeq": "warn",
+		"no-throw-literal": "warn",
+		"semi": "off"
+	},
+	"ignorePatterns": [
+		"out",
+		"dist",
+		"**/*.d.ts"
+	]
 }
