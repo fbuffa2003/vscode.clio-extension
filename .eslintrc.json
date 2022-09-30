@@ -10,7 +10,7 @@
 	],
 	"rules": {
 		/* 
-		{@link https://typescript-eslint.io/rules/naming-convention/ | naming-convention}
+		{@link https://typescript-eslint.io/rules/naming-convention/ | naming-convention} 
 		{@link https://typescript-eslint.io/rules/naming-convention/#allowed-selectors-modifiers-and-types | allowed-selectors}
 		*/
 		"@typescript-eslint/naming-convention": [

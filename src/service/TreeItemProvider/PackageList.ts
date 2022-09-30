@@ -235,7 +235,7 @@ export class Package extends CreatioTreeItem {
 				const args : IDownloadPackageArgs = {
 					environmentName : envName as String,
 					packageName : this.name,
-					destinationPath : path.join(folderPath, `${this.name}.zip -r true`)
+					destinationPath : path.join(folderPath)
 				};
 
 				const isValid = this.clio.downloadPackage.canExecute(args);

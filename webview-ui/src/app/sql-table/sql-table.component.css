@@ -1,8 +1,16 @@
-/* TODO NEED HELP*/
-
-.main-wrapper{
-	/* background-color: black; */
-	width: max-content;
+/* @import '../../../node_modules/ag-grid-community/dist/styles/ag-grid.css';
+@import '../../../node_modules/ag-grid-community/dist/styles/ag-theme-balham-dark.min.css'; */
+.ag-theme-balham-dark{
+	font-size: 13px;
 }
 
 
+/* TODO NEED HELP*/
+
+/*
+	.main-wrapper{
+		
+		width: max-content;
+	}
+
+*/

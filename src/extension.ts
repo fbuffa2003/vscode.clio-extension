@@ -109,7 +109,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ClioSQL.UpdateClioCli', async () => {
-			const result = await executor.ExecuteClioCommand("dotnet tool update clio -g");
+			const result = await executor.ExecuteClioCommand("dotnet tool update clio -g --no-cache");
 			vscode.window.showInformationMessage(result as string);
 		})
 	);

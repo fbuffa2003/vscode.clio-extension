@@ -123,8 +123,7 @@ export class SqlPanel {
 			<meta charset="UTF-8" />
 			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 			<link rel="stylesheet" type="text/css" href="${stylesUri}">
-			<link rel="stylesheet" type="text/css" href="${codiconsUri}">
-			<title>Marketplace apps</title>
+			<title>Clio SQL</title>
 		</head>
 			<body>
 				<div class="hidden">

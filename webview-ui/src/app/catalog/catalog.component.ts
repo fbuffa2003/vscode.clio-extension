@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener, Input } from '@angular/core';
 import { vscode } from "./../utilities/vscode";
 import { provideVSCodeDesignSystem, TextField, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow, vsCodeTextField } from "@vscode/webview-ui-toolkit";
+import { VscodeDataProviderService } from '../services/vscode-data-provider.service';
 
 
 @Component({
@@ -44,7 +45,7 @@ export class CatalogComponent implements OnInit {
 		this.catalog = this.unFilteredCatalog;
 	}
 
-	constructor() {
+	constructor(private vscodeDataProvider: VscodeDataProviderService) {
 		provideVSCodeDesignSystem().register(
 			vsCodeButton(), vsCodeCheckbox(), vsCodeTextField(),
 			vsCodeDataGrid(), vsCodeDataGridRow(), vsCodeDataGridCell()
@@ -57,10 +58,13 @@ export class CatalogComponent implements OnInit {
 	}
 	ngOnInit(): void {
 		//Ask extension to run clio catalog
-		vscode.postMessage({
-			command: "getCatalog",
-			environmentName: this.environmentName
-		});
+
+		(async ()=>await this.vscodeDataProvider.getCatalog())();
+
+		// vscode.postMessage({
+		// 	command: "getCatalog",
+		// 	environmentName: this.environmentName
+		// });
 	}
 
 	public search(inputEl : HTMLElement ): void{

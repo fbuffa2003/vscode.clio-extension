@@ -1,6 +1,6 @@
 import { ClioExecutor } from '../Common/clioExecutor';
 import { ICommand, ICommandArgs, ICommandResponse } from './BaseCommand';
-import {FlushDb,IFlushDbArgs,IFlushDbResponse } from './FlushDbCommand';
+import { FlushDb,IFlushDbArgs,IFlushDbResponse } from './FlushDbCommand';
 import { HealthCheck, IHealthCheckArgs, IHealthCheckResponse } from './HealthCheckCommand';
 import { IRegisterWebAppArgs, IRegisterWebAppResponse, RegisterWebApp } from './RegisterWebAppCommand';
 import { ISqlArgs, ISqlResponse, Sql } from './SqlCommand';

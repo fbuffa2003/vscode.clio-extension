@@ -8,7 +8,8 @@ import { CatalogComponent } from './catalog/catalog.component';
 import { ConnectionComponent } from './connection/connection.component';
 import { SqlTableComponent } from './sql-table/sql-table.component';
 import { FeaturesComponent } from './features/features.component';
-
+import { VscodeDataProviderService } from "./services/vscode-data-provider.service";
+import { AgGridModule } from 'ag-grid-angular';
 
 
 @NgModule({
@@ -22,9 +23,11 @@ import { FeaturesComponent } from './features/features.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
-	FormsModule, ReactiveFormsModule
+	FormsModule, 
+	ReactiveFormsModule,
+	AgGridModule
   ],
-  providers: [],
+  providers: [VscodeDataProviderService],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

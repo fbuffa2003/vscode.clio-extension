@@ -55,7 +55,7 @@ export class DownloadPackage extends BaseCommand implements ICommand<IDownloadPa
 		if(!this._validationResult.success){
 			throw new Error("Make sure to call canExecute before calling execute");
 		}
-		const result = await this.executor.ExecuteClioCommand(`clio pull-pkg ${args.packageName} -d ${args.destinationPath} -e ${args.environmentName}`);
+		const result = await this.executor.ExecuteClioCommand(`clio-dev pull-pkg ${args.packageName} -d ${args.destinationPath} -e ${args.environmentName} -r`);
 		return this.convertResult(result);
 	}
 
