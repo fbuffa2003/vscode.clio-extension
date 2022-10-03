@@ -35,3 +35,7 @@ vscode-button{
 	text-align: center;
 	display: block;
 }
+
+.header-row:hover{
+	background: var(--background);
+}

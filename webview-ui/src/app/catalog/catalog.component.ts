@@ -24,14 +24,6 @@ export class CatalogComponent implements OnInit {
 		this.vscodeDataProvider.onMessage(ev);
 	}
 
-	// @HostListener("window:message", ["$event"])
-	// onMessage(ev: any) {
-	// 	let data = ev.data;
-	// 	if(data.getCatalog){
-	// 		this.onGetCatalog(data.getCatalog);
-	// 	}
-	// }
-
 	/**
 	 * Parses catalog into model 
 	 * @param catalog data from clio
@@ -65,7 +57,7 @@ export class CatalogComponent implements OnInit {
 		//Ask extension to run clio catalog
 		(async ()=>{
 			const data = await this.vscodeDataProvider.getCatalog();
-			this.onGetCatalog(data.getCatalog);
+			this.onGetCatalog(data);
 		})();
 	}
 

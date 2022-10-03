@@ -19,15 +19,15 @@ export class VscodeDataProviderService {
 	public async getCatalog() : Promise<any>{
 		
 		return new Promise<any>((resolve, reject)=>{
-
+			const commandName = "getCatalog";
 			vscode.postMessage({
-				command: "getCatalog"
+				command: commandName
 			});
 
 			console.log("waiting for data");
 			var interval = setInterval(()=>{
-				if(this.data){
-					resolve(this.data);
+				if(this.data[commandName]){
+					resolve(this.data[commandName]);
 					clearInterval(interval);
 				}
 			},1000);
