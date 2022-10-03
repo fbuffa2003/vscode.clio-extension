@@ -120,7 +120,8 @@ export class InstallMarketplaceApp
 		const catalog = await clio.ExecuteClioCommand('clio catalog');
 
 		const html = this.buildRow(catalog);
-		return `<!DOCTYPE html>
+		return /*html*/`
+		<!DOCTYPE html>
 				<html lang="en">
 					<head>
 						<meta charset="UTF-8">

@@ -198,24 +198,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 	
 	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.ShowFeatures', async (node: Environment) => {
-		vscode.window.withProgress(
-			{
-				location : vscode.ProgressLocation.Notification,
-				title: "Getting AppFeature data"
-			},
-			async(progress, token)=>{
-				const environmentName = node.label;
-				const result = await node.getFeatures();
-
-				FeaturesPanel.render(context.extensionUri, environmentName as string);
-				FeaturesPanel.currentPanel?.sendMessage(result);
-				
-				progress.report({
-					increment: 100,
-					message: "Done"
-				});
-			}
-		);
+		FeaturesPanel.render(context.extensionUri, node);
 	}));
 	context.subscriptions.push( 
 		vscode.commands.registerCommand('ClioSQL.restart', async (node: Environment) => {
@@ -325,7 +308,6 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.InstallMarketplaceApp", async (node: Environment)=>{
 			CatalogPanel.render(context.extensionUri, node);
-			//CatalogPanel.currentPanel?.sendMessage();
 		})
 	);
 	

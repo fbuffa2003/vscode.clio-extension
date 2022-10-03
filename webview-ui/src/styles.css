@@ -3,6 +3,7 @@
 
 @import '../node_modules/ag-grid-community/dist/styles/ag-grid.css';
 @import '../node_modules/ag-grid-community/dist/styles/ag-theme-balham-dark.css';
+@import '../node_modules/@vscode/codicons/dist/codicon.css';
 
 body, html{
 	margin: 0;

@@ -11,8 +11,14 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-builders/custom-webpack:browser",
           "options": {
+			"customWebpackConfig": {
+				"path": "./webpack.config.js",
+				"mergeRules": {
+					"externals": "replace"
+				}
+			},
             "outputPath": "build",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -33,8 +39,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "1mb",
-                  "maximumError": "5mb"
+                  "maximumWarning": "20mb",
+                  "maximumError": "25mb"
                 },
                 {
                   "type": "anyComponentStyle",

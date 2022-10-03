@@ -1,5 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
-import { allComponents, DataGrid, provideVSCodeDesignSystem, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow } from '@vscode/webview-ui-toolkit';
+import { provideVSCodeDesignSystem, TextField, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow, vsCodeTextField } from '@vscode/webview-ui-toolkit';
+import { VscodeDataProviderService } from '../services/vscode-data-provider.service';
 
 @Component({
   selector: 'app-features',
@@ -7,57 +8,42 @@ import { allComponents, DataGrid, provideVSCodeDesignSystem, vsCodeButton, vsCod
   styleUrls: ['./features.component.css']
 })
 export class FeaturesComponent implements OnInit {
-
-	private readonly innerHtml = `<vscode-data-grid id='features-data-grid' generate-header="sticky"></vscode-data-grid>`;
-	public data : Array<IFeature> = [];
+		
+	public unFilteredData : Array<IFeature> = [];
+	public data : Array<IFeature> = this.unFilteredData;
+	
+	private _imageUri;
+	public environmentName;
+	public circleImageUri;
+	
 
 	@HostListener("window:message", ["$event"])
 	onMessage(ev: any) {	
-		this.onGetJsonData(ev.data);
+		this.vscodeDataProvider.onMessage(ev);
 	}
-	constructor() { 
+	constructor(private readonly vscodeDataProvider: VscodeDataProviderService) { 
 		provideVSCodeDesignSystem().register(
-			vsCodeButton(),vsCodeCheckbox(),
+			vsCodeButton(),vsCodeCheckbox(),vsCodeTextField(),
 			vsCodeDataGrid(), vsCodeDataGridRow(), vsCodeDataGridCell()
 		);
+		this._imageUri = history.state.imageUri;
+		this.environmentName = history.state.environmentName;
+		this.circleImageUri = this._imageUri+'/'+"creatio-square.svg";
 	}
 
 	ngOnInit(): void {
-		//this.data = this.mockData;
-		this.renderTable();
+		//Ask extension to run clio catalog
+		(async ()=>{
+			const data = await this.vscodeDataProvider.getFeatures();
+			this.unFilteredData = data;
+			this.data = this.unFilteredData;
+		})();
 	}
 
-	private onGetJsonData(data : any){
-		this.data = data;
-		//this.renderTable();
+	public search(inputEl : HTMLElement ): void{
+		const searchData = (inputEl as TextField).value;
+		this.data = this.unFilteredData.filter(c=> c.Code.toLowerCase().includes(searchData.toLowerCase()));
 	}
-
-	private renderTable(){
-		const wrapper = document.getElementById('wrapper') as HTMLElement;
-		wrapper.innerHTML = this.innerHtml;
-		let sqlGrid = document.getElementById('features-data-grid') as DataGrid;
-		sqlGrid.rowsData = this.data;
-	}
-
-
-	private mockData: IFeature[] = [
-		{
-			"Code": "AllowGeneralUserPasswordRecovery",
-			"State": true,
-			"StateForCurrentUser": false,
-			"Source": "GlobalAppSettings",
-			"Description": "",
-			"Id": "0c747c78-a848-4a0d-9848-49dd7bdc25bd"
-		},
-		{
-			"Code": "AllowOnlyOneSessionPerUser",
-			"State": true,
-			"StateForCurrentUser": false,
-			"Source": "GlobalAppSettings",
-			"Description": "",
-			"Id": "8b323f7e-28af-437c-ade7-95702ef2587f"
-		}
-	];
 
 }
 

@@ -20,12 +20,17 @@ export class CatalogComponent implements OnInit {
 
 
 	@HostListener("window:message", ["$event"])
-	onMessage(ev: any) {
-		let data = ev.data;
-		if(data.getCatalog){
-			this.onGetCatalog(data.getCatalog);
-		}
+	onMessage(ev: any){
+		this.vscodeDataProvider.onMessage(ev);
 	}
+
+	// @HostListener("window:message", ["$event"])
+	// onMessage(ev: any) {
+	// 	let data = ev.data;
+	// 	if(data.getCatalog){
+	// 		this.onGetCatalog(data.getCatalog);
+	// 	}
+	// }
 
 	/**
 	 * Parses catalog into model 
@@ -45,7 +50,7 @@ export class CatalogComponent implements OnInit {
 		this.catalog = this.unFilteredCatalog;
 	}
 
-	constructor(private vscodeDataProvider: VscodeDataProviderService) {
+	constructor(private readonly vscodeDataProvider: VscodeDataProviderService) {
 		provideVSCodeDesignSystem().register(
 			vsCodeButton(), vsCodeCheckbox(), vsCodeTextField(),
 			vsCodeDataGrid(), vsCodeDataGridRow(), vsCodeDataGridCell()
@@ -54,17 +59,14 @@ export class CatalogComponent implements OnInit {
 		this.imageUri = history.state.imageUri;
 		this.environmentName = history.state.environmentName;
 		this.circleImageUri = this.imageUri+'/'+"creatio-square.svg";
-		console.log(`catalog.component.ts environmentName: ${this.environmentName}`);
+		//console.log(`catalog.component.ts environmentName: ${this.environmentName}`);
 	}
 	ngOnInit(): void {
 		//Ask extension to run clio catalog
-
-		(async ()=>await this.vscodeDataProvider.getCatalog())();
-
-		// vscode.postMessage({
-		// 	command: "getCatalog",
-		// 	environmentName: this.environmentName
-		// });
+		(async ()=>{
+			const data = await this.vscodeDataProvider.getCatalog();
+			this.onGetCatalog(data.getCatalog);
+		})();
 	}
 
 	public search(inputEl : HTMLElement ): void{
@@ -84,7 +86,7 @@ export class CatalogComponent implements OnInit {
 
 }
 
-export class CatalogItem{
+export class CatalogItem {
 	
 	public id: number;
 	public name: string;

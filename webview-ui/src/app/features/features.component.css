@@ -1,13 +1,28 @@
-/* TODO NEED HELP*/
-
-.main-wrapper{
-	/* 
-	background-color: black; 
-	background-color: black;
-	*/
+.header{
+	display: block;
+	grid-column: 1 / -1;
+	align-items:center; 
+	text-align: center;
+	display: block;
 }
 
-.feature-table{
-	width: 100%;
-	max-width:1000px;
+.main-table{
+	margin-right: 1em;
+	margin-left: 1em;
+}
+
+vscode-checkbox{
+	display: contents;
+}
+.checkbox{
+	justify-self: center;
+}
+.checkbox-text{
+	text-align: center;
+}
+.header-row{
+	z-index: 100;
+}
+.header-row:hover{
+	background: var(--background);
 }

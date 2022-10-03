@@ -1,35 +1,38 @@
-<div class="main-wrapper">
-	<vscode-data-grid aria-label="Basic" generate-header="none" grid-template-columns="50px 300px 100px 100px 150px 1fr">
-		<vscode-data-grid-row row-type="sticky-header">
-			<vscode-data-grid-cell cell-type="columnheader" grid-column="1"></vscode-data-grid-cell>
-			<vscode-data-grid-cell cell-type="columnheader" grid-column="2">Code</vscode-data-grid-cell>
-			<vscode-data-grid-cell cell-type="columnheader" grid-column="3">State</vscode-data-grid-cell>
-			<vscode-data-grid-cell cell-type="columnheader" grid-column="4">State for CU</vscode-data-grid-cell>
-			<vscode-data-grid-cell cell-type="columnheader" grid-column="5">Source</vscode-data-grid-cell>
-			<vscode-data-grid-cell cell-type="columnheader" grid-column="6">Description</vscode-data-grid-cell>
+<div *ngIf="unFilteredData.length > 0" class="main-table">
+	<vscode-data-grid aria-label="Features" grid-template-columns="300px 100px 100px 150px 1fr" generate-header="sticky" class="main-table">
+		<vscode-data-grid-row row-type="sticky-header" class="header-row">
+			<div class="header">
+				<div >
+					<img class="logo-img"src={{circleImageUri}} alt="logo">
+					<span class="logo-text">Features on {{environmentName}}</span>
+				</div>
+				<br/>
+				<div>
+					<vscode-text-field type="text" id="cname" name="cname" placeholder="search" size="100"
+						#myData	(keyup)="search(myData)" ngDefaultControl>
+						<span slot="start" class="codicon codicon-search"></span>
+					</vscode-text-field>
+				</div>
+				<br/><br/>
+			</div>
+
+			<vscode-data-grid-cell cell-type="columnheader" grid-column="1">Code</vscode-data-grid-cell>
+			<vscode-data-grid-cell cell-type="columnheader" grid-column="2" class="checkbox-text">State</vscode-data-grid-cell>
+			<vscode-data-grid-cell cell-type="columnheader" grid-column="3" class="checkbox-text">State for CU</vscode-data-grid-cell>
+			<vscode-data-grid-cell cell-type="columnheader" grid-column="4">Source</vscode-data-grid-cell>
+			<vscode-data-grid-cell cell-type="columnheader" grid-column="5">Description</vscode-data-grid-cell>
 		</vscode-data-grid-row>
-		<vscode-data-grid-row *ngFor="let row of data">
-			<vscode-data-grid-cell grid-column="1">
-				<vscode-text-field disabled>
-					<span slot="start" class="codicon codicon-chevron-right"></span>
-				</vscode-text-field>
-			</vscode-data-grid-cell>
-			<vscode-data-grid-cell grid-column="2">
-				{{row.Code}}
-			</vscode-data-grid-cell>
-			<vscode-data-grid-cell grid-column="3">
+		
+		<vscode-data-grid-row *ngFor="let row of data" row-type="default">
+			<vscode-data-grid-cell grid-column="1">{{row.Code}}</vscode-data-grid-cell>
+			<vscode-data-grid-cell grid-column="2" class="checkbox">
 				<vscode-checkbox [checked]="row.State"></vscode-checkbox>
 			</vscode-data-grid-cell>
-			<vscode-data-grid-cell grid-column="4">
+			<vscode-data-grid-cell grid-column="3" class="checkbox">
 				<vscode-checkbox [checked]="row.StateForCurrentUser"></vscode-checkbox>
 			</vscode-data-grid-cell>
-			<vscode-data-grid-cell grid-column="5">GlobalAppSettings</vscode-data-grid-cell>
-			<vscode-data-grid-cell grid-column="6"></vscode-data-grid-cell>
+			<vscode-data-grid-cell grid-column="4">{{row.Source}}</vscode-data-grid-cell>
+			<vscode-data-grid-cell grid-column="5">{{row.Description}}</vscode-data-grid-cell>
 		</vscode-data-grid-row>
-	  </vscode-data-grid>
+	</vscode-data-grid>
 </div>
-
-<!-- 
-<br /><br />
-<div class="main-wrapper" id="wrapper"></div> 
--->

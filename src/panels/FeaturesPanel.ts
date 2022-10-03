@@ -1,6 +1,8 @@
+import { env } from "process";
 import * as vscode from "vscode";
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
 import { ClioExecutor } from "../Common/clioExecutor";
+import { Environment } from "../service/TreeItemProvider/Environment";
 import { getUri } from "../utilities/getUri";
 
 export class FeaturesPanel {
@@ -9,7 +11,7 @@ export class FeaturesPanel {
 	private _disposables: Disposable[] = [];
 	private static _envName : string | undefined;
 	private _clio: ClioExecutor;
-
+	private static environment : Environment | undefined;
 	/**
 	 * The CatalogPanel class private constructor (called only from the render method).
 	 *
@@ -29,8 +31,6 @@ export class FeaturesPanel {
 
 		// Set an event listener to listen for messages passed from the webview context
 		this._setWebviewMessageListener(this._panel.webview);
-
-		
 	}
 
 	/**
@@ -39,15 +39,17 @@ export class FeaturesPanel {
 	 *
 	 * @param extensionUri The URI of the directory containing the extension.
 	 */
-	public static render(extensionUri: Uri, envName: string) {
+	public static render(extensionUri: Uri, environment: Environment) {
+		
+		
 
 		if (FeaturesPanel.currentPanel) {
 			// If the webview panel already exists reveal it
 			FeaturesPanel.currentPanel._panel.reveal(ViewColumn.Two);
 		} else {
 
-			FeaturesPanel._envName = envName;
-			
+			FeaturesPanel._envName = environment.label;
+			FeaturesPanel.environment = environment;
 			// If a webview panel does not already exist create and show a new one
 			const panel = window.createWebviewPanel(
 				// Panel view type
@@ -61,14 +63,12 @@ export class FeaturesPanel {
 					// Enable JavaScript in the webview
 					enableScripts: true
 				},
-				
 			);
 		
 			panel.iconPath = {
 				light: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'unlocked-package.svg'),
 				dark: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'unlocked-package.svg')
 			};
-			
 			FeaturesPanel.currentPanel = new FeaturesPanel(panel, extensionUri);
 		}
 	}
@@ -120,7 +120,7 @@ export class FeaturesPanel {
 			<meta charset="UTF-8" />
 			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 			<link rel="stylesheet" type="text/css" href="${stylesUri}">
-			<title>Marketplace apps</title>
+			<title>Environment Features</title>
 		</head>
 			<body>
 				<div class="hidden">
@@ -148,9 +148,8 @@ export class FeaturesPanel {
 		async (message: any) => {
 			const command = message.command;
 			const environmentName = message.environmentName;
-
 			switch (command) {
-				case "getCatalog":{
+				case "getFeatures":{
 					// Code that should run in response to the hello message command
 					vscode.window.withProgress(
 						{
@@ -158,9 +157,10 @@ export class FeaturesPanel {
 							title: "Getting Data"
 						},
 						async(progress, token)=>{
-							const result = await this._clio.ExecuteClioCommand('clio catalog');
+							//const result = await this._clio.ExecuteClioCommand('clio catalog');
+							const result = await FeaturesPanel.environment?.getFeatures();
 							const msg = {
-								"getCatalog": result
+								"getFeatures": result
 							};
 			
 							//raising event, angular subscribes to it
@@ -172,27 +172,6 @@ export class FeaturesPanel {
 						}
 					);
 					break;
-				}
-				case "install":{
-					console.log(command);
-					const appId = message.appId;
-				
-					vscode.window.withProgress(
-						{
-							location : vscode.ProgressLocation.Notification,
-							title: `Installing app with id ${appId}`
-						},
-						async(progress, token)=>{
-							const clioExecutor = new ClioExecutor();
-							clioExecutor.executeCommandByTerminal(`install --id ${appId} -e ${environmentName}`);
-							//const result = await this._clio.ExecuteClioCommand(`clio install --id ${appId} -e ${environmentName}`);
-							progress.report({ 
-								increment: 100,
-								message: "Done"
-							});
-							//vscode.window.showInformationMessage(result as string);
-						}
-					);
 				}
 			}
 		},
