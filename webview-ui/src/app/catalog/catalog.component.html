@@ -1,4 +1,4 @@
-<div *ngIf="catalog.length > 0" class="main-table" >
+<div *ngIf="unFilteredCatalog.length>0"  class="main-table" >
 	<vscode-data-grid aria-label="Catalog" grid-template-columns="100px 1fr 50px" generate-Header="sticky">
 		<vscode-data-grid-row row-type="sticky-header" class="header-row">
 			<div class="header">
@@ -16,7 +16,7 @@
 				<br/><br/>
 			
 			</div>
-
+			
 			<vscode-data-grid-cell cell-type="columnheader" grid-column="1">App Id</vscode-data-grid-cell>
 			<vscode-data-grid-cell cell-type="columnheader" grid-column="2">App Name</vscode-data-grid-cell>
 			<vscode-data-grid-cell cell-type="columnheader" grid-column="3" class="install">Add</vscode-data-grid-cell>
