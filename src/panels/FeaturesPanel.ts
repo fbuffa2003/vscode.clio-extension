@@ -57,7 +57,7 @@ export class FeaturesPanel {
 				// Panel title
 				"FEATURES",
 				// The editor column the panel should be displayed in
-				ViewColumn.Two,
+				ViewColumn.One,
 				// Extra panel configurations
 				{
 					// Enable JavaScript in the webview
