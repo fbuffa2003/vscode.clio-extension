@@ -1,16 +1,32 @@
 # Change Log
 
-## Upcoming release
+## Upcoming RC
 
+- Log from Creatio
+- Feature Set for current user and all users
+- Feature comparison
+- Install multiple apps from Marketplace (savable scenario ?)
+	- Download all, repack, send to Creatio;
+- Selectable SQL Table
+--- 
+- Welcome journey
 - Edit existing connection
+- Edit SourceCodeSchema (CS, JS, SQL), others open in Creatio
+- WebSocket nlog appender
 
-## [0.0.8] Initial release  - Oct ???, 2022
+# PRTNER RELEASE
+
+- **NoCode+real code collaboration**
+
+
+## [0.0.8] Initial release  - Oct 6, 2022
 
 ### Added
 
 - Sow list of packages for an environment
 - Lock / Unlock package
 - Preview (readonly) CS, JS and SQL schemas
+- Preview (readonly) App features
 
 ### Changed
 
