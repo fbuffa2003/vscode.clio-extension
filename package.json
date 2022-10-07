@@ -343,7 +343,7 @@
 			},
 			{
 				"command": "ClioSQL.LockPackage",
-				"title": "Unlock package",
+				"title": "Lock package",
 				"icon": "$(lock)"
 			},
 			{

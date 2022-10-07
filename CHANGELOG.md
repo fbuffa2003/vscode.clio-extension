@@ -11,12 +11,26 @@
 --- 
 - Welcome journey
 - Edit existing connection
-- Edit SourceCodeSchema (CS, JS, SQL), others open in Creatio
+- Edit SourceCodeSchema (CS, JS, SQL), others open in Creatio 
+	- Implement [FileSystemProvider]
 - WebSocket nlog appender
 
 # PRTNER RELEASE
 
 - **NoCode+real code collaboration**
+
+## [0.0.9] Initial release  - Oct ???, 2022
+
+### Added
+
+
+### Changed
+
+
+### Bug Fix
+
+- Fixed disappearing marketplace panel
+- Fixed spelling on Lock/Unlock command
 
 
 ## [0.0.8] Initial release  - Oct 6, 2022
@@ -60,3 +74,4 @@
 #
 <!-- Named links -->
 [ag-grid]:https://ag-grid.com
+[FileSystemProvider]:https://code.visualstudio.com/api/references/vscode-api#FileSystemProvider
