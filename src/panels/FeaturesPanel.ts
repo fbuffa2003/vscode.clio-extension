@@ -2,6 +2,7 @@ import { env } from "process";
 import * as vscode from "vscode";
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
 import { ClioExecutor } from "../Common/clioExecutor";
+import { IFeature } from "../common/CreatioClient/CreatioClient";
 import { Environment } from "../service/TreeItemProvider/Environment";
 import { getUri } from "../utilities/getUri";
 
@@ -40,9 +41,6 @@ export class FeaturesPanel {
 	 * @param extensionUri The URI of the directory containing the extension.
 	 */
 	public static render(extensionUri: Uri, environment: Environment) {
-		
-		
-
 		if (FeaturesPanel.currentPanel) {
 			// If the webview panel already exists reveal it
 			FeaturesPanel.currentPanel._panel.reveal(ViewColumn.Two);
@@ -173,6 +171,42 @@ export class FeaturesPanel {
 					);
 					break;
 				}
+				case "setFeatureState":{
+					
+					let resultMsg : IFeature | undefined;
+
+					const feature = message.feature as IFeature;
+					if(feature && feature.Code){
+						const result = await FeaturesPanel.environment?.setFeatureState(feature);
+						resultMsg = result;
+					}
+					
+					//return msg to webview
+					const msg = {
+						"setFeatureState": resultMsg
+					};
+					
+					this._panel.webview.postMessage(msg);
+					break;
+				}
+				case "setFeatureStateForCurrentUser": {
+
+					let resultMsg : IFeature | undefined;
+					const feature = message.feature as IFeature;
+
+					if(feature && feature.Code){
+						const result = await FeaturesPanel.environment?.setFeatureStateForCurrentUser(feature);
+						resultMsg = result;
+					}
+					
+					//return msg to webview
+					const msg = {
+						"setFeatureStateForCurrentUser": resultMsg
+					};
+					this._panel.webview.postMessage(msg);
+					break;
+				}
+				
 			}
 		},
 		undefined,

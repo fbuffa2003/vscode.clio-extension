@@ -257,6 +257,14 @@ export class KnownRoutes {
 		this._getSqlSchema = v;
 	}
 	
+	private _setFeatureState : string = "/rest/FeatureStateService/SetFeatureState";
+	public get SetFeatureState() : string {
+		return this.getRoute(this._setFeatureState);
+	}
+	private set SetFeatureState(v : string) {
+		this._setFeatureState = v;
+	}
+	
 
 	/**
 	 *

@@ -453,6 +453,111 @@ export class CreatioClient {
 		return features[0];
 	}
 
+	public async SetFeatureState(feature: IFeature): Promise<IFeature>{
+		
+		const requestData = {
+			operationType: 2,
+			rootSchemaName: "AppFeature",
+			filters: {
+				isEnabled: true,
+				trimDateTimeParameterToDate: false,
+				filterType: 6,
+				logicalOperation: 0,
+				items: {
+					FilterById: {
+						isEnabled: true,
+						trimDateTimeParameterToDate: false,
+						filterType: 1,
+						comparisonType: 3,
+						leftExpression: {
+							expressionType: 0,
+							columnPath: "Id"
+						},
+						rightExpression: {
+							expressionType: 2,
+							parameter: {
+								dataValueType: 1,
+								value: feature.Id
+							}
+						}
+					}
+				}
+			},
+			columnValues: {
+				items: {
+					State: {
+						expressionType: 2,
+						parameter: {
+							dataValueType: 12,
+							value: feature.State
+						}
+					}
+				}
+			},
+			queryKind: 0
+		};
+		
+		
+		const options : IRequestOptions = {
+			path: new KnownRoutes(this.isNetCore).UpdateQuery,
+			data: requestData
+		};
+		await this.PostAsync(options); //TODO: probably should check for error, standard dataService response
+		return await this.GetFeatureById(feature.Id);
+	}
+	
+	public async SetFeatureStateForCurrentUser(feature: IFeature): Promise<IFeature>{
+		
+		const requestData = {
+			operationType: 2,
+			rootSchemaName: "AppFeature",
+			filters: {
+				isEnabled: true,
+				trimDateTimeParameterToDate: false,
+				filterType: 6,
+				logicalOperation: 0,
+				items: {
+					FilterById: {
+						isEnabled: true,
+						trimDateTimeParameterToDate: false,
+						filterType: 1,
+						comparisonType: 3,
+						leftExpression: {
+							expressionType: 0,
+							columnPath: "Id"
+						},
+						rightExpression: {
+							expressionType: 2,
+							parameter: {
+								dataValueType: 1,
+								value: feature.Id
+							}
+						}
+					}
+				}
+			},
+			columnValues: {
+				items: {
+					StateForCurrentUser: {
+						expressionType: 2,
+						parameter: {
+							dataValueType: 12,
+							value: feature.StateForCurrentUser
+						}
+					}
+				}
+			},
+			queryKind: 0
+		};
+		
+		
+		const options : IRequestOptions = {
+			path: new KnownRoutes(this.isNetCore).UpdateQuery,
+			data: requestData
+		};
+		await this.PostAsync(options); //TODO: probably should check for error, standard dataService response
+		return await this.GetFeatureById(feature.Id);
+	}
 
 
 

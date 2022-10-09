@@ -26,3 +26,23 @@ vscode-checkbox{
 .header-row:hover{
 	background: var(--background);
 }
+.loadingMask{
+	position: absolute;
+	width: 100vw;
+	height: 100vh;
+	display: grid;
+	justify-items: center;
+	align-content: center;
+
+}
+.loadingMaskWrapper{
+	z-index: 200;
+}
+.loadingMaskWrapper vscode-progress-ring{
+	width: auto;
+}
+
+.loading{
+	opacity: .3;
+	pointer-events: none;
+}
