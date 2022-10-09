@@ -1,15 +1,22 @@
-<div *ngIf="unFilteredData.length > 0" class="main-table">
+<div class="loadingMask" *ngIf="LoadingMaskVisible">
+	<div class="loadingMaskWrapper">
+		<vscode-progress-ring></vscode-progress-ring>
+		<span>Loading...</span>
+	</div>
+</div>
+
+<div *ngIf="UnFilteredData.length>0" [class]="mainTableCss">
 	<vscode-data-grid aria-label="Features" grid-template-columns="300px 100px 100px 150px 1fr" generate-header="sticky" class="main-table">
 		<vscode-data-grid-row row-type="sticky-header" class="header-row">
 			<div class="header">
 				<div >
-					<img class="logo-img"src={{circleImageUri}} alt="logo">
+					<img class="logo-img" src={{circleImageUri}} alt="logo">
 					<span class="logo-text">Features on {{environmentName}}</span>
 				</div>
 				<br/>
 				<div>
 					<vscode-text-field type="text" id="cname" name="cname" placeholder="search" size="100"
-						#myData	(keyup)="search(myData)" ngDefaultControl>
+						[(ngModel)] = "SearchValue" ngDefaultControl>
 						<span slot="start" class="codicon codicon-search"></span>
 					</vscode-text-field>
 				</div>
@@ -23,13 +30,16 @@
 			<vscode-data-grid-cell cell-type="columnheader" grid-column="5">Description</vscode-data-grid-cell>
 		</vscode-data-grid-row>
 		
-		<vscode-data-grid-row *ngFor="let row of data" row-type="default">
+		<vscode-data-grid-row *ngFor="let row of Data" row-type="default" id="{{row.Id}}">
 			<vscode-data-grid-cell grid-column="1">{{row.Code}}</vscode-data-grid-cell>
 			<vscode-data-grid-cell grid-column="2" class="checkbox">
-				<vscode-checkbox [checked]="row.State"></vscode-checkbox>
+				<vscode-checkbox *ngIf="row.State" checked (click)="onStateClick(row)"></vscode-checkbox>
+				<vscode-checkbox *ngIf="!row.State" (click)="onStateClick(row)"></vscode-checkbox>
 			</vscode-data-grid-cell>
+			
 			<vscode-data-grid-cell grid-column="3" class="checkbox">
-				<vscode-checkbox [checked]="row.StateForCurrentUser"></vscode-checkbox>
+				<vscode-checkbox *ngIf="row.StateForCurrentUser" checked (click)="onStateForCurrentUserClick(row)"></vscode-checkbox>
+				<vscode-checkbox *ngIf="!row.StateForCurrentUser" (click)="onStateForCurrentUserClick(row)"></vscode-checkbox>
 			</vscode-data-grid-cell>
 			<vscode-data-grid-cell grid-column="4">{{row.Source}}</vscode-data-grid-cell>
 			<vscode-data-grid-cell grid-column="5">{{row.Description}}</vscode-data-grid-cell>

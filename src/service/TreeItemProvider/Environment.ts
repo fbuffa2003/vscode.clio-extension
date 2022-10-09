@@ -200,6 +200,15 @@ export class Environment extends CreatioTreeItem {
 		return this.creatioClient.GetFeatures();
 	}
 	
+
+	public async setFeatureState(feature : IFeature): Promise<IFeature>{
+		return this.creatioClient.SetFeatureState(feature);
+	}
+
+	public async setFeatureStateForCurrentUser(feature: IFeature): Promise<IFeature>{
+		return this.creatioClient.SetFeatureStateForCurrentUser(feature);
+	}
+
 	//#endregion
 }
 
