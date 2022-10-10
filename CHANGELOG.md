@@ -3,7 +3,6 @@
 ## Upcoming RC
 
 - Log from Creatio
-- Feature Set for current user and all users
 - Feature comparison
 - Install multiple apps from Marketplace (savable scenario ?)
 	- Download all, repack, send to Creatio;
@@ -11,7 +10,7 @@
 --- 
 - Welcome journey
 - Edit existing connection
-- Edit SourceCodeSchema (CS, JS, SQL), others open in Creatio 
+- Edit SourceCodeSchema (CS, JS, SQL), others open in Creatio
 	- Implement [FileSystemProvider]
 - WebSocket nlog appender
 
@@ -23,6 +22,7 @@
 
 ### Added
 
+- Feature Set for current user and all users
 
 ### Changed
 

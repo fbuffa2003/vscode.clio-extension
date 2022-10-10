@@ -7,6 +7,7 @@ import { KnownRoutes } from "./KnownRoutes";
 import { ItemType } from "../../service/TreeItemProvider/ItemType";
 import { IRequestOptions, IResponse } from "../interfaces";
 import { HttpMethod } from "../Enums";
+import  { WebSocket, ClientOptions } from 'ws';
 
 export class CreatioClient {
 
@@ -226,7 +227,6 @@ export class CreatioClient {
 		return Schema;
 	}
 
-
 	public async FlushDb(){
 		const options : IRequestOptions = {
 			path: new KnownRoutes(this.isNetCore).ClearRedisDb,
@@ -282,7 +282,6 @@ export class CreatioClient {
 		return result;
 	}
 
-
 	public async GetPackageProperties(packageUId: string){
 		const options : IRequestOptions = {
 			path: new KnownRoutes(this.isNetCore).GetPackageProperties,
@@ -292,7 +291,6 @@ export class CreatioClient {
 		const json = JSON.parse(response.body);
 		return response;
 	}
-
 
 	public async GetWorkspaceItems(): Promise<Array<IWorkSpaceItem>>{
 		const options : IRequestOptions = {
@@ -559,6 +557,30 @@ export class CreatioClient {
 		return await this.GetFeatureById(feature.Id);
 	}
 
+	public async Listen() : Promise<WebSocket>{
+		
+		const headers : OutgoingHttpHeaders = {
+			"Accept-Encoding":"gzip, deflate, br"
+		};
+		if(this.CookieValues.length === 0){
+			await this.Login();
+		}
+
+		const options  = {
+			headers: this.setCookies(headers)
+		} as ClientOptions;
+
+		const ws = new WebSocket(this.createWsUrl(), options);
+
+		return new Promise((resole, reject)=>{
+			const timer = setInterval(()=>{
+				if(ws.readyState === WebSocket.OPEN){
+					clearInterval(timer);
+					resole(ws);
+				}
+			},10);
+		});
+	}
 
 
 	//#region Method : Private
@@ -581,7 +603,6 @@ export class CreatioClient {
 	}
 
 	private async execute(path: string, method: HttpMethod, headers?: OutgoingHttpHeaders, data?: any) : Promise<IResponse>{
-		
 		return new Promise<IResponse>((resolve, reject)=>{
 			const options = {
 				host: this.url.hostname,
@@ -629,16 +650,11 @@ export class CreatioClient {
 			request.end();
 			
 			request.on("error",(error)=>{
-				
-
 				resolve({
 					body : error.message,
 					statusCode: (error as any).errno as unknown as number
 				} as IResponse);
-
 			});
-
-
 		});
 	}
 
@@ -701,6 +717,11 @@ export class CreatioClient {
 		else {
 			throw new Error('Supported protocols either http or https');
 		}
+	}
+
+	private createWsUrl() : URL{
+		let protocol : string = (this.url.protocol === "http:")? 'ws://': 'wss://';
+		return new URL(protocol+this.url.host + new KnownRoutes(this.isNetCore).WebSocket);
 	}
 
 	/**
@@ -907,4 +928,14 @@ export interface IWorkSpaceItem{
 	title: string | undefined,
 	type: number,
 	uId: string
+}
+
+
+export interface IWebSocketMessage{
+	Id: string,
+	Header:{
+		Sender: string
+		BodyTypeName: string|undefined
+	},
+	Body: string|undefined
 }

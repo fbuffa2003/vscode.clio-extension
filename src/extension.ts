@@ -316,6 +316,11 @@ export function activate(context: vscode.ExtensionContext) {
 			node.download();
 		})
 	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.Listen", (node: Environment)=>{
+			node.Listen();
+		})
+	);
 
 	//#endregion
 

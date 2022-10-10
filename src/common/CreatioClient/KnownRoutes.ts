@@ -265,7 +265,17 @@ export class KnownRoutes {
 		this._setFeatureState = v;
 	}
 	
-
+	/**
+	 * WebSocket connection page
+	 */
+	private _webSocket : string = "/Nui/ViewModule.aspx.ashx";
+	public get WebSocket() : string {
+		return this.getRoute(this._webSocket);
+	}
+	public set WebSocket(v : string) {
+		this._webSocket = v;
+	}
+	
 	/**
 	 *
 	 * @param isNetCore Indicates if routes are for netCore app

@@ -7,12 +7,14 @@ import { EntityList } from './EntityList';
 import { CreatioTreeItem } from "./CreatioTreeItem";
 import { ItemType } from "./ItemType";
 import { IHealthCheckArgs } from '../../commands/HealthCheckCommand';
-import { CreatioClient, IFeature } from '../../common/CreatioClient/CreatioClient';
+import { CreatioClient, IFeature, IWebSocketMessage } from '../../common/CreatioClient/CreatioClient';
 import { ClioExecutor } from '../../Common/clioExecutor';
 import { IRestoreConfigurationArgs } from '../../commands/RestoreConfiguration';
 import { Clio } from '../../commands/Clio';
 import { IFlushDbArgs } from '../../commands/FlushDbCommand';
 import { ISqlArgs } from '../../commands/SqlCommand';
+import WebSocket = require('ws');
+import { toNamespacedPath } from 'path';
 
 export class Environment extends CreatioTreeItem {
 
@@ -156,6 +158,50 @@ export class Environment extends CreatioTreeItem {
 			throw new Error(result.message.toString());
 		}
 	}
+	public async getFeatures(): Promise<IFeature[]>{
+		return this.creatioClient.GetFeatures();
+	}
+
+	public async setFeatureState(feature : IFeature): Promise<IFeature>{
+		return this.creatioClient.SetFeatureState(feature);
+	}
+
+	public async setFeatureStateForCurrentUser(feature: IFeature): Promise<IFeature>{
+		return this.creatioClient.SetFeatureStateForCurrentUser(feature);
+	}
+
+	/**
+	 * Start listening to WebSocket message
+	 */
+	public Listen(){
+		let client : WebSocket;
+		vscode.window.withProgress(
+			{
+				location : vscode.ProgressLocation.Notification,
+				title: "Connecting ...",
+				cancellable: true
+			},
+			async(progress, token)=>{
+
+				client = await this.creatioClient.Listen();
+				
+				this.addEventHandlers(client);
+				progress.report({ 
+					increment: 100, 
+					message: "Connected" 
+				});
+
+				token.onCancellationRequested(_=>{
+					progress.report({ 
+						increment: 100, 
+						message: "Cancelled" 
+					});
+				});
+			}
+		);
+	}
+	//#endregion
+
 	//#region Methods : Private
 	private setHealthStatus(status: HealthStatus): void {
 		switch (status) {
@@ -195,18 +241,39 @@ export class Environment extends CreatioTreeItem {
 		};
 		this._onDidStatusUpdate?.fire(this);
 	}
-
-	public async getFeatures(): Promise<IFeature[]>{
-		return this.creatioClient.GetFeatures();
-	}
 	
+	/**
+	 * 
+	 * @param client WebSocket client that we are adding event listeners to
+	 */
+	private addEventHandlers(client : WebSocket){
+		client.on('message', (data: WebSocket.RawData)=>{
+			const wsMsg = JSON.parse(data.toString()) as IWebSocketMessage;
+			if (wsMsg && wsMsg.Body){
+				wsMsg.Body = JSON.parse(wsMsg.Body);
+			}
+			//vscode.window.showInformationMessage(`Message: ${wsMsg.Header.Sender}`);
+			
+			const header = wsMsg.Header.Sender;
+			const options: vscode.MessageOptions = { detail: wsMsg.Body, modal: false };
+			vscode.window.showInformationMessage(header, options);
+		});
+		client.on('error',(error:Error)=>{
+			console.log('Error');
+			vscode.window.showInformationMessage(`Error: ${error.message}`);
+		});
 
-	public async setFeatureState(feature : IFeature): Promise<IFeature>{
-		return this.creatioClient.SetFeatureState(feature);
-	}
+		client.on('ping',(data: Buffer)=>{
+			console.log('received ping');
+		});
 
-	public async setFeatureStateForCurrentUser(feature: IFeature): Promise<IFeature>{
-		return this.creatioClient.SetFeatureStateForCurrentUser(feature);
+		client.on('pong',(data: Buffer)=>{
+			console.log('received pong');
+		});
+
+		client.on('close', (code: number)=>{
+			this.Listen();
+		});
 	}
 
 	//#endregion
