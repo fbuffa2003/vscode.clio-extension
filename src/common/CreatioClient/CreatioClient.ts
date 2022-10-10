@@ -571,7 +571,7 @@ export class CreatioClient {
 		} as ClientOptions;
 
 		const ws = new WebSocket(this.createWsUrl(), options);
-
+		
 		return new Promise((resole, reject)=>{
 			const timer = setInterval(()=>{
 				if(ws.readyState === WebSocket.OPEN){

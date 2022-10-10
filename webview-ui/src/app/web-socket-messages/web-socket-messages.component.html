@@ -1,0 +1,36 @@
+<div class="loadingMask" *ngIf="LoadingMaskVisible">
+	<div class="loadingMaskWrapper">
+		<vscode-progress-ring></vscode-progress-ring>
+		<span>Loading...</span>
+	</div>
+</div>
+
+<div *ngIf="Messages.length>0" [class]="mainTableCss">
+	<vscode-data-grid aria-label="Features" grid-template-columns="2fr 3fr" generate-header="sticky" class="main-table">
+		<vscode-data-grid-row row-type="sticky-header" class="header-row">
+			<div class="header">
+				<div >
+					<img class="logo-img" src={{circleImageUri}} alt="logo">
+					<span class="logo-text">WebSocket messages from {{environmentName}}</span>
+				</div>
+				<br/>
+				<div>
+					<vscode-text-field type="text" id="cname" name="cname" placeholder="search" size="100"
+						[(ngModel)] = "SearchValue" ngDefaultControl>
+						<span slot="start" class="codicon codicon-search"></span>
+					</vscode-text-field>
+				</div>
+				<br/><br/>
+			</div>
+
+			<vscode-data-grid-cell cell-type="columnheader" grid-column="1">Sender</vscode-data-grid-cell>
+			<vscode-data-grid-cell cell-type="columnheader" grid-column="2">Body</vscode-data-grid-cell>
+			
+		</vscode-data-grid-row>
+		
+		<vscode-data-grid-row *ngFor="let row of Data" row-type="default" id="{{row.Id}}">
+			<vscode-data-grid-cell grid-column="1">{{row.Header.Sender}}</vscode-data-grid-cell>
+			<vscode-data-grid-cell grid-column="2">{{row.BodyTxt}}</vscode-data-grid-cell>
+		</vscode-data-grid-row>
+	</vscode-data-grid>
+</div>
