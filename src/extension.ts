@@ -14,6 +14,7 @@ import { ProcessList } from './service/TreeItemProvider/ProcessList';
 import { EntityList } from './service/TreeItemProvider/EntityList';
 import { SqlPanel } from './panels/SqlPanel';
 import { FeaturesPanel } from './panels/FeaturesPanel';
+import { WebSocketMessagesPanel } from './panels/WebSocketMessagesPanel';
 
 export function activate(context: vscode.ExtensionContext) {
 	const clio = new Clio();
@@ -318,7 +319,8 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.Listen", (node: Environment)=>{
-			node.Listen();
+			//node.Listen();
+			WebSocketMessagesPanel.render(context.extensionUri, node);
 		})
 	);
 

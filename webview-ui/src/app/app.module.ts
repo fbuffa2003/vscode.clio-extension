@@ -10,6 +10,7 @@ import { SqlTableComponent } from './sql-table/sql-table.component';
 import { FeaturesComponent } from './features/features.component';
 import { VscodeDataProviderService } from "./services/vscode-data-provider.service";
 import { AgGridModule } from 'ag-grid-angular';
+import { WebSocketMessagesComponent } from './web-socket-messages/web-socket-messages.component';
 
 
 @NgModule({
@@ -18,7 +19,8 @@ import { AgGridModule } from 'ag-grid-angular';
     CatalogComponent,
     ConnectionComponent,
     SqlTableComponent,
-    FeaturesComponent
+    FeaturesComponent,
+    WebSocketMessagesComponent
   ],
   imports: [
     BrowserModule,

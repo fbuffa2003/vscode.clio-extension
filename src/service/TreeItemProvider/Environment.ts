@@ -18,11 +18,21 @@ import { toNamespacedPath } from 'path';
 
 export class Environment extends CreatioTreeItem {
 
+
+	private _onWebSocketMessage: vscode.EventEmitter<IWebSocketMessage > = new vscode.EventEmitter<IWebSocketMessage>();
+	readonly onWebSocketMessage: vscode.Event<IWebSocketMessage> = this._onWebSocketMessage.event;
+
+
 	private healthStatus: HealthStatus = HealthStatus.unknown;
 	public readonly connectionSettings : IConnectionSettings;
 	public creatioClient: CreatioClient;
 	private readonly clioExecutor: ClioExecutor = new ClioExecutor();
 	public contextValue = 'CreatioInstance';
+
+	private _isStopRequested: boolean = false;
+	private _wsClient : WebSocket | undefined;
+
+
 	constructor( label: string, connectionSettings :IConnectionSettings)
 	{
 		super(label, connectionSettings.uri.toString(), 
@@ -174,18 +184,18 @@ export class Environment extends CreatioTreeItem {
 	 * Start listening to WebSocket message
 	 */
 	public Listen(){
-		let client : WebSocket;
+		//let client : WebSocket;
 		vscode.window.withProgress(
 			{
 				location : vscode.ProgressLocation.Notification,
-				title: "Connecting ...",
+				title: "Connecting to websocket...",
 				cancellable: true
 			},
 			async(progress, token)=>{
 
-				client = await this.creatioClient.Listen();
+				this._wsClient = await this.creatioClient.Listen();
 				
-				this.addEventHandlers(client);
+				this.addEventHandlers(this._wsClient);
 				progress.report({ 
 					increment: 100, 
 					message: "Connected" 
@@ -199,6 +209,12 @@ export class Environment extends CreatioTreeItem {
 				});
 			}
 		);
+	}
+
+	public StopListening(){
+		if(this._isStopRequested && this._wsClient){
+			this._wsClient.close();
+		}
 	}
 	//#endregion
 
@@ -252,30 +268,19 @@ export class Environment extends CreatioTreeItem {
 			if (wsMsg && wsMsg.Body){
 				wsMsg.Body = JSON.parse(wsMsg.Body);
 			}
-			//vscode.window.showInformationMessage(`Message: ${wsMsg.Header.Sender}`);
-			
-			const header = wsMsg.Header.Sender;
-			const options: vscode.MessageOptions = { detail: wsMsg.Body, modal: false };
-			vscode.window.showInformationMessage(header, options);
+			this._onWebSocketMessage.fire(wsMsg);
 		});
 		client.on('error',(error:Error)=>{
 			console.log('Error');
-			vscode.window.showInformationMessage(`Error: ${error.message}`);
-		});
-
-		client.on('ping',(data: Buffer)=>{
-			console.log('received ping');
-		});
-
-		client.on('pong',(data: Buffer)=>{
-			console.log('received pong');
+			vscode.window.showErrorMessage(error.message);
 		});
 
 		client.on('close', (code: number)=>{
-			this.Listen();
+			if(!this._isStopRequested){
+				this.Listen();
+			}
 		});
 	}
-
 	//#endregion
 }
 
