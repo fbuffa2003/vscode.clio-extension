@@ -5,13 +5,15 @@
 - Log from Creatio
 - Feature comparison
 - Install multiple apps from Marketplace (savable scenario ?)
-	- Download all, repack, send to Creatio;
-- Selectable SQL Table
---- 
+  - Download all, repack, send to Creatio;
+
+---
+
 - Welcome journey
 - Edit existing connection
-- Edit SourceCodeSchema (CS, JS, SQL), others open in Creatio
-	- Implement [FileSystemProvider]
+- Edit SourceCodeSchema (CS, JS, SQL)
+  - Implement [FileSystemProvider] for CS, JS, SQL
+  - Open other schemas in in Creatio
 - WebSocket nlog appender
 
 # PRTNER RELEASE
@@ -22,10 +24,13 @@
 
 ### Added
 
-- Feature Set for current user and all users
+- Set global `feature` state
+- Set `feature` state for current user
+- WebSocket listener
 
 ### Changed
 
+- Made sql table columns selectable on double click
 
 ### Bug Fix
 
