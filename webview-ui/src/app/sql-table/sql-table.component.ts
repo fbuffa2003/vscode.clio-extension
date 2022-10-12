@@ -32,7 +32,8 @@ export class SqlTableComponent implements OnInit {
 			const colDefItem : ColDef = {
 				field: key,
 				resizable: true,
-				sortable: true
+				sortable: true,
+				editable: true
 			};
 			result.push(colDefItem);
 		});
