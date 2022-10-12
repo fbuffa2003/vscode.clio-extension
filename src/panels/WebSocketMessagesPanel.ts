@@ -52,9 +52,9 @@ export class WebSocketMessagesPanel {
 			// If a webview panel does not already exist create and show a new one
 			const panel = window.createWebviewPanel(
 				// Panel view type
-				"showFeaturesPanel",
+				"showWebSocketMessagesPanel",
 				// Panel title
-				"FEATURES",
+				"WS MESSAGES",
 				// The editor column the panel should be displayed in
 				ViewColumn.One,
 				// Extra panel configurations
@@ -64,6 +64,7 @@ export class WebSocketMessagesPanel {
 				},
 			);
 		
+			
 			panel.iconPath = {
 				light: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'unlocked-package.svg'),
 				dark: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'unlocked-package.svg')

@@ -363,7 +363,7 @@
 			},
 			{
 				"command": "ClioSQL.Listen",
-				"title": "Listen WS",
+				"title": "Attach to WS",
 				"icon": "$(symbol-event)"
 			}
 		],
