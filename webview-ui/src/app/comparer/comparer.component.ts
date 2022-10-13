@@ -165,11 +165,11 @@ export class Comparer{
 
 		this._current = current;
 		this._other = other;
-
 		this.buildCommon();
 		this.buildUniqueToCurrent();
 		this.buildUniqueToOther();
 		this.buildDiff();
+		
 		console.log(`
 			Common: ${this.Common.length}
 			Current: ${this.Current.length}
@@ -185,7 +185,7 @@ export class Comparer{
 	 */
 	private buildCommon() {
 
-		for(let i: number = 0; i< this.Current.length-1; i++){
+		for(let i: number = 0; i < this.Current.length; i++){
 
 			const currentCode = this.Current[i].Code;
 			const currentState = this.Current[i].State;
@@ -219,7 +219,7 @@ export class Comparer{
 	}
 
 	private buildUniqueToCurrent(){
-		for(let i=0; i< this.Current.length-1; i++){
+		for(let i=0; i< this.Current.length; i++){
 			const index = this.Other.findIndex(element=> element.Code === this.Current[i].Code);
 			if(index === -1){
 				this.UniqueToCurrent.push(this.Current[i]);
@@ -232,7 +232,7 @@ export class Comparer{
 		});
 	}
 	private buildUniqueToOther(){
-		for(let i=0; i< this.Other.length-1; i++){
+		for(let i=0; i< this.Other.length; i++){
 			const index = this.Current.findIndex(element=> element.Code === this.Other[i].Code);
 			if(index === -1){
 				this.UniqueToOther.push(this.Other[i]);
@@ -261,7 +261,9 @@ export class Comparer{
 			};
 
 			const other = this.Other.find(o=> o.Code === current.Code);
-			if(other){
+
+			if(other) {
+
 				const otherDiffItem: IDiffValue = {
 					State: other.State,
 					StateForCurrentUser: other.StateForCurrentUser,
