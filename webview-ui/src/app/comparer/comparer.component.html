@@ -32,11 +32,11 @@
 			<vscode-badge appearance="secondary">{{comparer?.Common?.length}}</vscode-badge>
 		</vscode-panel-tab>
 		<vscode-panel-tab id="tab-3">
-			Unique to {{environmentName}}
+			UNIQUE to {{environmentName}}
 			<vscode-badge appearance="secondary">{{comparer?.UniqueToCurrent?.length}}</vscode-badge>
 		</vscode-panel-tab>
 		<vscode-panel-tab id="tab-4">
-			Unique to {{_selectedOtherEnvironment}}
+			UNIQUE to {{_selectedOtherEnvironment}}
 			<vscode-badge appearance="secondary">{{comparer?.UniqueToOther?.length}}</vscode-badge>
 		</vscode-panel-tab>
 		<vscode-panel-view id="view-1">
@@ -54,15 +54,15 @@
 					<vscode-data-grid-cell grid-column="1" class="grid-row-common">{{row.code}}</vscode-data-grid-cell>
 					<vscode-data-grid-cell grid-column="2">
 						<div style="display: flex; flex-direction: column;">
-							<vscode-checkbox [checked]="row.current.State"></vscode-checkbox>
-							<vscode-checkbox [checked]="row.other.State"></vscode-checkbox>
+							<vscode-checkbox readonly [checked]="row.current.State"></vscode-checkbox>
+							<vscode-checkbox readonly [checked]="row.other.State"></vscode-checkbox>
 						</div>
 					</vscode-data-grid-cell>
 					
 					<vscode-data-grid-cell grid-column="3">
 						<div style="display: flex; flex-direction: column;">
-							<vscode-checkbox [checked]="row.current.StateForCurrentUser"></vscode-checkbox>
-							<vscode-checkbox [checked]="row.other.StateForCurrentUser"></vscode-checkbox>
+							<vscode-checkbox readonly [checked]="row.current.StateForCurrentUser"></vscode-checkbox>
+							<vscode-checkbox readonly [checked]="row.other.StateForCurrentUser"></vscode-checkbox>
 						</div>
 					</vscode-data-grid-cell>
 					<vscode-data-grid-cell grid-column="4" class="cell">
@@ -93,13 +93,11 @@
 				<vscode-data-grid-row *ngFor="let row of comparer?.Common" row-type="default" id="{{row.Id}}">
 					<vscode-data-grid-cell grid-column="1">{{row.Code}}</vscode-data-grid-cell>
 					<vscode-data-grid-cell grid-column="2" class="checkbox">
-						<vscode-checkbox *ngIf="row.State" checked></vscode-checkbox>
-						<vscode-checkbox *ngIf="!row.State"></vscode-checkbox>
+						<vscode-checkbox readonly [checked]="row.State"></vscode-checkbox>
 					</vscode-data-grid-cell>
 					
 					<vscode-data-grid-cell grid-column="3" class="checkbox">
-						<vscode-checkbox *ngIf="row.StateForCurrentUser" checked></vscode-checkbox>
-						<vscode-checkbox *ngIf="!row.StateForCurrentUser"></vscode-checkbox>
+						<vscode-checkbox readonly [checked]="row.StateForCurrentUser"></vscode-checkbox>
 					</vscode-data-grid-cell>
 					<vscode-data-grid-cell grid-column="4">{{row.Source}}</vscode-data-grid-cell>
 					<vscode-data-grid-cell grid-column="5">{{row.Description}}</vscode-data-grid-cell>
@@ -118,13 +116,11 @@
 				<vscode-data-grid-row *ngFor="let row of comparer?.UniqueToCurrent" row-type="default" id="{{row.Id}}">
 					<vscode-data-grid-cell grid-column="1">{{row.Code}}</vscode-data-grid-cell>
 					<vscode-data-grid-cell grid-column="2" class="checkbox">
-						<vscode-checkbox *ngIf="row.State" checked></vscode-checkbox>
-						<vscode-checkbox *ngIf="!row.State"></vscode-checkbox>
+						<vscode-checkbox readonly [checked]="row.State"></vscode-checkbox>
 					</vscode-data-grid-cell>
 					
 					<vscode-data-grid-cell grid-column="3" class="checkbox">
-						<vscode-checkbox *ngIf="row.StateForCurrentUser" checked></vscode-checkbox>
-						<vscode-checkbox *ngIf="!row.StateForCurrentUser"></vscode-checkbox>
+						<vscode-checkbox readonly [checked]="row.StateForCurrentUser"></vscode-checkbox>
 					</vscode-data-grid-cell>
 					<vscode-data-grid-cell grid-column="4">{{row.Source}}</vscode-data-grid-cell>
 					<vscode-data-grid-cell grid-column="5">{{row.Description}}</vscode-data-grid-cell>
@@ -143,13 +139,11 @@
 				<vscode-data-grid-row *ngFor="let row of comparer?.UniqueToOther" row-type="default" id="{{row.Id}}">
 					<vscode-data-grid-cell grid-column="1">{{row.Code}}</vscode-data-grid-cell>
 					<vscode-data-grid-cell grid-column="2" class="checkbox">
-						<vscode-checkbox *ngIf="row.State" checked></vscode-checkbox>
-						<vscode-checkbox *ngIf="!row.State"></vscode-checkbox>
+						<vscode-checkbox readonly [checked]="row.State"></vscode-checkbox>
 					</vscode-data-grid-cell>
 					
 					<vscode-data-grid-cell grid-column="3" class="checkbox">
-						<vscode-checkbox *ngIf="row.StateForCurrentUser" checked></vscode-checkbox>
-						<vscode-checkbox *ngIf="!row.StateForCurrentUser"></vscode-checkbox>
+						<vscode-checkbox readonly [checked]="row.StateForCurrentUser"></vscode-checkbox>
 					</vscode-data-grid-cell>
 					<vscode-data-grid-cell grid-column="4">{{row.Source}}</vscode-data-grid-cell>
 					<vscode-data-grid-cell grid-column="5">{{row.Description}}</vscode-data-grid-cell>
