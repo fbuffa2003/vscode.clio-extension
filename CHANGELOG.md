@@ -3,7 +3,6 @@
 ## Upcoming RC
 
 - Log from Creatio
-- Feature comparison
 - Install multiple apps from Marketplace (savable scenario ?)
   - Download all, repack, send to Creatio;
 
@@ -26,6 +25,7 @@
 
 - Set global `feature` state
 - Set `feature` state for current user
+- Feature comparison
 - WebSocket listener
 
 ### Changed
