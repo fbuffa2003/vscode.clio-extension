@@ -85,8 +85,6 @@ export class FeaturesComponent implements OnInit {
 			(async ()=>{
 				this.LoadingMaskVisible = true;
 				const updatedFeature = await this.vscodeDataProvider.setFeatureState(item);
-				//const i = this.UnFilteredData.findIndex(f=> f.Id === row.Id);
-				//this.UnFilteredData[i] = updatedFeature;
 				item.State = updatedFeature.State;
 				item.StateForCurrentUser = updatedFeature.StateForCurrentUser;
 				this.LoadingMaskVisible = false;
