@@ -25,8 +25,6 @@
 
 - Set global `feature` state
 - Set `feature` state for current user
-- Feature comparison
-- WebSocket listener
 
 ### Changed
 
