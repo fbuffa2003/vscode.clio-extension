@@ -74,5 +74,34 @@ export class VscodeDataProviderService {
 			},1000);
 		});
 	}
+	public async getOtherEnvironments() : Promise<string[]>{
+		return new Promise<any>((resolve, reject)=>{
+			const commandName = "getOtherEnvironments";
+			vscode.postMessage({
+				command: commandName
+			});
+			var interval = setInterval(()=>{
+				if(this.data[commandName]){
+					resolve(this.data[commandName]);
+					clearInterval(interval);
+				}
+			},1000);
+		});
+	}
 
+	public async getOtherEnvironmentFeatures(environmentName : string) : Promise<IFeature[]>{
+		return new Promise<any>((resolve, reject)=>{
+			const commandName = "getOtherEnvironmentFeatures";
+			vscode.postMessage({
+				command: commandName,
+				environmentName: environmentName
+			});
+			var interval = setInterval(()=>{
+				if(this.data[commandName]){
+					resolve(this.data[commandName]);
+					clearInterval(interval);
+				}
+			},1000);
+		});
+	}
 }

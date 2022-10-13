@@ -15,6 +15,7 @@ import { EntityList } from './service/TreeItemProvider/EntityList';
 import { SqlPanel } from './panels/SqlPanel';
 import { FeaturesPanel } from './panels/FeaturesPanel';
 import { WebSocketMessagesPanel } from './panels/WebSocketMessagesPanel';
+import { ComparePanel } from './panels/ComparePanel';
 
 export function activate(context: vscode.ExtensionContext) {
 	const clio = new Clio();
@@ -201,6 +202,12 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.ShowFeatures', async (node: Environment) => {
 		FeaturesPanel.render(context.extensionUri, node);
 	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.CompareFeatures', async (node: Environment) => {
+		ComparePanel.render(context.extensionUri, node, treeProvider.environments);
+	}));
+
+
 	context.subscriptions.push( 
 		vscode.commands.registerCommand('ClioSQL.restart', async (node: Environment) => {
 			vscode.window
