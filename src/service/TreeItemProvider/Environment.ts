@@ -10,19 +10,15 @@ import { IHealthCheckArgs } from '../../commands/HealthCheckCommand';
 import { CreatioClient, IFeature, IWebSocketMessage } from '../../common/CreatioClient/CreatioClient';
 import { ClioExecutor } from '../../Common/clioExecutor';
 import { IRestoreConfigurationArgs } from '../../commands/RestoreConfiguration';
-import { Clio } from '../../commands/Clio';
+// import { Clio } from '../../commands/Clio';
 import { IFlushDbArgs } from '../../commands/FlushDbCommand';
 import { ISqlArgs } from '../../commands/SqlCommand';
 import WebSocket = require('ws');
-import { toNamespacedPath } from 'path';
 import { LogLevel } from '../../common/CreatioClient/enums';
 
 export class Environment extends CreatioTreeItem {
-
-
 	private _onWebSocketMessage: vscode.EventEmitter<IWebSocketMessage > = new vscode.EventEmitter<IWebSocketMessage>();
 	readonly onWebSocketMessage: vscode.Event<IWebSocketMessage> = this._onWebSocketMessage.event;
-
 
 	private healthStatus: HealthStatus = HealthStatus.unknown;
 	public readonly connectionSettings : IConnectionSettings;
@@ -31,7 +27,13 @@ export class Environment extends CreatioTreeItem {
 	public contextValue = 'CreatioInstance';
 
 	private _isStopRequested: boolean = false;
-	private _wsClient : WebSocket | undefined;
+	private _wsClient : WebSocket.WebSocket | undefined;
+
+	private _isSubscribed:boolean = false;
+
+
+	private _logLevel: LogLevel = LogLevel.Info;
+	private _loggerPattern : string = 'ExceptNoisyLoggers';
 
 
 	constructor( label: string, connectionSettings :IConnectionSettings)
@@ -184,7 +186,7 @@ export class Environment extends CreatioTreeItem {
 	/**
 	 * Start listening to WebSocket message
 	 */
-	public Listen(){
+	private Listen(){
 		//let client : WebSocket;
 		vscode.window.withProgress(
 			{
@@ -193,10 +195,14 @@ export class Environment extends CreatioTreeItem {
 				cancellable: true
 			},
 			async(progress, token)=>{
-
+				this._isStopRequested = false;
 				this._wsClient = await this.creatioClient.Listen();
 				
 				this.addEventHandlers(this._wsClient);
+				// if(!this._isSubscribed){
+				// 	this._isSubscribed = true;
+				// }
+
 				progress.report({ 
 					increment: 100, 
 					message: "Connected" 
@@ -213,19 +219,23 @@ export class Environment extends CreatioTreeItem {
 	}
 
 	public StopListening(){
-
 		this._isStopRequested = true;
-		if(this._isStopRequested && this._wsClient){
+		if(this._isStopRequested && this._wsClient && this._wsClient.readyState === WebSocket.OPEN){
 			this._wsClient.close();
 		}
 	}
 
-
 	public async StartLogBroadcast(logLevel: LogLevel, loggerPattern: string){
-		this.creatioClient.StartLogBroadcast(logLevel, loggerPattern);
+		
+		this._logLevel = logLevel;
+		this._loggerPattern = loggerPattern;
+		
+		this.Listen();
+		await this.creatioClient.StartLogBroadcast(this._logLevel, this._loggerPattern);
 	}
 	public async StopLogBroadcast(){
-		this.creatioClient.StopLogBroadcast();
+		await this.creatioClient.StopLogBroadcast();
+		this.StopListening();
 	}
 
 	//#endregion
@@ -278,20 +288,32 @@ export class Environment extends CreatioTreeItem {
 		client.on('message', (data: WebSocket.RawData)=>{
 			const wsMsg = JSON.parse(data.toString()) as IWebSocketMessage;
 			if (wsMsg && wsMsg.Body){
-				wsMsg.Body = JSON.parse(wsMsg.Body);
+				try	{
+					wsMsg.Body = JSON.parse(wsMsg.Body);
+				}
+				catch(error: any){
+					console.log("Error parsing JSON L286");
+					//console.log(error);
+				}
+				this._onWebSocketMessage.fire(wsMsg);
 			}
-			this._onWebSocketMessage.fire(wsMsg);
 		});
-		client.on('error',(error:Error)=>{
-			console.log('Error');
-			vscode.window.showErrorMessage(error.message);
-		});
-
+		
 		client.on('close', (code: number)=>{
-			if(!this._isStopRequested){
-				this.Listen();
+			if(this._isStopRequested){
+				this.StopListening();
+			}else{
+				const timer = setInterval(async ()=>{
+					if(client.CLOSED){
+						clearInterval(timer);
+						await this.StopLogBroadcast();
+						//this.Listen();
+						await this.StartLogBroadcast(this._logLevel, this._loggerPattern);
+					}
+				},1000);
 			}
 		});
+		
 	}
 	//#endregion
 }

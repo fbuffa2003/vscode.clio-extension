@@ -52,9 +52,10 @@
 	<vscode-data-grid aria-label="Features" grid-template-columns="2fr 1fr 4fr 14fr" generate-header="sticky" class="main-table">
 		<vscode-data-grid-row row-type="sticky-header" class="header-row">
 			<div class="header">
-				<div >
+				<div class="header-text">
 					<img class="logo-img" src={{circleImageUri}} alt="logo">
 					<span class="logo-text">Telemetry logs from {{environmentName}}</span>
+					<vscode-badge appearance="secondary">{{LogMessagesFiltered.length}}</vscode-badge>
 				</div>
 				<br/>
 				<div>

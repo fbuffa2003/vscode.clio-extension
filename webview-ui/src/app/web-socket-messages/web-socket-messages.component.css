@@ -60,3 +60,9 @@ vscode-checkbox{
 .creatio-button:hover{
 	background-color: #b53c21;
 }
+.header-text{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	
+}

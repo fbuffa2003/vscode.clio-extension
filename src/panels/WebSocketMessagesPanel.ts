@@ -1,8 +1,9 @@
-import { env } from "process";
+import { eventNames } from "process";
 import * as vscode from "vscode";
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
-import { ClioExecutor } from "../Common/clioExecutor";
-import { IFeature } from "../common/CreatioClient/CreatioClient";
+import { IWebSocketMessage } from "../common/CreatioClient/CreatioClient";
+import { LogLevel } from "../common/CreatioClient/enums";
+//import { ClioExecutor } from "../Common/clioExecutor";
 import { Environment } from "../service/TreeItemProvider/Environment";
 import { getUri } from "../utilities/getUri";
 
@@ -11,7 +12,10 @@ export class WebSocketMessagesPanel {
 	private readonly _panel: WebviewPanel;
 	private _disposables: Disposable[] = [];
 	private static _envName : string | undefined;
-	private _clio: ClioExecutor;
+	private _webSocketEventEvent: vscode.Disposable | undefined;
+	private _isSubscribed: boolean = false;
+
+	//private _clio: ClioExecutor;
 	private static environment : Environment | undefined;
 	/**
 	 * The CatalogPanel class private constructor (called only from the render method).
@@ -21,7 +25,7 @@ export class WebSocketMessagesPanel {
 	 */
 	private constructor(panel: WebviewPanel, extensionUri: Uri) {
 		this._panel = panel;
-		this._clio = new ClioExecutor();
+		//this._clio = new ClioExecutor();
 
 		// Set an event listener to listen for when the panel is disposed (i.e. when the user closes
 		// the panel or when the panel is closed programmatically)
@@ -45,8 +49,6 @@ export class WebSocketMessagesPanel {
 			// If the webview panel already exists reveal it
 			WebSocketMessagesPanel.currentPanel._panel.reveal(ViewColumn.One);
 		} else {
-
-			environment.Listen();
 			WebSocketMessagesPanel._envName = environment.label;
 			WebSocketMessagesPanel.environment = environment;
 			// If a webview panel does not already exist create and show a new one
@@ -64,16 +66,11 @@ export class WebSocketMessagesPanel {
 				},
 			);
 		
-			
 			panel.iconPath = {
 				light: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'unlocked-package.svg'),
 				dark: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'unlocked-package.svg')
 			};
 			WebSocketMessagesPanel.currentPanel = new WebSocketMessagesPanel(panel, extensionUri);
-			
-			environment.onWebSocketMessage(msg=>{
-				this.currentPanel?._panel.webview.postMessage(msg);
-			});
 		}
 	}
 
@@ -152,75 +149,22 @@ export class WebSocketMessagesPanel {
 		webview.onDidReceiveMessage(
 		async (message: any) => {
 			const command = message.command;
-			const environmentName = message.environmentName;
+			const str : keyof typeof LogLevel = message.logLevel;
+			//console.log(LogLevel[str]);
+
 			switch (command) {
-				case "getFeatures":{
-					// Code that should run in response to the hello message command
-					vscode.window.withProgress(
-						{
-							location : vscode.ProgressLocation.Notification,
-							title: "Getting Data"
-						},
-						async(progress, token)=>{
-							//const result = await this._clio.ExecuteClioCommand('clio catalog');
-							const result = await WebSocketMessagesPanel.environment?.getFeatures();
-							const msg = {
-								"getFeatures": result
-							};
-			
-							//raising event, angular subscribes to it
-							this._panel.webview.postMessage(msg);
-							progress.report({ 
-								increment: 100, 
-								message: "Done" 
-							});
-						}
-					);
-					break;
-				}
-				case "setFeatureState":{
-					
-					let resultMsg : IFeature | undefined;
-
-					const feature = message.feature as IFeature;
-					if(feature && feature.Code){
-						const result = await WebSocketMessagesPanel.environment?.setFeatureState(feature);
-						resultMsg = result;
-					}
-					
-					//return msg to webview
-					const msg = {
-						"setFeatureState": resultMsg
-					};
-					
-					this._panel.webview.postMessage(msg);
-					break;
-				}
-				case "setFeatureStateForCurrentUser": {
-
-					let resultMsg : IFeature | undefined;
-					const feature = message.feature as IFeature;
-
-					if(feature && feature.Code){
-						const result = await WebSocketMessagesPanel.environment?.setFeatureStateForCurrentUser(feature);
-						resultMsg = result;
-					}
-					
-					//return msg to webview
-					const msg = {
-						"setFeatureStateForCurrentUser": resultMsg
-					};
-					this._panel.webview.postMessage(msg);
-					break;
-				}
 				case "startLogBroadcast":{
+					this._webSocketEventEvent = WebSocketMessagesPanel.environment?.onWebSocketMessage(msg=>{
+						this._panel.webview.postMessage(msg);
+					});
 					await WebSocketMessagesPanel.environment?.StartLogBroadcast(
-						message.logLevel,
+						LogLevel[str],
 						message.loggerPattern
 					);
 					break;
 				}
 				case "stopLogBroadcast":{
+					this._webSocketEventEvent?.dispose();
 					await WebSocketMessagesPanel.environment?.StopLogBroadcast();
 					break;
 				}
@@ -229,9 +173,5 @@ export class WebSocketMessagesPanel {
 		undefined,
 		this._disposables
 		);
-	}
-
-	public sendMessage(jsonData: any){
-		this._panel.webview.postMessage(jsonData);
 	}
 }

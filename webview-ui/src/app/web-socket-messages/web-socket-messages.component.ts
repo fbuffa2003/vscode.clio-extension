@@ -1,5 +1,5 @@
 import { Component, HostListener, OnInit } from "@angular/core";
-import { Checkbox, provideVSCodeDesignSystem, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow, vsCodeProgressRing, vsCodeTextField } from '@vscode/webview-ui-toolkit';
+import { Checkbox, provideVSCodeDesignSystem, vsCodeBadge, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow, vsCodeProgressRing, vsCodeTextField } from '@vscode/webview-ui-toolkit';
 import { LogLevel, VscodeDataProviderService } from "../services/vscode-data-provider.service";
 
 @Component({
@@ -59,6 +59,7 @@ export class WebSocketMessagesComponent implements OnInit {
 	public get LogMessagesFiltered() : Array<ILogPortionItem> {
 
 		if(this.SearchValue.length >0){
+			debugger;
 			return this.LogMessages.filter(item=> item.message.includes(this.SearchValue));
 		}
 		else{
@@ -105,6 +106,7 @@ export class WebSocketMessagesComponent implements OnInit {
 	constructor(private readonly vscodeDataProvider: VscodeDataProviderService) {
 		provideVSCodeDesignSystem().register(
 			vsCodeButton(),vsCodeCheckbox(),vsCodeTextField(), vsCodeProgressRing(),
+			vsCodeBadge(),
 			vsCodeDataGrid(), vsCodeDataGridRow(), vsCodeDataGridCell()
 		);
 		this._imageUri = history.state.imageUri;
@@ -130,10 +132,11 @@ export class WebSocketMessagesComponent implements OnInit {
 				this.LogMessages.unshift(item);
 				debugger;
 			}
-		}else{
-			msg.BodyTxt = JSON.stringify(msg.Body);
-			this.Messages.unshift(msg);
 		}
+		// else{
+		// 	msg.BodyTxt = JSON.stringify(msg.Body);
+		// 	this.Messages.unshift(msg);
+		// }
 	}
 
 	ngOnInit(): void {
@@ -144,7 +147,7 @@ export class WebSocketMessagesComponent implements OnInit {
 			this.IsBroadcastStarted = !this.IsBroadcastStarted;
 			
 		}else{
-			this.vscodeDataProvider.startLogBroadcast(this.environmentName, LogLevel.Debug, this.loggerName);
+			this.vscodeDataProvider.startLogBroadcast(this.environmentName, LogLevel.Info, this.loggerName);
 			this.IsBroadcastStarted = !this.IsBroadcastStarted;
 		}
 	}
