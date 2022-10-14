@@ -1,5 +1,6 @@
 import { Component, HostListener, OnInit } from "@angular/core";
 import { Checkbox, provideVSCodeDesignSystem, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow, vsCodeProgressRing, vsCodeTextField } from '@vscode/webview-ui-toolkit';
+import { LogLevel, VscodeDataProviderService } from "../services/vscode-data-provider.service";
 
 @Component({
 	selector: "app-web-socket-messages",
@@ -38,8 +39,6 @@ export class WebSocketMessagesComponent implements OnInit {
 		this._logMessages = v;
 	}
 
-
-
 	
 	private _loadingMaskVisible : boolean = false;
 	public get LoadingMaskVisible() : boolean {
@@ -63,7 +62,7 @@ export class WebSocketMessagesComponent implements OnInit {
 		}
 	}
 
-	constructor() {
+	constructor(private readonly vscodeDataProvider: VscodeDataProviderService) {
 		provideVSCodeDesignSystem().register(
 			vsCodeButton(),vsCodeCheckbox(),vsCodeTextField(), vsCodeProgressRing(),
 			vsCodeDataGrid(), vsCodeDataGridRow(), vsCodeDataGridCell()
@@ -97,7 +96,9 @@ export class WebSocketMessagesComponent implements OnInit {
 		}
 	}
 
-	ngOnInit(): void {}
+	ngOnInit(): void {
+		this.vscodeDataProvider.startLogBroadcast(this.environmentName, LogLevel.Debug, "ExceptNoisyLoggers");
+	}
 }
 
 

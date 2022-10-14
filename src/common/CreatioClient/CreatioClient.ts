@@ -2,7 +2,7 @@ import { ClientRequest, IncomingMessage, OutgoingHttpHeaders } from "http";
 import { RequestOptions } from "https";
 import { request as httpRequest } from "http";
 import { request as httpsRequest} from "https";
-import { ColumnUsage, DataValueType, ParameterDirection, ProcessDataValueType } from "./enums";
+import { ColumnUsage, DataValueType, LogLevel, ParameterDirection, ProcessDataValueType } from "./enums";
 import { KnownRoutes } from "./KnownRoutes";
 import { ItemType } from "../../service/TreeItemProvider/ItemType";
 import { IRequestOptions, IResponse } from "../interfaces";
@@ -20,7 +20,12 @@ export class CreatioClient {
 			public password: string,
 			public isNetCore: boolean
 		) {
-			this._pathName = url.pathname;
+
+			if(url.pathname === '/'){
+				this._pathName = '';
+			}else{
+				this._pathName = url.pathname;
+			}
 		}
 
 	public async GetAsync(options: IRequestOptions): Promise<IResponse>{
@@ -583,6 +588,28 @@ export class CreatioClient {
 				}
 			},10);
 		});
+	}
+
+	public async StartLogBroadcast(logLevel: LogLevel, loggerPattern: string) : Promise<void>{
+		const options : IRequestOptions = {
+			path: new KnownRoutes(this.isNetCore).StartLogBroadcast,
+			data: {
+				bufferSize: 1,
+				logLevelStr: LogLevel[logLevel],
+				loggerPattern: "ExceptNoisyLoggers"
+			}
+		};
+		const response = await this.PostAsync(options);
+		const json = JSON.parse(response.body);
+	}
+	
+	public async StopLogBroadcast() : Promise<void>{
+		const options : IRequestOptions = {
+			path: new KnownRoutes(this.isNetCore).StopLogBroadcast,
+			data: {}
+		};
+		const response = await this.PostAsync(options);
+		const json = JSON.parse(response.body);
 	}
 
 

@@ -119,3 +119,13 @@ export enum ColumnUsage{
 	 */
 	None = 2
 }
+
+
+export enum LogLevel{
+	Debug,
+	Error,
+	Fatal,
+	Info,
+	Trace,
+	Warn
+}

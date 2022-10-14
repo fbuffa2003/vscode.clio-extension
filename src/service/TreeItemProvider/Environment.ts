@@ -15,6 +15,7 @@ import { IFlushDbArgs } from '../../commands/FlushDbCommand';
 import { ISqlArgs } from '../../commands/SqlCommand';
 import WebSocket = require('ws');
 import { toNamespacedPath } from 'path';
+import { LogLevel } from '../../common/CreatioClient/enums';
 
 export class Environment extends CreatioTreeItem {
 
@@ -216,6 +217,15 @@ export class Environment extends CreatioTreeItem {
 			this._wsClient.close();
 		}
 	}
+
+
+	public async StartLogBroadcast(logLevel: LogLevel, loggerPattern: string){
+		this.creatioClient.StartLogBroadcast(logLevel, loggerPattern);
+	}
+	public async StopLogBroadcast(){
+		this.creatioClient.StopLogBroadcast();
+	}
+
 	//#endregion
 
 	//#region Methods : Private

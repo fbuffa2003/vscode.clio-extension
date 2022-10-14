@@ -52,9 +52,9 @@ export class WebSocketMessagesPanel {
 			// If a webview panel does not already exist create and show a new one
 			const panel = window.createWebviewPanel(
 				// Panel view type
-				"showWebSocketMessagesPanel",
+				"showTelemetryLogPanel",
 				// Panel title
-				"WS MESSAGES",
+				"Telemetry Logs",
 				// The editor column the panel should be displayed in
 				ViewColumn.One,
 				// Extra panel configurations
@@ -213,7 +213,17 @@ export class WebSocketMessagesPanel {
 					this._panel.webview.postMessage(msg);
 					break;
 				}
-				
+				case "startLogBroadcast":{
+					await WebSocketMessagesPanel.environment?.StartLogBroadcast(
+						message.logLevel,
+						message.loggerPattern
+					);
+					break;
+				}
+				case "stopLogBroadcast":{
+					await WebSocketMessagesPanel.environment?.StopLogBroadcast();
+					break;
+				}
 			}
 		},
 		undefined,
