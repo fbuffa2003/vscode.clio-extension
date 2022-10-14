@@ -101,6 +101,16 @@
 					"command": "ClioSQL.ShowFeatures",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-5@1"
+				},
+				{
+					"command": "ClioSQL.CompareFeatures",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-5@2"
+				},
+				{
+					"command": "ClioSQL.Listen",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-6@1"
 				}
 			],
 			"ClioSQL.OverflowHeaderMenu":[
