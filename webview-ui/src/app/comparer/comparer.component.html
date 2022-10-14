@@ -1,0 +1,154 @@
+
+<div class="loadingMask" *ngIf="LoadingMaskVisible">
+	<div class="loadingMaskWrapper">
+		<vscode-progress-ring></vscode-progress-ring>
+		<span>Loading...</span>
+	</div>
+</div>
+
+
+<div class={{contentCssClass}} >
+	<div class="search">
+		<div class="text">
+			<span>Compare {{environmentName}} environment with:</span>
+		</div>
+		<div class="spacer"></div>
+		<vscode-dropdown class="combobox" name="environments" (change)="onChange($event)">
+			<span slot="indicator" class="codicon codicon-settings"></span>
+			<vscode-option *ngFor="let env of OtherEnvironments">{{env}}</vscode-option>
+		</vscode-dropdown>
+		<div class="spacer"></div>
+		<vscode-button class="apply-button" (click)="onApply($event)">APPLY</vscode-button>
+	</div>
+	
+	
+	<vscode-panels class="panels">
+		<vscode-panel-tab id="tab-1">
+			DIFF
+			<vscode-badge appearance="secondary">{{comparer?.Diff?.length}}</vscode-badge>
+		</vscode-panel-tab>
+		<vscode-panel-tab id="tab-2">
+			COMMON
+			<vscode-badge appearance="secondary">{{comparer?.Common?.length}}</vscode-badge>
+		</vscode-panel-tab>
+		<vscode-panel-tab id="tab-3">
+			UNIQUE to {{environmentName}}
+			<vscode-badge appearance="secondary">{{comparer?.UniqueToCurrent?.length}}</vscode-badge>
+		</vscode-panel-tab>
+		<vscode-panel-tab id="tab-4">
+			UNIQUE to {{_selectedOtherEnvironment}}
+			<vscode-badge appearance="secondary">{{comparer?.UniqueToOther?.length}}</vscode-badge>
+		</vscode-panel-tab>
+		<vscode-panel-view id="view-1">
+			<vscode-data-grid aria-label="common-features" grid-template-columns="300px 100px 100px 150px 1fr" generate-header="sticky" class="main-table">
+				<vscode-data-grid-row row-type="sticky-header" class="header-row">	
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="1">Code</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="2" class="checkbox-text">State</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="3" class="checkbox-text">State for CU</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="4">Source</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="5">Description</vscode-data-grid-cell>
+				</vscode-data-grid-row>
+				
+				
+				<vscode-data-grid-row *ngFor="let row of comparer?.Diff" row-type="default" id={{row.code}}>
+					<vscode-data-grid-cell grid-column="1" class="grid-row-common">{{row.code}}</vscode-data-grid-cell>
+					<vscode-data-grid-cell grid-column="2">
+						<div style="display: flex; flex-direction: column;">
+							<vscode-checkbox readonly [checked]="row.current.State"></vscode-checkbox>
+							<vscode-checkbox readonly [checked]="row.other.State"></vscode-checkbox>
+						</div>
+					</vscode-data-grid-cell>
+					
+					<vscode-data-grid-cell grid-column="3">
+						<div style="display: flex; flex-direction: column;">
+							<vscode-checkbox readonly [checked]="row.current.StateForCurrentUser"></vscode-checkbox>
+							<vscode-checkbox readonly [checked]="row.other.StateForCurrentUser"></vscode-checkbox>
+						</div>
+					</vscode-data-grid-cell>
+					<vscode-data-grid-cell grid-column="4" class="cell">
+						<div style="display: flex; flex-direction: column;">
+							<span>{{row.current.Source}}</span>
+							<span>{{row.other.Source}}</span>
+						</div>
+					</vscode-data-grid-cell>
+					<vscode-data-grid-cell grid-column="5" class="cell">
+						<div style="display: flex; flex-direction: column;">
+							<span>{{row.current.Description}}</span>
+							<span>{{row.other.Description}}</span>
+						</div>
+					</vscode-data-grid-cell>
+				</vscode-data-grid-row>
+				
+			</vscode-data-grid>
+		</vscode-panel-view>
+		<vscode-panel-view id="view-2">
+			<vscode-data-grid aria-label="common-features" grid-template-columns="300px 100px 100px 150px 1fr" generate-header="sticky" class="main-table">
+				<vscode-data-grid-row row-type="sticky-header" class="header-row">	
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="1">Code</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="2" class="checkbox-text">State</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="3" class="checkbox-text">State for CU</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="4">Source</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="5">Description</vscode-data-grid-cell>
+				</vscode-data-grid-row>
+				<vscode-data-grid-row *ngFor="let row of comparer?.Common" row-type="default" id="{{row.Id}}">
+					<vscode-data-grid-cell grid-column="1">{{row.Code}}</vscode-data-grid-cell>
+					<vscode-data-grid-cell grid-column="2" class="checkbox">
+						<vscode-checkbox readonly [checked]="row.State"></vscode-checkbox>
+					</vscode-data-grid-cell>
+					
+					<vscode-data-grid-cell grid-column="3" class="checkbox">
+						<vscode-checkbox readonly [checked]="row.StateForCurrentUser"></vscode-checkbox>
+					</vscode-data-grid-cell>
+					<vscode-data-grid-cell grid-column="4">{{row.Source}}</vscode-data-grid-cell>
+					<vscode-data-grid-cell grid-column="5">{{row.Description}}</vscode-data-grid-cell>
+				</vscode-data-grid-row>
+			</vscode-data-grid>
+		</vscode-panel-view>
+		<vscode-panel-view id="view-3">
+			<vscode-data-grid aria-label="common-features" grid-template-columns="300px 100px 100px 150px 1fr" generate-header="sticky" class="main-table">
+				<vscode-data-grid-row row-type="sticky-header" class="header-row">	
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="1">Code</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="2" class="checkbox-text">State</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="3" class="checkbox-text">State for CU</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="4">Source</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="5">Description</vscode-data-grid-cell>
+				</vscode-data-grid-row>
+				<vscode-data-grid-row *ngFor="let row of comparer?.UniqueToCurrent" row-type="default" id="{{row.Id}}">
+					<vscode-data-grid-cell grid-column="1">{{row.Code}}</vscode-data-grid-cell>
+					<vscode-data-grid-cell grid-column="2" class="checkbox">
+						<vscode-checkbox readonly [checked]="row.State"></vscode-checkbox>
+					</vscode-data-grid-cell>
+					
+					<vscode-data-grid-cell grid-column="3" class="checkbox">
+						<vscode-checkbox readonly [checked]="row.StateForCurrentUser"></vscode-checkbox>
+					</vscode-data-grid-cell>
+					<vscode-data-grid-cell grid-column="4">{{row.Source}}</vscode-data-grid-cell>
+					<vscode-data-grid-cell grid-column="5">{{row.Description}}</vscode-data-grid-cell>
+				</vscode-data-grid-row>
+			</vscode-data-grid>
+		</vscode-panel-view>
+		<vscode-panel-view id="view-4">
+			<vscode-data-grid aria-label="common-features" grid-template-columns="300px 100px 100px 150px 1fr" generate-header="sticky" class="main-table">
+				<vscode-data-grid-row row-type="sticky-header" class="header-row">	
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="1">Code</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="2" class="checkbox-text">State</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="3" class="checkbox-text">State for CU</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="4">Source</vscode-data-grid-cell>
+					<vscode-data-grid-cell cell-type="columnheader" grid-column="5">Description</vscode-data-grid-cell>
+				</vscode-data-grid-row>
+				<vscode-data-grid-row *ngFor="let row of comparer?.UniqueToOther" row-type="default" id="{{row.Id}}">
+					<vscode-data-grid-cell grid-column="1">{{row.Code}}</vscode-data-grid-cell>
+					<vscode-data-grid-cell grid-column="2" class="checkbox">
+						<vscode-checkbox readonly [checked]="row.State"></vscode-checkbox>
+					</vscode-data-grid-cell>
+					
+					<vscode-data-grid-cell grid-column="3" class="checkbox">
+						<vscode-checkbox readonly [checked]="row.StateForCurrentUser"></vscode-checkbox>
+					</vscode-data-grid-cell>
+					<vscode-data-grid-cell grid-column="4">{{row.Source}}</vscode-data-grid-cell>
+					<vscode-data-grid-cell grid-column="5">{{row.Description}}</vscode-data-grid-cell>
+				</vscode-data-grid-row>
+			</vscode-data-grid>
+		</vscode-panel-view>
+	</vscode-panels>
+</div>

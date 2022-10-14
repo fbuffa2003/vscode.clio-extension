@@ -1,0 +1,68 @@
+.search{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 2rem;
+	margin-bottom: 2rem;
+}
+
+.text{
+	/* margin-top: 20px; */
+}
+
+.combobox {
+	width:auto;
+	min-width: 150px;
+}
+.spacer{
+	width:40px;
+}
+
+.apply-button{
+	/* margin-top: 20px; */
+	background-color: #ED522F;
+}
+.apply-button:hover{
+	background-color: #b53c21;
+}
+
+.loadingMask{
+	position: absolute;
+	width: 100vw;
+	height: 100vh;
+	display: grid;
+	justify-items: center;
+	align-content: center;
+
+}
+.loadingMaskWrapper{
+	z-index: 200;
+}
+.loadingMaskWrapper vscode-progress-ring{
+	width: auto;
+}
+.loading{
+	opacity: .3;
+	pointer-events: none;
+}
+
+.main-table{
+	display: grid;
+}
+
+.grid-row-common{
+	display: grid;
+	align-items: center;
+}
+
+.panels{
+	margin-left:1rem;
+	margin-right: 1rem;
+}
+
+
+.cell{
+	display: grid;
+	align-items: center;
+
+}

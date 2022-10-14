@@ -11,26 +11,22 @@ import { FeaturesComponent } from './features/features.component';
 import { VscodeDataProviderService } from "./services/vscode-data-provider.service";
 import { AgGridModule } from 'ag-grid-angular';
 import { WebSocketMessagesComponent } from './web-socket-messages/web-socket-messages.component';
+import { ComparerComponent } from './comparer/comparer.component';
 
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    CatalogComponent,
-    ConnectionComponent,
-    SqlTableComponent,
-    FeaturesComponent,
-    WebSocketMessagesComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-	FormsModule, 
-	ReactiveFormsModule,
-	AgGridModule
-  ],
-  providers: [VscodeDataProviderService],
-  bootstrap: [AppComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+	declarations: [
+		AppComponent,
+		CatalogComponent,
+		ConnectionComponent,
+		SqlTableComponent,
+		FeaturesComponent,
+		WebSocketMessagesComponent,
+		ComparerComponent,
+	],
+	imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, AgGridModule],
+	providers: [VscodeDataProviderService],
+	bootstrap: [AppComponent],
+	schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class AppModule { }
+export class AppModule {}
