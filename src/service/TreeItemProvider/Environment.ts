@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import path = require('path');
 import { HealthStatus } from '../../common/Enums';
 import { PackageList } from './PackageList';
-import { ProcessList } from './ProcessList';
-import { EntityList } from './EntityList';
+// import { ProcessList } from './ProcessList';
+// import { EntityList } from './EntityList';
 import { CreatioTreeItem } from "./CreatioTreeItem";
 import { ItemType } from "./ItemType";
 import { IHealthCheckArgs } from '../../commands/HealthCheckCommand';
@@ -25,13 +25,9 @@ export class Environment extends CreatioTreeItem {
 	public creatioClient: CreatioClient;
 	private readonly clioExecutor: ClioExecutor = new ClioExecutor();
 	public contextValue = 'CreatioInstance';
-
 	private _isStopRequested: boolean = false;
 	private _wsClient : WebSocket.WebSocket | undefined;
-
 	private _isSubscribed:boolean = false;
-
-
 	private _logLevel: LogLevel = LogLevel.Info;
 	private _loggerPattern : string = 'ExceptNoisyLoggers';
 
@@ -187,7 +183,6 @@ export class Environment extends CreatioTreeItem {
 	 * Start listening to WebSocket message
 	 */
 	private Listen(){
-		//let client : WebSocket;
 		vscode.window.withProgress(
 			{
 				location : vscode.ProgressLocation.Notification,
@@ -197,12 +192,8 @@ export class Environment extends CreatioTreeItem {
 			async(progress, token)=>{
 				this._isStopRequested = false;
 				this._wsClient = await this.creatioClient.Listen();
-				
 				this.addEventHandlers(this._wsClient);
-				// if(!this._isSubscribed){
-				// 	this._isSubscribed = true;
-				// }
-
+				
 				progress.report({ 
 					increment: 100, 
 					message: "Connected" 
@@ -226,13 +217,12 @@ export class Environment extends CreatioTreeItem {
 	}
 
 	public async StartLogBroadcast(logLevel: LogLevel, loggerPattern: string){
-		
 		this._logLevel = logLevel;
 		this._loggerPattern = loggerPattern;
-		
 		this.Listen();
 		await this.creatioClient.StartLogBroadcast(this._logLevel, this._loggerPattern);
 	}
+
 	public async StopLogBroadcast(){
 		await this.creatioClient.StopLogBroadcast();
 		this.StopListening();
@@ -292,8 +282,7 @@ export class Environment extends CreatioTreeItem {
 					wsMsg.Body = JSON.parse(wsMsg.Body);
 				}
 				catch(error: any){
-					console.log("Error parsing JSON L286");
-					//console.log(error);
+					console.log("Error parsing JSON, this happens when someone sends non object in body");
 				}
 				this._onWebSocketMessage.fire(wsMsg);
 			}
@@ -307,13 +296,11 @@ export class Environment extends CreatioTreeItem {
 					if(client.CLOSED){
 						clearInterval(timer);
 						await this.StopLogBroadcast();
-						//this.Listen();
 						await this.StartLogBroadcast(this._logLevel, this._loggerPattern);
 					}
 				},1000);
 			}
 		});
-		
 	}
 	//#endregion
 }

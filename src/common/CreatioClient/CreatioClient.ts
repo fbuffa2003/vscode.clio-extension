@@ -8,8 +8,6 @@ import { ItemType } from "../../service/TreeItemProvider/ItemType";
 import { IRequestOptions, IResponse } from "../interfaces";
 import { HttpMethod } from "../Enums";
 import  { WebSocket, ClientOptions } from 'ws';
-import { time } from "console";
-import { getSystemErrorMap } from "util";
 
 export class CreatioClient {
 
@@ -593,7 +591,7 @@ export class CreatioClient {
 				}
 				resolve(await this.Listen());
 			});
-			
+
 			// ws.on("close",async ()=>{
 			// 	console.log("Connection closed");
 			// 	await this.Listen();
