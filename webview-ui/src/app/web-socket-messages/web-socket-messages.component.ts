@@ -13,6 +13,29 @@ export class WebSocketMessagesComponent implements OnInit {
 	public environmentName;
 	public circleImageUri;
 
+	public loggerName = 'ExceptNoisyLoggers';
+	public logLevel = '';
+	
+	public buttonText: string = 'START';
+
+	private _isBroadcastStarted :boolean = false;
+	public get IsBroadcastStarted() :boolean {
+		return this._isBroadcastStarted;
+	}
+	public set IsBroadcastStarted(v :boolean) {
+
+		if(v){
+			this.buttonText = "STOP";
+		}else{
+			this.buttonText = "START";
+		}
+
+		this._isBroadcastStarted = v;
+	}
+	
+
+
+
 	mainTableCss:string = "main-table";
 	
 	private _searchValue : string = '';
@@ -31,6 +54,23 @@ export class WebSocketMessagesComponent implements OnInit {
 		this._messages = v;
 	}
 	
+
+	private _logMessagesFiltered : Array<ILogPortionItem> = [];
+	public get LogMessagesFiltered() : Array<ILogPortionItem> {
+
+		if(this.SearchValue.length >0){
+			return this.LogMessages.filter(item=> item.message.includes(this.SearchValue));
+		}
+		else{
+			return this.LogMessages;
+		}
+		//return this._logMessagesFiltered;
+	}
+	private set LogMessagesFiltered(v : Array<ILogPortionItem>) {
+		this._logMessagesFiltered = v;
+	}
+
+
 	private _logMessages : Array<ILogPortionItem> = [];
 	public get LogMessages() : Array<ILogPortionItem> {
 		return this._logMessages;
@@ -97,8 +137,18 @@ export class WebSocketMessagesComponent implements OnInit {
 	}
 
 	ngOnInit(): void {
-		this.vscodeDataProvider.startLogBroadcast(this.environmentName, LogLevel.Debug, "ExceptNoisyLoggers");
 	}
+	toggleBroadcast(){
+		if(this.IsBroadcastStarted){
+			this.vscodeDataProvider.stopLogBroadcast(this.environmentName);
+			this.IsBroadcastStarted = !this.IsBroadcastStarted;
+			
+		}else{
+			this.vscodeDataProvider.startLogBroadcast(this.environmentName, LogLevel.Debug, this.loggerName);
+			this.IsBroadcastStarted = !this.IsBroadcastStarted;
+		}
+	}
+
 }
 
 

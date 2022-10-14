@@ -46,3 +46,17 @@ vscode-checkbox{
 	opacity: .3;
 	pointer-events: none;
 }
+
+.config{
+	display: grid;
+	align-items: center;
+	grid-template-columns: auto 64px;
+	justify-items: start;
+}
+
+.creatio-button{
+	background-color: #ED522F;
+}
+.creatio-button:hover{
+	background-color: #b53c21;
+}

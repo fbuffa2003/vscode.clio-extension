@@ -213,6 +213,8 @@ export class Environment extends CreatioTreeItem {
 	}
 
 	public StopListening(){
+
+		this._isStopRequested = true;
 		if(this._isStopRequested && this._wsClient){
 			this._wsClient.close();
 		}

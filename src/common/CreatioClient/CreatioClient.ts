@@ -595,8 +595,8 @@ export class CreatioClient {
 			path: new KnownRoutes(this.isNetCore).StartLogBroadcast,
 			data: {
 				bufferSize: 1,
-				logLevelStr: LogLevel[logLevel],
-				loggerPattern: "ExceptNoisyLoggers"
+				logLevelStr: logLevel,
+				loggerPattern: loggerPattern
 			}
 		};
 		const response = await this.PostAsync(options);
