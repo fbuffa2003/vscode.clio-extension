@@ -12,13 +12,16 @@ import  { WebSocket, ClientOptions } from 'ws';
 export class CreatioClient {
 
 	private CookieValues : Array<{key: string, value:string}> = new Array<{key: string, value:string}>();
+	private readonly _pathName : string;
 
 	constructor(
 			public url: URL,
 			public username: string,
 			public password: string,
 			public isNetCore: boolean
-		) {}
+		) {
+			this._pathName = url.pathname;
+		}
 
 	public async GetAsync(options: IRequestOptions): Promise<IResponse>{
 		
@@ -606,7 +609,7 @@ export class CreatioClient {
 		return new Promise<IResponse>((resolve, reject)=>{
 			const options = {
 				host: this.url.hostname,
-				path: path,
+				path: this._pathName+path,
 				port: this.url.port,
 				method: HttpMethod[method],
 				headers: this.setCookies(headers)
@@ -721,7 +724,7 @@ export class CreatioClient {
 
 	private createWsUrl() : URL{
 		let protocol : string = (this.url.protocol === "http:")? 'ws://': 'wss://';
-		return new URL(protocol+this.url.host + new KnownRoutes(this.isNetCore).WebSocket);
+		return new URL(protocol+this.url.host+this._pathName + new KnownRoutes(this.isNetCore).WebSocket);
 	}
 
 	/**
