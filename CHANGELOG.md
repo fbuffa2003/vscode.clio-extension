@@ -19,12 +19,13 @@
 
 - **NoCode+real code collaboration**
 
-## [0.0.9] Initial release  - Oct ???, 2022
+## [0.0.10] Initial release  - Oct 20, 2022
 
 ### Added
+- Live logging
 
-- Set global `feature` state
-- Set `feature` state for current user
+
+## [0.0.9] Initial release  - Oct 13, 2022
 
 ### Changed
 

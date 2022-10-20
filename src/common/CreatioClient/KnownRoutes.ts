@@ -264,6 +264,32 @@ export class KnownRoutes {
 	private set SetFeatureState(v : string) {
 		this._setFeatureState = v;
 	}
+
+
+	private _startLogBroadcast : string = "/rest/ATFLogService/StartLogBroadcast";
+	/**
+	 * Url to start listening to telemetry service
+	 */
+	public get StartLogBroadcast() : string {
+		return this.getRoute(this._startLogBroadcast);
+	}
+	private set StartLogBroadcast(v : string) {
+		this._startLogBroadcast = v;
+	}
+
+	private _stopLogBroadcast : string = "/rest/ATFLogService/ResetConfiguration";
+	/**
+	 * Url to stop listening to telemetry service
+	 */
+	public get StopLogBroadcast() : string {
+		return this.getRoute(this._stopLogBroadcast);
+	}
+	private set StopLogBroadcast(v : string) {
+		this._stopLogBroadcast = v;
+	}
+
+
+
 	
 	/**
 	 * WebSocket connection page

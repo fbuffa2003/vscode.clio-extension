@@ -174,7 +174,7 @@ export class CatalogPanel {
 					break;
 				}
 				case "install":{
-					console.log(command);
+					//console.log(command);
 					const appId = message.appId;
 				
 					vscode.window.withProgress(

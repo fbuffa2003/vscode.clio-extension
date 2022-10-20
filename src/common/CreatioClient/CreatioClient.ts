@@ -2,7 +2,7 @@ import { ClientRequest, IncomingMessage, OutgoingHttpHeaders } from "http";
 import { RequestOptions } from "https";
 import { request as httpRequest } from "http";
 import { request as httpsRequest} from "https";
-import { ColumnUsage, DataValueType, ParameterDirection, ProcessDataValueType } from "./enums";
+import { ColumnUsage, DataValueType, LogLevel, ParameterDirection, ProcessDataValueType } from "./enums";
 import { KnownRoutes } from "./KnownRoutes";
 import { ItemType } from "../../service/TreeItemProvider/ItemType";
 import { IRequestOptions, IResponse } from "../interfaces";
@@ -20,7 +20,12 @@ export class CreatioClient {
 			public password: string,
 			public isNetCore: boolean
 		) {
-			this._pathName = url.pathname;
+
+			if(url.pathname === '/'){
+				this._pathName = '';
+			}else{
+				this._pathName = url.pathname;
+			}
 		}
 
 	public async GetAsync(options: IRequestOptions): Promise<IResponse>{
@@ -561,28 +566,73 @@ export class CreatioClient {
 	}
 
 	public async Listen() : Promise<WebSocket>{
-		
-		const headers : OutgoingHttpHeaders = {
-			"Accept-Encoding":"gzip, deflate, br"
-		};
-		if(this.CookieValues.length === 0){
-			await this.Login();
-		}
+		return new Promise(async (resolve, reject)=>{
 
-		const options  = {
-			headers: this.setCookies(headers)
-		} as ClientOptions;
+			const headers : OutgoingHttpHeaders = {
+				"Accept-Encoding":"gzip, deflate, br"
+			};
 
-		const ws = new WebSocket(this.createWsUrl(), options);
-		
-		return new Promise((resole, reject)=>{
+			if(this.CookieValues.length === 0){
+				await this.Login();
+			}
+	
+			const options  = {
+				headers: this.setCookies(headers)
+			} as ClientOptions;
+	
+			const url = this.createWsUrl();
+			const ws = new WebSocket(url, options);
+			
+			ws.on("error",async (error:Error)=>{
+				console.log(error.message);
+				if(error.message ==='Unexpected server response: 302'){
+					console.log("Attempting to login ...");
+					const r = await this.Login();
+				}
+				resolve(await this.Listen());
+			});
+
+			// ws.on("close",async ()=>{
+			// 	console.log("Connection closed");
+			// 	await this.Listen();
+			// });
+
 			const timer = setInterval(()=>{
 				if(ws.readyState === WebSocket.OPEN){
 					clearInterval(timer);
-					resole(ws);
+					resolve(ws);
 				}
 			},10);
 		});
+	}
+
+	public async StartLogBroadcast(logLevel: LogLevel, loggerPattern: string) : Promise<void>{
+		const options : IRequestOptions = {
+			path: new KnownRoutes(this.isNetCore).StartLogBroadcast,
+			data: {
+				bufferSize: 1,
+				logLevelStr: LogLevel[logLevel],
+				loggerPattern: loggerPattern
+			}
+		};
+		//await this.PostAsync(options);
+		return new Promise((resole, reject)=>{
+			const timer = setInterval(async ()=>{
+				const response = await this.PostAsync(options);
+				if(response.statusCode === 200){
+					clearInterval(timer);
+					resole();
+				}
+			},2000);
+		});
+	}
+	
+	public async StopLogBroadcast() : Promise<void>{
+		const options : IRequestOptions = {
+			path: new KnownRoutes(this.isNetCore).StopLogBroadcast,
+			data: {}
+		};
+		await this.PostAsync(options);
 	}
 
 

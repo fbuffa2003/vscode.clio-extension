@@ -104,4 +104,32 @@ export class VscodeDataProviderService {
 			},1000);
 		});
 	}
+	
+	public startLogBroadcast(environmentName : string, logLevel: LogLevel, loggerPattern:string): void{
+		const commandName = "startLogBroadcast";
+		vscode.postMessage({
+			command: commandName,
+			environmentName: environmentName,
+			logLevel: LogLevel[logLevel],
+			loggerPattern: loggerPattern
+		});
+	}
+	public stopLogBroadcast(environmentName : string): void {
+		const commandName = "stopLogBroadcast";
+		vscode.postMessage({
+			command: commandName,
+			environmentName: environmentName
+		});
+	}
+}
+
+
+export enum LogLevel{
+	ALL,
+	Debug,
+	Error,
+	Fatal,
+	Info,
+	Trace,
+	Warn
 }

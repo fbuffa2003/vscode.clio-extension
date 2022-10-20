@@ -4,6 +4,17 @@
 		<span>Loading...</span>
 	</div>
 </div>
+<!-- 
+<div class="config">
+	<vscode-text-field 
+		type="text" id="loggerName" name="loggerName" placeholder="Logger name"
+		ngDefaultControl required [(ngModel)]="loggerName" #trackName="ngModel">
+		Logger Name:
+		<span slot="end" class="codicon codicon-debug"></span>
+	</vscode-text-field>
+	<vscode-button class="creatio-button" (click)="toggleBroadcast()">{{buttonText}}</vscode-button>
+
+</div> -->
 
 <!-- <div *ngIf="Messages.length>0" [class]="mainTableCss">
 	<vscode-data-grid aria-label="Features" grid-template-columns="1fr 3fr" generate-header="sticky" class="main-table">
@@ -36,22 +47,44 @@
 </div> -->
 
 
-<div *ngIf="LogMessages.length>0" [class]="mainTableCss">
-	<vscode-data-grid aria-label="Features" grid-template-columns="2fr 1fr 4fr 14fr" generate-header="sticky" class="main-table">
+<div [class]="mainTableCss">
+	<vscode-data-grid aria-label="Features" grid-template-columns="100px 2fr 4fr 14fr" generate-header="sticky" class="main-table">
 		<vscode-data-grid-row row-type="sticky-header" class="header-row">
 			<div class="header">
-				<div >
+				<div class="header-text">
 					<img class="logo-img" src={{circleImageUri}} alt="logo">
-					<span class="logo-text">WebSocket messages from {{environmentName}}</span>
+					<span class="logo-text">Telemetry logs from {{environmentName}}</span>
+					<div>
+
+					</div>
+					<vscode-badge appearance="secondary" style="margin-left: 10px;">{{LogMessagesFiltered.length}}</vscode-badge>
+					<br/><br/>
+					
 				</div>
-				<br/>
 				<div>
-					<vscode-text-field type="text" id="cname" name="cname" placeholder="search" size="100"
-						[(ngModel)] = "SearchValue" ngDefaultControl>
-						<span slot="start" class="codicon codicon-search"></span>
-					</vscode-text-field>
+					<div class="settings">
+						<vscode-text-field 
+							type="text" id="loggerName" name="loggerName" placeholder="Logger name"
+							ngDefaultControl required [(ngModel)]="loggerName" #trackName="ngModel" size="80">
+							
+							<span slot="end" class="codicon codicon-close" (click)="clearLogger()"></span>
+						</vscode-text-field>
+						<vscode-button class="creatio-button-green" (click)="toggleBroadcast()">{{buttonText}}</vscode-button>
+						<vscode-button class="creatio-button" (click)="clearGrid()">Clear</vscode-button>
+					</div>
+					<br/>
+					
+					<div>
+						<vscode-text-field type="text" id="cname" name="cname" placeholder="Search" size="100"
+							[(ngModel)] = "SearchValue" ngDefaultControl>
+							<span slot="start" class="codicon codicon-search"></span>
+						</vscode-text-field>
+	
+					</div>
 				</div>
+
 				<br/><br/>
+				
 			</div>
 
 			<vscode-data-grid-cell cell-type="columnheader" grid-column="1">Date</vscode-data-grid-cell>
@@ -61,10 +94,10 @@
 			
 		</vscode-data-grid-row>
 		
-		<vscode-data-grid-row *ngFor="let row of LogMessages" row-type="default">
+		<vscode-data-grid-row *ngFor="let row of LogMessagesFiltered" row-type="default">
 			<vscode-data-grid-cell grid-column="1">{{row.date.getHours()+":"+row.date.getMinutes()+":"+row.date.getSeconds()+"."+row.date.getMilliseconds()}}</vscode-data-grid-cell>
 			<vscode-data-grid-cell grid-column="2">{{row.level}}</vscode-data-grid-cell>
-			<vscode-data-grid-cell grid-column="3">{{row.logger}}</vscode-data-grid-cell>
+			<vscode-data-grid-cell grid-column="3" style="overflow: hidden;	text-overflow: ellipsis; white-space: nowrap">{{row.logger}}</vscode-data-grid-cell>
 			<vscode-data-grid-cell grid-column="4">{{row.message}}</vscode-data-grid-cell>
 		</vscode-data-grid-row>
 	</vscode-data-grid>
