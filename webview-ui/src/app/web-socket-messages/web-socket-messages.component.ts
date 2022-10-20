@@ -13,10 +13,11 @@ export class WebSocketMessagesComponent implements OnInit {
 	public environmentName;
 	public circleImageUri;
 
-	public loggerName = 'ExceptNoisyLoggers';
+	public loggerName = '';
+	public defaultLoggerName = 'ExceptNoisyLoggers';
 	public logLevel = '';
 	
-	public buttonText: string = 'START';
+	public buttonText: string = 'Start';
 
 	private _isBroadcastStarted :boolean = false;
 	public get IsBroadcastStarted() :boolean {
@@ -25,9 +26,9 @@ export class WebSocketMessagesComponent implements OnInit {
 	public set IsBroadcastStarted(v :boolean) {
 
 		if(v){
-			this.buttonText = "STOP";
+			this.buttonText = "Stop";
 		}else{
-			this.buttonText = "START";
+			this.buttonText = "Start";
 		}
 
 		this._isBroadcastStarted = v;
@@ -147,9 +148,18 @@ export class WebSocketMessagesComponent implements OnInit {
 			this.IsBroadcastStarted = !this.IsBroadcastStarted;
 			
 		}else{
-			this.vscodeDataProvider.startLogBroadcast(this.environmentName, LogLevel.ALL, this.loggerName);
+			this.vscodeDataProvider.startLogBroadcast(this.environmentName, LogLevel.ALL, this.loggerName.length>0 ? this.loggerName : this.defaultLoggerName);
 			this.IsBroadcastStarted = !this.IsBroadcastStarted;
 		}
+	}
+
+	clearLogger(){
+		this.loggerName ="";
+	}
+	clearGrid(){
+		//this.Messages = [];
+		this.LogMessages = [];
+		
 	}
 
 }
