@@ -122,6 +122,7 @@ export enum ColumnUsage{
 
 
 export enum LogLevel{
+	ALL,
 	Debug,
 	Error,
 	Fatal,

@@ -266,7 +266,7 @@ export class KnownRoutes {
 	}
 
 
-	private _startLogBroadcast : string = "/rest/LoggerConfigService/StartLogBroadcast";
+	private _startLogBroadcast : string = "/rest/ATFLogService/StartLogBroadcast";
 	/**
 	 * Url to start listening to telemetry service
 	 */
@@ -277,7 +277,7 @@ export class KnownRoutes {
 		this._startLogBroadcast = v;
 	}
 
-	private _stopLogBroadcast : string = "/rest/LoggerConfigService/ResetConfiguration";
+	private _stopLogBroadcast : string = "/rest/ATFLogService/ResetConfiguration";
 	/**
 	 * Url to stop listening to telemetry service
 	 */

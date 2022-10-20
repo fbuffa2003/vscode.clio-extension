@@ -125,6 +125,7 @@ export class VscodeDataProviderService {
 
 
 export enum LogLevel{
+	ALL,
 	Debug,
 	Error,
 	Fatal,

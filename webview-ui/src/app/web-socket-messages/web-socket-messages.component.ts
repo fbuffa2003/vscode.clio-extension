@@ -147,7 +147,7 @@ export class WebSocketMessagesComponent implements OnInit {
 			this.IsBroadcastStarted = !this.IsBroadcastStarted;
 			
 		}else{
-			this.vscodeDataProvider.startLogBroadcast(this.environmentName, LogLevel.Info, this.loggerName);
+			this.vscodeDataProvider.startLogBroadcast(this.environmentName, LogLevel.ALL, this.loggerName);
 			this.IsBroadcastStarted = !this.IsBroadcastStarted;
 		}
 	}
