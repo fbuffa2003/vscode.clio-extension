@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { ClientRequest, IncomingMessage, OutgoingHttpHeaders } from "http";
 import { RequestOptions } from "https";
 import { request as httpRequest } from "http";
@@ -8,6 +9,8 @@ import { ItemType } from "../../service/TreeItemProvider/ItemType";
 import { IRequestOptions, IResponse } from "../interfaces";
 import { HttpMethod } from "../Enums";
 import  { WebSocket, ClientOptions } from 'ws';
+import { getVSCodeDownloadUrl } from "@vscode/test-electron/out/util";
+import { window } from "vscode";
 
 export class CreatioClient {
 
@@ -332,7 +335,6 @@ export class CreatioClient {
 			}
 		}
 		
-		
 		const options : IRequestOptions = {
 			path: route,
 			data: {
@@ -343,8 +345,45 @@ export class CreatioClient {
 		const response = await this.PostAsync(options);
 		const json = JSON.parse(response.body);
 
-		return json['schema']['body'] as string;
+		return json['schema'] as object;
+		//return json['schema']['body'] as string;
 	}
+
+
+	public async SaveSchemaAsync(fullSchema: any, itemType:ItemType): Promise<Object>{
+		let route : string;
+		switch(itemType){
+			case ItemType.clientModuleSchema: {
+				route = new KnownRoutes(this.isNetCore).SaveClientUnitSchema;
+				break;
+			}
+			case ItemType.sourceCodeSchema: {
+				route = new KnownRoutes(this.isNetCore).SaveSourceCodeSchema;
+				break;
+			}
+			case ItemType.sqlScriptSchema: {
+				route = new KnownRoutes(this.isNetCore).SaveSqlSchema;
+				break;
+			}
+			default:{
+				throw Error("Unknown schema type");
+			}
+		}
+
+		const options : IRequestOptions = {
+			path: route,
+			data: fullSchema
+		};
+		const response = await this.PostAsync(options);
+		const json = JSON.parse(response.body);
+		
+		if(json['errorInfo']['message']){
+			vscode.window.showErrorMessage(json['errorInfo']['message']);
+		}
+
+		return json as Object;
+	}
+
 
 	public async GetFeatures(): Promise<Array<IFeature>>{
 		const dataServiceRequest  = {
@@ -591,11 +630,6 @@ export class CreatioClient {
 				}
 				resolve(await this.Listen());
 			});
-
-			// ws.on("close",async ()=>{
-			// 	console.log("Connection closed");
-			// 	await this.Listen();
-			// });
 
 			const timer = setInterval(()=>{
 				if(ws.readyState === WebSocket.OPEN){

@@ -101,6 +101,11 @@
 					"command": "ClioSQL.Listen",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-6@1"
+				},
+				{
+					"command": "creatioFS/getFile",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-7@1"
 				}
 			],
 			"ClioSQL.OverflowHeaderMenu":[
@@ -351,11 +356,15 @@
 				"title": "Show Content",
 				"icon": "$(file-code)"
 			},
-			
 			{
 				"command": "ClioSQL.Listen",
 				"title": "Logs",
 				"icon": "$(symbol-event)"
+			},
+			{
+				"command": "creatioFS/getFile",
+				"title": "Get File",
+				"icon": "$(file-code)"
 			}
 			
 		],

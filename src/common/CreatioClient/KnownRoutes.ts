@@ -239,6 +239,14 @@ export class KnownRoutes {
 	private set GetClientUnitSchema(v : string) {
 		this._getClientUnitSchema = v;
 	}
+
+	private _saveClientUnitSchema : string = "/ServiceModel/ClientUnitSchemaDesignerService.svc/SaveSchema";
+	public get SaveClientUnitSchema() : string {
+		return this.getRoute(this._saveClientUnitSchema);
+	}
+	private set SaveClientUnitSchema(v : string) {
+		this._saveClientUnitSchema = v;
+	}
 	
 	
 	private _getSourceCodeSchema : string = "/ServiceModel/SourceCodeSchemaDesignerService.svc/GetSchema";
@@ -249,6 +257,14 @@ export class KnownRoutes {
 		this._getSourceCodeSchema = v;
 	}
 	
+	private _saveSourceCodeSchema : string = "/ServiceModel/SourceCodeSchemaDesignerService.svc/SaveSchema";
+	public get SaveSourceCodeSchema() : string {
+		return this.getRoute(this._saveSourceCodeSchema);
+	}
+	private set SaveSourceCodeSchema(v : string) {
+		this._saveSourceCodeSchema = v;
+	}
+	
 	private _getSqlSchema : string = "/ServiceModel/SqlScriptSchemaDesignerService.svc/GetSchema";
 	public get GetSqlSchema() : string {
 		return this.getRoute(this._getSqlSchema);
@@ -257,6 +273,18 @@ export class KnownRoutes {
 		this._getSqlSchema = v;
 	}
 	
+	private _saveSqlSchema : string = "/ServiceModel/SqlScriptSchemaDesignerService.svc/SaveSchema";
+	public get SaveSqlSchema() : string {
+		return this.getRoute(this._saveSqlSchema);
+	}
+	private set SaveSqlSchema(v : string) {
+		this._saveSqlSchema = v;
+	}
+	
+
+
+
+
 	private _setFeatureState : string = "/rest/FeatureStateService/SetFeatureState";
 	public get SetFeatureState() : string {
 		return this.getRoute(this._setFeatureState);

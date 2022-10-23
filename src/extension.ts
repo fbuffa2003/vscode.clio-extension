@@ -16,10 +16,43 @@ import { SqlPanel } from './panels/SqlPanel';
 import { FeaturesPanel } from './panels/FeaturesPanel';
 import { WebSocketMessagesPanel } from './panels/WebSocketMessagesPanel';
 import { ComparePanel } from './panels/ComparePanel';
+import { CreatioFS } from './file-system-provider/fileSystemProvider';
+import { ItemType } from './service/TreeItemProvider/ItemType';
 
 export function activate(context: vscode.ExtensionContext) {
 	const clio = new Clio();
 	const executor = new ClioExecutor();
+
+
+	//#region FileSystemProvider
+	const creatioFS = new CreatioFS();
+	const registration = vscode.workspace.registerFileSystemProvider("creatio", creatioFS, {
+		isCaseSensitive : true,
+		isReadonly : false
+	});
+	context.subscriptions.push(registration);
+
+	let initialized = false;
+	
+	context.subscriptions.push(vscode.commands.registerCommand("creatioFS/getFile", _=>{
+		//const file_uri = vscode.Uri.parse(`creatio:/environment-name/afile.cs`);
+		const file_uri = vscode.Uri.parse(`creatio:/environment-name/afile.cs?uid=$some-guid-here&itemType=some-type-here`);
+		vscode.workspace.openTextDocument(file_uri)
+		.then((doc: vscode.TextDocument)=>{
+			vscode.window.showTextDocument(doc);
+		});
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('creatioFS.workspaceInit', _ => {
+		vscode.workspace.updateWorkspaceFolders(
+			0, 
+			0, 
+			{ uri: vscode.Uri.parse('creatio:/'), 
+			name: "creatioFS - Sample" });
+	}));
+
+
+	//#endregion
 
 	const treeProvider = new CreatioTreeItemProvider();
 	//vscode.window.registerTreeDataProvider('vscode-clio-extension.creatioExplorer', treeProvider);
@@ -36,13 +69,16 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 	
-
 	treeView.onDidChangeSelection(async (event: vscode.TreeViewSelectionChangeEvent<CreatioTreeItem>)=>{
 		
 	});
 
 	treeView.onDidExpandElement(async (event: vscode.TreeViewExpansionEvent<CreatioTreeItem>)=>{
 		if(event.element instanceof Environment){
+			creatioFS.addClient({
+				client: event.element.creatioClient,
+				name : event.element.label
+			});
 			return;
 		}
 		
@@ -57,12 +93,56 @@ export function activate(context: vscode.ExtensionContext) {
 					await (event.element as PackageList).getPackagesDev();
 					treeProvider.refresh();
 					
+					const packages = (event.element.items as Package[]);
+					packages.forEach((p, index)=>{
+
+						const u = vscode.Uri.parse(`creatio:/${event.element.parent?.label}/${p.name}`);
+						creatioFS.createDirectory(u);
+					});
+
 					progress.report({
 						increment: 100,
 						message: "Done"
 					});
 				}
 			);
+		}
+
+
+		if(event.element instanceof Package){
+
+			console.log("Package expanded");
+			const creatioPackage = event.element as Package;
+			const items = creatioPackage.items as WorkSpaceItem[];
+
+			items.forEach((item)=>{
+				
+				
+				switch(item.itemType){
+					case ItemType.clientModuleSchema:
+						const jsFileName = item.name+'.js';
+						const jsFileUri = vscode.Uri.parse(`creatio:/${creatioPackage.parent?.parent?.label}/${creatioPackage.name}/${jsFileName}`);
+						creatioFS.writeFile(jsFileUri, new Uint8Array(0), {create:true, overwrite:true, isInit: true, itemType: item.itemType});
+						break;
+					
+					case ItemType.sourceCodeSchema:
+						const csFileName = item.name+'.cs';
+						const csFileUri = vscode.Uri.parse(`creatio:/${creatioPackage.parent?.parent?.label}/${creatioPackage.name}/${csFileName}`);
+						creatioFS.writeFile(csFileUri, new Uint8Array(0), {create:true, overwrite:true, isInit: true, itemType: item.itemType});
+						break;
+					
+					case ItemType.sourceCodeSchema:
+						const sqlFileName = item.name+'.cs';
+						const sqlFileUri = vscode.Uri.parse(`creatio:/${creatioPackage.parent?.parent?.label}/${creatioPackage.name}/${sqlFileName}`);
+						creatioFS.writeFile(sqlFileUri, new Uint8Array(0), {create:true, overwrite:true,isInit: true, itemType: item.itemType});
+						break;
+				}
+
+				
+
+
+			});
+
 		}
 		
 		if(event.element instanceof ProcessList){
@@ -332,7 +412,6 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	//#endregion
-
 
 	//#region Commands : Package
 	context.subscriptions.push(
