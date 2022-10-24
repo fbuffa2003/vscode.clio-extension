@@ -10,7 +10,6 @@ import { IHealthCheckArgs } from '../../commands/HealthCheckCommand';
 import { CreatioClient, IFeature, IWebSocketMessage } from '../../common/CreatioClient/CreatioClient';
 import { ClioExecutor } from '../../Common/clioExecutor';
 import { IRestoreConfigurationArgs } from '../../commands/RestoreConfiguration';
-// import { Clio } from '../../commands/Clio';
 import { IFlushDbArgs } from '../../commands/FlushDbCommand';
 import { ISqlArgs } from '../../commands/SqlCommand';
 import WebSocket = require('ws');
@@ -32,16 +31,14 @@ export class Environment extends CreatioTreeItem {
 	private _loggerPattern : string = 'ExceptNoisyLoggers';
 
 
-	constructor( label: string, connectionSettings :IConnectionSettings)
+	constructor(label: string, connectionSettings :IConnectionSettings)
 	{
 		super(label, connectionSettings.uri.toString(), 
 			ItemType.creatioInstance, undefined, vscode.TreeItemCollapsibleState.Collapsed);
 
 		this.connectionSettings = connectionSettings;
 		this.items.push(new PackageList(this));
-		// this.items.push(new ProcessList(this));
-		// this.items.push(new EntityList(this));
-		this.creatioClient = new CreatioClient(connectionSettings.uri, connectionSettings.login, connectionSettings.password, connectionSettings.isNetCore);
+		this.creatioClient = new CreatioClient(connectionSettings);
 		this.setHealthStatus(HealthStatus.unknown);
 		this.checkHealth();
 	}
@@ -311,10 +308,13 @@ export class Environment extends CreatioTreeItem {
  */
 export interface IConnectionSettings {
 	uri: URL,
-	login: string
-	password: string,
-	maintainer: string,
+	login?: string
+	password?: string,
+	maintainer?: string,
 	isNetCore: boolean,
 	isSafe: boolean,
-	isDeveloperMode: boolean
+	isDeveloperMode: boolean,
+	oauthUrl?: URL,
+	clientId?: string,
+	clientSecret?: string
 }

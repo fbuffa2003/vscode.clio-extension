@@ -9,20 +9,41 @@ import { ItemType } from "../../service/TreeItemProvider/ItemType";
 import { IRequestOptions, IResponse } from "../interfaces";
 import { HttpMethod } from "../Enums";
 import  { WebSocket, ClientOptions } from 'ws';
-import { getVSCodeDownloadUrl } from "@vscode/test-electron/out/util";
-import { window } from "vscode";
+import { IConnectionSettings } from '../../service/TreeItemProvider/Environment';
 
+
+export interface ITokenModel{
+	access_token: string;
+	expires_in: number;
+	token_type: string;
+	issuedAt: Date;
+	expiresAt: Date
+}
+
+export enum CredentialsFlow{
+	Form = 0,
+	OAuth = 1
+}
 export class CreatioClient {
 
+	private readonly _credentialsFlow : CredentialsFlow = CredentialsFlow.Form;
 	private CookieValues : Array<{key: string, value:string}> = new Array<{key: string, value:string}>();
 	private readonly _pathName : string;
-
+	private readonly isNetCore : boolean;
+	private readonly Settings: IConnectionSettings;
+	
+	private readonly username: string;
+	private readonly password: string;
+	private readonly url: URL;
+	private oauthToken : ITokenModel | undefined;
+	/*
 	constructor(
 			public url: URL,
 			public username: string,
 			public password: string,
 			public isNetCore: boolean
 		) {
+			this._credentialsFlow = CredentialsFlow.Form;
 
 			if(url.pathname === '/'){
 				this._pathName = '';
@@ -30,12 +51,40 @@ export class CreatioClient {
 				this._pathName = url.pathname;
 			}
 		}
+	*/
+
+	constructor(args: IConnectionSettings) {
+		if(args.login && args.password){
+			this._credentialsFlow = CredentialsFlow.Form;
+		}
+		if(args.clientId && args.clientSecret){
+			this._credentialsFlow = CredentialsFlow.OAuth;
+		}
+		
+
+		this.Settings = args;
+		this.url = this.Settings.uri;
+		this.isNetCore = this.Settings.isNetCore;
+		this.username = this.Settings.login ?? '';
+		this.password = this.Settings.password ?? '';
+		if(this.Settings.uri.pathname === '/'){
+			this._pathName = '';
+		}else{
+			this._pathName = this.Settings.uri.pathname;
+		}
+	}
 
 	public async GetAsync(options: IRequestOptions): Promise<IResponse>{
 		
-		if(this.CookieValues.length === 0){
-			await this.Login();
+		if(this._credentialsFlow === CredentialsFlow.Form){
+			if(this.CookieValues.length === 0){
+				await this.Login();
+			}
 		}
+		else{
+			await this.GetTokenAsync();
+		}
+
 		const headers : OutgoingHttpHeaders = {
 			"Accept-Encoding":"gzip, deflate, br",
 		};
@@ -55,10 +104,19 @@ export class CreatioClient {
 	}
 
 	public async PostAsync(options: IRequestOptions): Promise<IResponse>{
-		
-		if(this.CookieValues.length === 0){
-			await this.Login();
+		if(this._credentialsFlow === CredentialsFlow.Form){
+			if(this.CookieValues.length === 0){
+				await this.Login();
+			}
 		}
+		else{
+			if(!this.oauthToken){
+				await this.GetTokenAsync();
+			}else if(this.oauthToken.expiresAt < new Date()){
+				await this.GetTokenAsync();
+			}
+		}
+
 		const headers : OutgoingHttpHeaders = {
 			"Content-Type":"application/json",
 			"Accept-Encoding":"gzip, deflate, br",
@@ -66,7 +124,11 @@ export class CreatioClient {
 		};
 		const firstRequest =  await this.execute(options.path, HttpMethod.POST, headers, options.data);
 		if(firstRequest.statusCode === 401 || firstRequest.statusCode === 403){
-			await this.Login();
+			if(this._credentialsFlow === CredentialsFlow.Form){
+				await this.Login();
+			}else{
+				await this.GetTokenAsync();
+			}
 			return this.execute(options.path, HttpMethod.POST, headers, options.data);
 		} else {
 			return firstRequest;
@@ -349,7 +411,6 @@ export class CreatioClient {
 		//return json['schema']['body'] as string;
 	}
 
-
 	public async SaveSchemaAsync(fullSchema: any, itemType:ItemType): Promise<Object>{
 		let route : string;
 		switch(itemType){
@@ -383,7 +444,6 @@ export class CreatioClient {
 
 		return json as Object;
 	}
-
 
 	public async GetFeatures(): Promise<Array<IFeature>>{
 		const dataServiceRequest  = {
@@ -614,9 +674,9 @@ export class CreatioClient {
 			if(this.CookieValues.length === 0){
 				await this.Login();
 			}
-	
+
 			const options  = {
-				headers: this.setCookies(headers)
+				headers: this.setHeaders(headers)
 			} as ClientOptions;
 	
 			const url = this.createWsUrl();
@@ -689,6 +749,81 @@ export class CreatioClient {
 			HttpMethod.POST, headers, postData);
 	}
 
+	private async GetTokenAsync() : Promise<IResponse>{
+		const xFormBody = `${encodeURI('grant_type')}=${encodeURI('client_credentials')}&${encodeURI('client_Id')}=${encodeURI(this.Settings.clientId ?? '')}&${encodeURI('client_secret')}=${encodeURI(this.Settings.clientSecret ?? '')}`;
+		const token =  await this.executeToken(new KnownRoutes(this.isNetCore).Token, HttpMethod.POST, xFormBody);
+		
+		this.oauthToken = JSON.parse(token.body) as ITokenModel;
+		
+		const now = new Date();
+		this.oauthToken.issuedAt = new Date();
+		this.oauthToken.expiresAt = now;
+
+		const addSeconds = now.getSeconds() + this.oauthToken.expires_in - 5*60;
+		this.oauthToken.expiresAt.setSeconds(addSeconds);
+		return token;
+	}
+
+	private async executeToken(path: string, method: HttpMethod, data: string) : Promise<IResponse>{
+		return new Promise<IResponse>((resolve, reject)=>{
+			const options = {
+				host: this.Settings.oauthUrl?.hostname,
+				path: this._pathName+path,
+				port: this.Settings.oauthUrl?.port,
+				method: HttpMethod[method],
+				headers: {
+					"Content-Type" :"application/x-www-form-urlencoded",
+					"Accept-Encoding":"gzip, deflate, br",
+					"Content-Length": Buffer.byteLength(data, "utf8")
+				}
+			} as RequestOptions;
+
+			var chunks : Array<any> = [];
+			const callBack = (res : IncomingMessage) => {
+				//res.setEncoding('utf8');
+				res.on("data", (chunk: string) => {
+					if(res.statusCode !== 401 && res.statusCode !== 403){
+						this.getCookies(res);
+						chunks.push(chunk);
+					} else if (res.statusCode === 401 || res.statusCode === 403){
+						this.CookieValues = new Array<{key: string, value:string}>();
+						resolve({
+							body: chunk.toString(), 
+							statusCode: res.statusCode
+						} as IResponse);
+					}
+				});
+
+				res.on("end", ()=>{
+					resolve({
+						body: Buffer.concat(chunks).toString(),
+						statusCode: res.statusCode
+					} as IResponse);
+				});
+
+				res.on("error", (error) =>{
+					resolve({
+						body: error.message, 
+						statusCode: res.statusCode
+					} as IResponse);
+				});
+			};
+
+			const request : ClientRequest = this.resolveClient(options, callBack);
+			if(data){
+				request.write(data);
+			}
+			request.end();
+			
+			request.on("error",(error)=>{
+				resolve({
+					body : error.message,
+					statusCode: (error as any).errno as unknown as number
+				} as IResponse);
+			});
+		});
+	}
+
 	private async execute(path: string, method: HttpMethod, headers?: OutgoingHttpHeaders, data?: any) : Promise<IResponse>{
 		return new Promise<IResponse>((resolve, reject)=>{
 			const options = {
@@ -696,7 +831,7 @@ export class CreatioClient {
 				path: this._pathName+path,
 				port: this.url.port,
 				method: HttpMethod[method],
-				headers: this.setCookies(headers)
+				headers: this.setHeaders(headers)
 			} as RequestOptions;
 
 			var chunks : Array<any> = [];
@@ -770,8 +905,15 @@ export class CreatioClient {
 		});
 	}
 
-	private setCookies(headers?: OutgoingHttpHeaders): OutgoingHttpHeaders | undefined{	
-		if(this.CookieValues.length>0){
+	private setHeaders(headers?: OutgoingHttpHeaders): OutgoingHttpHeaders | undefined{	
+		
+		if(this._credentialsFlow === CredentialsFlow.OAuth){
+			const h = headers as unknown as {[key: string]: any};
+			h.Authorization = `${this.oauthToken?.token_type} ${this.oauthToken?.access_token}`;
+			return h as unknown as OutgoingHttpHeaders;
+		}
+
+		if(this.CookieValues.length>0 && this._credentialsFlow === CredentialsFlow.Form){
 			const h = headers as unknown as {[key: string]: any};
 
 			const bpmcsrf = this.CookieValues.find((x)=>{
@@ -790,7 +932,7 @@ export class CreatioClient {
 			}
 			return h as unknown as OutgoingHttpHeaders;
 		}
-		return headers;
+		//return headers;
 	}
 
 	private resolveClient(options: RequestOptions, callBack?: (res : IncomingMessage)=>void): ClientRequest {

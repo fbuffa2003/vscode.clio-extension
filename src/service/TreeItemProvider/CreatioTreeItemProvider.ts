@@ -98,12 +98,15 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 
 			const env : IConnectionSettings = {
 				uri: new URL(environment['Uri']),
-				login: environment['Login'],
-				password: environment['Password'],
-				maintainer: environment['Maintainer'],
-				isNetCore: environment['IsNetCore'],
-				isSafe: environment['Safe'],
-				isDeveloperMode: environment['DeveloperModeEnabled']
+				login: environment['Login'] ?? '',
+				password: environment['Password'] ?? '',
+				maintainer: environment['Maintainer'] ?? '',
+				isNetCore: environment['IsNetCore'] ?? false,
+				isSafe: environment['Safe'] ?? false,
+				isDeveloperMode: environment['DeveloperModeEnabled'],
+				oauthUrl: environment['AuthAppUri'] !== undefined ? new URL(environment['AuthAppUri']) : undefined,
+				clientId: environment['ClientId'] !== undefined ? environment['ClientId'] : undefined,
+				clientSecret: environment['ClientSecret'] !== undefined ? environment['ClientSecret'] : undefined
 			};
 			map.set(keyName as string, env);
 		});

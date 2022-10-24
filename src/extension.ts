@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { InstallMarketplaceApp } from './panels/MarketplaceApp';
 import { Clio } from './commands/Clio';
 import { IRegisterWebAppArgs } from './commands/RegisterWebAppCommand';
 import { TextEditor } from 'vscode';
@@ -18,11 +17,13 @@ import { WebSocketMessagesPanel } from './panels/WebSocketMessagesPanel';
 import { ComparePanel } from './panels/ComparePanel';
 import { CreatioFS } from './file-system-provider/fileSystemProvider';
 import { ItemType } from './service/TreeItemProvider/ItemType';
+import { MarketplaceCatalogue } from './common/MarketplaceClient/MarketplaceCatalogue';
+import { ModerationState, ProductCategory } from './common/MarketplaceClient/marketplaceApp';
 
 export function activate(context: vscode.ExtensionContext) {
 	const clio = new Clio();
-	const executor = new ClioExecutor();
-
+	const executor = new ClioExecutor();	
+	const _marketplaceCatalogue = new MarketplaceCatalogue();
 
 	//#region FileSystemProvider
 	const creatioFS = new CreatioFS();
@@ -432,6 +433,30 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.ShowSchemaContent", async (node: WorkSpaceItem)=>{
 			node.showContent();
+		})
+	);
+	//#endregion
+
+	//#region Experemental
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.GetCatalogue", async ()=>{
+			await _marketplaceCatalogue.FillCatalogueAsync();
+			
+			const apps = _marketplaceCatalogue.Applications.filter(app=>app.moderationState === ModerationState.published);
+			await apps[0].FillAllPropertiesAsync();
+			const app = apps[0];
+
+			console.log(`Title: ${app.title}`);
+			console.log(`Languages: ${app.AppLanguages}`);
+			console.log(`Certified: ${app.isCertified}`);
+			console.log(`MarketplaceUrl: ${app.MarketplaceUrl.toString()}`);
+			console.log(`Product Category: ${ProductCategory[app.AppProductCategory]}`);
+			console.log(`Application Map: ${app.ApplicationMap}`);
+			console.log(`Compatibility: ${app.AppCompatibility}`);
+			console.log(`Compatible Version: ${app.AppCompatibilityVersion}`);
+			console.log(`Compatible dbms: ${app.AppCompatibleDbms}`);
+			console.log(`Compatible platform: ${app.AppCompatiblePlatform}`);
+			console.log(`Developer: ${app.AppDeveloper}`);
 		})
 	);
 	//#endregion

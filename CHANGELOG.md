@@ -5,25 +5,28 @@
 - Log from Creatio
 - Install multiple apps from Marketplace (savable scenario ?)
   - Download all, repack, send to Creatio;
-
 ---
-
 - Welcome journey
 - Edit existing connection
-- Edit SourceCodeSchema (CS, JS, SQL)
-  - Implement [FileSystemProvider] for CS, JS, SQL
   - Open other schemas in in Creatio
-- WebSocket nlog appender
+
 
 # PRTNER RELEASE
 
 - **NoCode+real code collaboration**
 
+## [0.0.11] Initial release  - Oct 27, 2022
+
+### Added
+
+- Edit SourceCodeSchema (CS, JS, SQL), implemented FileSystemProvider
+
+
 ## [0.0.10] Initial release  - Oct 20, 2022
 
 ### Added
-- Live logging
 
+- Live logging / WebSocket nlog appender (see clio gate release ver: 3.0.1.33)
 
 ## [0.0.9] Initial release  - Oct 13, 2022
 

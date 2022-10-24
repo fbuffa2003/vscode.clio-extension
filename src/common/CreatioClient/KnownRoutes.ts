@@ -5,7 +5,8 @@ export class KnownRoutes {
 	 * - /ServiceModel/AuthService.svc/Login
 	 */
 	public Login: string = "/ServiceModel/AuthService.svc/Login";
-
+	public Token: string = "/connect/token";
+	
 
 	private _logout: string = "/rest/MainMenuService/Logout";
 	/**

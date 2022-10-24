@@ -7,4 +7,5 @@ export interface IResponse {
 export interface IRequestOptions {
 	path: string,
 	data?: any
+	query?:Array<{key:any, value:any}>
 }
