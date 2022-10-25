@@ -1,7 +1,12 @@
 vscode-text-field{
-	width: 60%;
+	width: 80%;
 }
 
+.logo{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
 .install{
 	text-align: center;
 }
@@ -15,8 +20,8 @@ vscode-text-field{
 
 
 .main-table{
-	margin-right: 100px;
-	margin-left: 100px;
+	margin-right: 1rem;
+	margin-left: 1rem;
 }
 
 
@@ -39,3 +44,41 @@ vscode-button{
 .header-row:hover{
 	background: var(--background);
 }
+.header-title{
+	display: grid;
+	grid-template-columns: 100px 1fr 50px;
+}
+.content-cell{
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+.content-cell>div{
+	width: 100%;
+}
+
+.content-cell > .title{
+	font-weight: 500;
+	font-size: larger;
+}
+.content-cell > .short-description{
+	font-weight: lighter;
+	font-size: smaller;
+}
+.content-cell > .marketplace-url{
+	font-weight: lighter;
+	font-size: smaller;
+}
+
+.button-wrapper{
+
+}
+
+.button-wrapper > .button-add{
+
+}
+
+.button-wrapper > .button-expand{
+
+}
+

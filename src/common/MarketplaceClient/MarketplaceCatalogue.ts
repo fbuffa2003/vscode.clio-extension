@@ -19,6 +19,7 @@ export class MarketplaceCatalogue{
 	constructor() {}
 
 	public async FillCatalogueAsync(): Promise<void>{
-		this.Applications = await this._marketplaceClient.GetCatalogueAsync();
+		//this.Applications = await this._marketplaceClient.GetCatalogueAsync();
+		this.Applications = await this._marketplaceClient.GetCatalogueAsyncParallel();
 	}
 }

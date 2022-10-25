@@ -32,26 +32,26 @@ export class MarketplaceClient{
 		};
 		const response : IResponse= await this.GetAsync(options);
 		const data = JSON.parse(response.body)['data'] as Array<any>;
-		const returnData : CompatiblePlatform[] = [];
+		const _tempData : CompatiblePlatform[] = [];
 		data.forEach(element=>{
 			if(element['attributes'] && element['attributes']['name']){
 				
 				switch(element['attributes']['name']){
 					case ".Net Core":
-						returnData.push(CompatiblePlatform.NetCore);
+						_tempData.push(CompatiblePlatform.NetCore);
 						break;
 					case ".Net Framework":
-						returnData.push(CompatiblePlatform.NetFramework);
+						_tempData.push(CompatiblePlatform.NetFramework);
 						break;
 					default:
-						returnData.push(CompatiblePlatform.Unknown);
+						_tempData.push(CompatiblePlatform.Unknown);
 						break;
 				}
 			}else{
-				returnData.push(CompatiblePlatform.Unknown);
+				_tempData.push(CompatiblePlatform.Unknown);
 			}
 		});
-		return returnData;
+		return _tempData;
 	}
 
 	public async GetAppCompatibilityDbmsAsync(id: string, vid: number): Promise<DbmsCompatibility[]>{
@@ -65,33 +65,32 @@ export class MarketplaceClient{
 		};
 		const response : IResponse= await this.GetAsync(options);
 		const data = JSON.parse(response.body)['data'] as Array<any>;
-		const returnData : DbmsCompatibility[] = [];
+		const _tempData : DbmsCompatibility[] = [];
 		data.forEach(element=>{
 			if(element['attributes'] && element['attributes']['name']){
 				switch (element['attributes']['name']){
 					case "Any supported DBMS":
-						returnData.push(DbmsCompatibility.All);
+						_tempData.push(DbmsCompatibility.All);
 						break;
 					case "MS SQL":
-						returnData.push(DbmsCompatibility.MsSql);
+						_tempData.push(DbmsCompatibility.MsSql);
 						break;
 					case "Oracle":
-						returnData.push(DbmsCompatibility.Oracle);
+						_tempData.push(DbmsCompatibility.Oracle);
 						break;
 					case "PostgreSQL":
-						returnData.push(DbmsCompatibility.PgSql);
+						_tempData.push(DbmsCompatibility.PgSql);
 						break;
 					default:
-						returnData.push(DbmsCompatibility.Unknown);
+						_tempData.push(DbmsCompatibility.Unknown);
 						break;
 				}
 			}else{
-				returnData.push(DbmsCompatibility.Unknown);
+				_tempData.push(DbmsCompatibility.Unknown);
 			}
 		});
-		return returnData;
+		return _tempData;
 	}
-
 
 	public async GetAppLanguageAsync(id: string, vid: number): Promise<string[]>{
 		//field_app_language
@@ -104,15 +103,14 @@ export class MarketplaceClient{
 		};
 		const response : IResponse= await this.GetAsync(options);
 		const data = JSON.parse(response.body)['data'] as Array<any>;
-		const returnData : string[] = [];
+		const _tempData : string[] = [];
 		data.forEach(element=>{
 			if(element['attributes'] && element['attributes']['name']){
-				returnData.push(element['attributes']['name']);
+				_tempData.push(element['attributes']['name']);
 			}
 		});
-		return returnData;
+		return _tempData;
 	}
-
 
 	/**
 	 * Gets lowest semantic version of a compatible creatio app. Assume that the higher version will always support lower
@@ -167,13 +165,13 @@ export class MarketplaceClient{
 		};
 		const response : IResponse= await this.GetAsync(options);
 		const data = JSON.parse(response.body)['data'] as Array<any>;
-		const returnData : string[] = [];
+		const _tempData : string[] = [];
 		data.forEach(element=>{
 			if(element['attributes'] && element['attributes']['name']){
-				returnData.push(element['attributes']['name']);
+				_tempData.push(element['attributes']['name']);
 			}
 		});
-		return returnData;
+		return _tempData;
 	}
 
 	public async GetAppProductCategoryAsync(id: string, vid: number): Promise<ProductCategory>{
@@ -203,6 +201,7 @@ export class MarketplaceClient{
 			return ProductCategory.Unknown;
 		}
 	}
+	
 	public async GetDeveloperAsync(id: string, vid: number): Promise<string | undefined>{
 		const options : IRequestOptions = {
 			path: `/jsonapi/node/application/${id}/field_developer`,
@@ -218,6 +217,21 @@ export class MarketplaceClient{
 		}
 	}
 
+	public async GetAppLogoAsync(id: string, vid: number): Promise<string | undefined>{
+		const options : IRequestOptions = {
+			path: `/jsonapi/node/application/${id}/field_app_logo`,
+			query:[
+				{key: "resourceVersion", value: `id:${vid}`},
+				{key: "fields[file--file]", value: "uri"}
+			]
+		};
+		const response : IResponse= await this.GetAsync(options);
+		const jData =JSON.parse(response.body);
+		if(jData['data'] !== null && jData['data']['attributes']['uri']['url']) {
+			return jData['data']['attributes']['uri']['url'];
+		}
+	}
+
 	public async GetFieldApplicationMapAsync(id: string, vid: number) : Promise<string[]>{
 		const options : IRequestOptions = {
 			path: `/jsonapi/node/application/${id}/field_application_map`,
@@ -228,42 +242,77 @@ export class MarketplaceClient{
 		};
 		const response : IResponse= await this.GetAsync(options);
 		const data = JSON.parse(response.body)['data'] as Array<any>;
-		const returnData : string[] = [];
+		const _tempData : string[] = [];
 		data.forEach(element=>{
 			if(element['attributes'] && element['attributes']['name']){
-				returnData.push(element['attributes']['name']);
+				_tempData.push(element['attributes']['name']);
 			}
 		});
-		return returnData;
+		return _tempData;
 	}
 
-	public async GetCatalogueAsync() : Promise<MarketplaceApp[]>{
+	public async GetCatalogueAsyncParallel() : Promise<MarketplaceApp[]>{
 
-		const returnData : Array<MarketplaceApp> = [];
-		let offset : number = 0;
+		let _isComplete : boolean = false;
+		const _returnData :MarketplaceApp[] = [];
+		do{
+			const result = await Promise.all([
+				this.GetCatalogueAsync_batch(0),
+				this.GetCatalogueAsync_batch(50),
+				this.GetCatalogueAsync_batch(100),
+				this.GetCatalogueAsync_batch(150),
+				this.GetCatalogueAsync_batch(200),
+				this.GetCatalogueAsync_batch(250),
+				this.GetCatalogueAsync_batch(300),
+				this.GetCatalogueAsync_batch(350),
+				this.GetCatalogueAsync_batch(400),
+				this.GetCatalogueAsync_batch(450)
+			]);
+			const _tempData :MarketplaceApp[] = [];
+			_tempData.push(...result[0]);
+			_tempData.push(...result[1]);
+			_tempData.push(...result[2]);
+			_tempData.push(...result[3]);
+			_tempData.push(...result[4]);
+			_tempData.push(...result[5]);
+			_tempData.push(...result[6]);
+			_tempData.push(...result[7]);
+			_tempData.push(...result[8]);
+			_tempData.push(...result[9]);
+			
+			//Every batch item gets 50 records
+			_isComplete = _tempData.length < result.length*50 ? true : false;
+
+			_returnData.push(..._tempData);
+		}
+		while(!_isComplete);
+		return _returnData;
+	}
+
+	private async GetCatalogueAsync_batch(offset: number) : Promise<MarketplaceApp[]>{
+
+		const _tempData : Array<MarketplaceApp> = [];
+		
 		let isDone : boolean = false;
 		const data : Array<any> = [];
 
-		do {
-			const options : IRequestOptions = {
-				path: '/jsonapi/node/application',
-				query: [
-					{key: 'page[limit]', value:50},
-					{key: 'page[offset]', value:offset},
-					{key: 'filter[created-filter][condition][path]', value:'created'},
-					{key: 'filter[created-filter][condition][operator]', value:'>='},
-					{key: 'filter[created-filter][condition][value]', value:0},
-					{key: 'fields[node--application]', value:'title,moderation_state,drupal_internal__vid,drupal_internal__nid,field_app_short_description,path,field_app_certificate'}
-				]
-			};
-	
-			console.log(`Executing request: ${offset}`);
-			const response : IResponse= await this.GetAsync(options);
-			const _requestData : Array<any> = JSON.parse(response.body)['data'];
-			isDone = _requestData.length < 50 ? true:false;
-			offset +=50;
-			data.push(..._requestData);
-		} while (!isDone);
+		const options : IRequestOptions = {
+			path: '/jsonapi/node/application',
+			query: [
+				{key: 'page[limit]', value:50},
+				{key: 'page[offset]', value:offset},
+				{key: 'filter[created-filter][condition][path]', value:'created'},
+				{key: 'filter[created-filter][condition][operator]', value:'>='},
+				{key: 'filter[created-filter][condition][value]', value:0},
+				{key: 'fields[node--application]', value:'title,moderation_state,drupal_internal__vid,drupal_internal__nid,field_app_short_description,path,field_app_certificate,field_app_product_description,mp_statistic_views,mp_statistic_downloads'}
+			]
+		};
+
+		console.log(`Fetching record from : ${offset} to: ${offset+50}`);
+		const response : IResponse= await this.GetAsync(options);
+		const _requestData : Array<any> = JSON.parse(response.body)['data'];
+		data.push(..._requestData);
+		
 		
 		data.forEach(element=>{
 			const _id = element['id'] as string;
@@ -271,13 +320,25 @@ export class MarketplaceClient{
 			const _vid: number = element['attributes']['drupal_internal__vid'] as number;
 			const _title: string = element['attributes']['title'] as string;
 			const _moderationState: ModerationState = element['attributes']['moderation_state'] === 'published' ? ModerationState.published : ModerationState.upcoming;
-			const _shortDescription: string = element['attributes']['field_app_short_description']['processed'] as string;
+			
+			let _shortDescription: string = element['attributes']['field_app_short_description']['processed'] as string;
+			let _longDescription: string = element['attributes']['field_app_product_description']['processed'] as string;
+			//strip HTML tags
+			_shortDescription = _shortDescription.replace(/(<([^>]+)>)/gi, "");
+			_longDescription = _longDescription.replace(/(<([^>]+)>)/gi, "");
+
 			const _path: string = element['attributes']['path']['alias'] as string;
 			const _isCertified: boolean = element['attributes']['field_app_certificate'] as boolean;
-			const app = new MarketplaceApp(_id, _nid, _vid, _title, _moderationState, _shortDescription, _path, _isCertified);
-			returnData.push(app);
+
+			const _totalViews = element['attributes']['mp_statistic_views'] as number;
+			const _totalDownloads = element['attributes']['mp_statistic_downloads'] as number;
+			
+
+			const app = new MarketplaceApp(_id, _nid, _vid, _title, _moderationState, _shortDescription, _longDescription, _path, _isCertified, _totalViews, _totalDownloads);
+
+			_tempData.push(app);
 		});
-		return returnData;
+		return _tempData;
 	}
 
 	//#region Private
@@ -332,7 +393,7 @@ export class MarketplaceClient{
 				});
 
 				res.on("error", (error) =>{
-					reject({
+					resolve({
 						body: error.message, 
 						statusCode: res.statusCode
 					} as IResponse);

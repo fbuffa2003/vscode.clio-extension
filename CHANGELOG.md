@@ -19,6 +19,7 @@
 
 ### Added
 
+- OAuth support
 - Edit SourceCodeSchema (CS, JS, SQL), implemented FileSystemProvider
 
 

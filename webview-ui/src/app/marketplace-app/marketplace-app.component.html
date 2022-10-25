@@ -1,0 +1,74 @@
+<div class="component-wrapper">
+	<div class="cell1">
+		{{internalNid}}
+	</div>
+	<div class="cell2">
+		<div style="display:flex">
+			<span *ngIf="isStarred" class="codicon codicon-star-full" style="color: yellow; padding-right: 0.5rem;"></span>
+			<div class="title">{{title}}</div>
+		</div>
+		<div class="short-description">{{shortDescription}}</div>
+		
+		<div *ngIf="IsExpanded" class="expanded-details">
+			
+			<div class="wrapper">
+				
+				<div class="details">
+					<div class="marketplace-url">
+						<a [href]="'https://marketplace.creatio.com'+path" target="_blank">https://marketplace.creatio.com{{path}}</a>
+					</div>
+
+					<div class="developer">
+						<span>Developed by: {{details?.developer}}</span><br/>
+						<span>Supported localization: {{details?.languages}}</span>
+					</div>
+					<br/>
+					<div class="application">
+						Category: {{productCategoryString}} {{details?.map}}
+					</div>
+					<div class="compatibility">
+						Compatible with: {{details?.compatibility}}<br/>
+						Min Version: {{details?.minVersion}} and up<br/>
+						Supported Databases: {{dbmsString}}<br/>
+						Platform: {{compatiblePlatformString}}
+					</div>
+				</div>
+
+				<div class="metrics">
+					<div class="app-views">
+						<span class="label">Views</span>
+						<span class="value">{{MarketplaceApp?.totalViews}}</span>
+					</div>
+					<div class="spacer"></div>
+					<div class="app-downloads">
+						<span class="label">Downloads</span>
+						<span class="value">{{MarketplaceApp?.totalDownloads}}</span>
+					</div>
+
+				</div>
+				<div class="appLogo">
+					<img *ngIf="imageUrl" src="{{imageUrl}}" alt="app-logo">
+				</div>
+			</div>
+			
+			<div class="longDetails">
+				{{MarketplaceApp?.longDescription}}
+			</div>
+		</div>
+	</div>
+	<div class="cell3">
+		<div class="button-wrapper">
+			<div class="button-add">
+				<vscode-button class="creatio-button install" [disabled]="moderationState===1">
+					<span class="codicon codicon-add" id={{internalNid}}></span>
+				</vscode-button>
+			</div>
+			<div class="button-expand" (click)="onExpanded()">
+				<vscode-button class="creatio-button install">
+					<span *ngIf="!IsExpanded" class="codicon codicon-chevron-right"></span>
+					<span *ngIf="IsExpanded" class="codicon codicon-chevron-down"></span>
+				</vscode-button>
+			</div>
+		</div>
+	</div>	
+</div>

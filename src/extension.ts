@@ -457,6 +457,8 @@ export function activate(context: vscode.ExtensionContext) {
 			console.log(`Compatible dbms: ${app.AppCompatibleDbms}`);
 			console.log(`Compatible platform: ${app.AppCompatiblePlatform}`);
 			console.log(`Developer: ${app.AppDeveloper}`);
+			
+			console.log(`Logo: ${app.AppLogo}`);
 		})
 	);
 	//#endregion

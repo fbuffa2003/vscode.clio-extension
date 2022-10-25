@@ -9,10 +9,13 @@ export class MarketplaceApp{
 	public readonly internalNid: number;
 	public readonly internalVid: number;
 	public readonly shortDescription: string;
+	public readonly longDescription: string;
 	public readonly isCertified : boolean;
-
+	public readonly totalViews : number;
+	public readonly totalDownloads : number;
 	private readonly _marketplaceClient = new MarketplaceClient();
 	private readonly _path : string;
+	
 
 	public async FillAllPropertiesAsync() : Promise<void>{
 		const results = await Promise.all([
@@ -23,7 +26,9 @@ export class MarketplaceApp{
 			this._marketplaceClient.GetDeveloperAsync(this.id, this.internalVid),
 			this._marketplaceClient.GetAppCompatibilityDbmsAsync(this.id, this.internalVid),
 			this._marketplaceClient.GetAppCompatibilityPlatformAsync(this.id, this.internalVid),
-			this._marketplaceClient.GetAppProductCategoryAsync(this.id, this.internalVid)
+			this._marketplaceClient.GetAppProductCategoryAsync(this.id, this.internalVid),
+			this._marketplaceClient.GetAppLogoAsync(this.id, this.internalVid)
+			
 		]);
 		
 		this._applicationMap = results[0];
@@ -34,6 +39,7 @@ export class MarketplaceApp{
 		this._appCompatibleDbms = results[5];
 		this._appCompatiblePlatform = results[6];
 		this._appProductCategory = results[7];
+		this._appLogo = results[8];
 	}
 
 
@@ -64,8 +70,9 @@ export class MarketplaceApp{
 		return this._appLanguages;
 	}
 	
-	public get AppLogo() : Promise<string[]> {
-		throw new Error();
+	private _appLogo : string | undefined;
+	public get AppLogo() : string | undefined {
+		return this._appLogo;
 	}
 	
 	public get AppPrice() : Promise<string[]> {
@@ -76,15 +83,7 @@ export class MarketplaceApp{
 	public get AppProductCategory() : ProductCategory {
 		return this._appProductCategory;
 	}
-	
-	public get AppProductScreenShot() : Promise<string[]> {
-		throw new Error();
-	}
-	
-	public get AppCertificate() : Promise<string[]> {
-		throw new Error();
-	}
-	
+		
 	private _appCompatibleDbms : DbmsCompatibility[] = [];
 	public get AppCompatibleDbms() : DbmsCompatibility[] {
 		return this._appCompatibleDbms;
@@ -113,10 +112,14 @@ export class MarketplaceApp{
 	 * @param title Application title
 	 * @param moderationState Application moderation state
 	 * @param shortDescription Application short description
-	 * @param path Application alias
+	 * @param longDescription Application long description
+	 * @param path Application alias prepend https://marketplace.creatio.com to get marketplace app url
 	 * @param isCertified Application alias
+	 * @param totalViews Total application views
+	 * @param totalDownloads Total application downloads
 	 */
-	constructor(id: string, internal_nid:number, internal_vid:number, title: string, moderationState: ModerationState, shortDescription: string, path: string, isCertified: boolean)
+	constructor(id: string, internal_nid:number, internal_vid:number, title: string, moderationState: ModerationState, 
+		shortDescription: string, longDescription: string,path: string, isCertified: boolean, totalViews: number, totalDownloads: number)
 	{
 		this.id = id;
 		this.internalNid = internal_nid;
@@ -124,11 +127,12 @@ export class MarketplaceApp{
 		this.title = title;
 		this.moderationState = moderationState;
 		this.shortDescription = shortDescription;
+		this.longDescription = longDescription;
 		this._path = path;
 		this.isCertified = isCertified;
+		this.totalViews = totalViews;
+		this.totalDownloads=totalDownloads;
 	}
-
-	
 }
 
 export enum ModerationState{

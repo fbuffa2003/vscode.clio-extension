@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
 import { ClioExecutor } from "../Common/clioExecutor";
+import { MarketplaceCatalogue } from "../common/MarketplaceClient/MarketplaceCatalogue";
 import { Environment } from "../service/TreeItemProvider/Environment";
 import { getUri } from "../utilities/getUri";
 
@@ -9,8 +10,8 @@ export class CatalogPanel {
 	private readonly _panel: WebviewPanel;
 	private _disposables: Disposable[] = [];
 	private static _envName : string | undefined;
-	private _clio: ClioExecutor;
-
+	private _clio: ClioExecutor;		
+	private _marketplaceCatalogue : MarketplaceCatalogue;
 	/**
 	 * The CatalogPanel class private constructor (called only from the render method).
 	 *
@@ -20,7 +21,7 @@ export class CatalogPanel {
 	private constructor(panel: WebviewPanel, extensionUri: Uri) {
 		this._panel = panel;
 		this._clio = new ClioExecutor();
-
+		this._marketplaceCatalogue = new MarketplaceCatalogue();
 		// Set an event listener to listen for when the panel is disposed (i.e. when the user closes
 		// the panel or when the panel is closed programmatically)
 		this._panel.onDidDispose(this.dispose, null, this._disposables);
@@ -85,10 +86,10 @@ export class CatalogPanel {
 
 		// Dispose of all disposables (i.e. commands) for the current webview panel
 		while (this._disposables.length) {
-		const disposable = this._disposables.pop();
-		if (disposable) {
-			disposable.dispose();
-		}
+			const disposable = this._disposables.pop();
+			if (disposable) {
+				disposable.dispose();
+			}
 		}
 	}
 
@@ -148,6 +149,7 @@ export class CatalogPanel {
 		async (message: any) => {
 			const command = message.command;
 			const environmentName = message.environmentName;
+			const nid = message.internalNid;
 
 			switch (command) {
 				case "getCatalog":{
@@ -158,9 +160,13 @@ export class CatalogPanel {
 							title: "Getting Data"
 						},
 						async(progress, token)=>{
-							const result = await this._clio.ExecuteClioCommand('clio catalog');
+
+							if(this._marketplaceCatalogue.Applications.length === 0){
+								await this._marketplaceCatalogue.FillCatalogueAsync();
+							}
+
 							const msg = {
-								"getCatalog": result
+								"getCatalog": this._marketplaceCatalogue.Applications
 							};
 			
 							//raising event, angular subscribes to it
@@ -190,9 +196,46 @@ export class CatalogPanel {
 								increment: 100,
 								message: "Done"
 							});
-							//vscode.window.showInformationMessage(result as string);
+							
 						}
 					);
+				}
+				case "getMarketplaceAppDetails":{
+					vscode.window.withProgress(
+						{
+							location : vscode.ProgressLocation.Notification,
+							title: "Getting Application Details"
+						},
+						async(progress, token)=>{
+
+							const appIndex = this._marketplaceCatalogue.Applications.findIndex(app=> app.internalNid === nid);
+							if( appIndex === -1) {return;}
+
+							await this._marketplaceCatalogue.Applications[appIndex].FillAllPropertiesAsync();
+							const app = this._marketplaceCatalogue.Applications[appIndex];
+							const msg = {
+								"getMarketplaceAppDetails": {
+									languages : app.AppLanguages,
+									developer: app.AppDeveloper,
+									dbms: app.AppCompatibleDbms,
+									map: app.ApplicationMap,
+									productCategory: app.AppProductCategory,
+									compatibility: app.AppCompatibility,
+									minVersion: app.AppCompatibilityVersion.toString(),
+									platform: app.AppCompatiblePlatform,
+									appLogo: app.AppLogo
+								}
+							};
+			
+							//raising event, angular subscribes to it
+							this._panel.webview.postMessage(msg);
+							progress.report({ 
+								increment: 100, 
+								message: "Done" 
+							});
+						}
+					);
+					break;
 				}
 			}
 		},

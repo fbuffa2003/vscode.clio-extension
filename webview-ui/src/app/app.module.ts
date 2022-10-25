@@ -12,6 +12,8 @@ import { VscodeDataProviderService } from "./services/vscode-data-provider.servi
 import { AgGridModule } from 'ag-grid-angular';
 import { WebSocketMessagesComponent } from './web-socket-messages/web-socket-messages.component';
 import { ComparerComponent } from './comparer/comparer.component';
+import { MarketplaceAppComponent } from './marketplace-app/marketplace-app.component';
+
 
 
 @NgModule({
@@ -23,6 +25,7 @@ import { ComparerComponent } from './comparer/comparer.component';
 		FeaturesComponent,
 		WebSocketMessagesComponent,
 		ComparerComponent,
+		MarketplaceAppComponent
 	],
 	imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, AgGridModule],
 	providers: [VscodeDataProviderService],

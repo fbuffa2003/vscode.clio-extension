@@ -121,6 +121,23 @@ export class VscodeDataProviderService {
 			environmentName: environmentName
 		});
 	}
+
+	public async getMarketplaceAppDetails(nid: number) : Promise<IMarketplaceAppDetail>{
+		
+		return new Promise<any>((resolve, reject)=>{
+			const commandName = "getMarketplaceAppDetails";
+			vscode.postMessage({
+				command: commandName,
+				internalNid: nid
+			});
+			var interval = setInterval(()=>{
+				if(this.data[commandName]){
+					resolve(this.data[commandName] as IMarketplaceAppDetail);
+					clearInterval(interval);
+				}
+			},100);
+		});
+	}
 }
 
 
@@ -132,4 +149,39 @@ export enum LogLevel{
 	Info,
 	Trace,
 	Warn
+}
+
+
+export interface IMarketplaceAppDetail{
+	languages : string[];
+	developer: string | undefined;
+	dbms: DbmsCompatibility[];
+	map: string[];
+	productCategory: ProductCategory;
+	compatibility: string[];
+	minVersion: string;
+	platform: CompatiblePlatform[];
+	appLogo: string
+}
+
+export enum DbmsCompatibility{
+	Unknown = 0,
+	All = 1,
+	MsSql = 2,
+	Oracle = 3,
+	PgSql = 4
+}
+
+export enum ProductCategory{
+	Unknown = 0,
+	SoftwareSolution = 1,
+	Connector = 2,
+	AddOn = 3
+}
+
+export enum CompatiblePlatform{
+	Unknown = 0,
+	All = 1,
+	NetCore = 2,
+	NetFramework=3
 }
