@@ -59,12 +59,12 @@
 	<div class="cell3">
 		<div class="button-wrapper">
 			<div class="button-add">
-				<vscode-button class="creatio-button install" [disabled]="moderationState===1">
+				<vscode-button class="creatio-button install" [disabled]="moderationState===1" (click)="onSelectedForInstall()">
 					<span class="codicon codicon-add" id={{internalNid}}></span>
 				</vscode-button>
 			</div>
-			<div class="button-expand" (click)="onExpanded()">
-				<vscode-button class="creatio-button install">
+			<div class="button-expand" >
+				<vscode-button class="creatio-button install" (click)="onExpanded()">
 					<span *ngIf="!IsExpanded" class="codicon codicon-chevron-right"></span>
 					<span *ngIf="IsExpanded" class="codicon codicon-chevron-down"></span>
 				</vscode-button>

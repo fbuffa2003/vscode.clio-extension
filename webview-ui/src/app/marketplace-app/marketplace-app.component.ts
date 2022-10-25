@@ -1,4 +1,5 @@
-import { Component, HostListener, Input, OnInit } from "@angular/core";
+import { ThisReceiver } from "@angular/compiler";
+import { Component, EventEmitter, HostListener, Input, OnInit, Output } from "@angular/core";
 import {
 	provideVSCodeDesignSystem,
 	vsCodeButton,
@@ -19,7 +20,9 @@ import { DbmsCompatibility, IMarketplaceAppDetail, VscodeDataProviderService } f
 export class MarketplaceAppComponent implements OnInit {
 	
 	@Input() MarketplaceApp : IMarketplaceApp | undefined;
-	
+	@Output() Selected = new EventEmitter<number>();
+
+
 	private _isExpanded : boolean = false;
 	public get IsExpanded() : boolean {
 		return this._isExpanded;
@@ -116,5 +119,9 @@ export class MarketplaceAppComponent implements OnInit {
 
 			this.productCategoryString =  ProductCategory[this.details.productCategory];
 		}
+	}
+
+	public onSelectedForInstall(){
+		this.Selected.emit(this.internalNid);
 	}
 }

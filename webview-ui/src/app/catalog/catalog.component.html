@@ -12,6 +12,10 @@
 						#myData	(keyup)="search(myData)" ngDefaultControl>
 						<span slot="start" class="codicon codicon-search"></span>
 					</vscode-text-field>
+					<div>
+						{{selectedAppsString}}<br/>
+						Not yet implemented :(
+					</div>
 				</div>
 				<br/><br/>
 			</div>
@@ -26,7 +30,7 @@
 		</vscode-data-grid-row>
 		<vscode-data-grid-row *ngFor="let item of catalog" #dataItem #myRowData>
 			<vscode-data-grid-cell grid-column="1" class="content-cell" style="grid-column: 1 / -1;">
-				<app-marketplace-app [MarketplaceApp]="item" style="width: 100%;"></app-marketplace-app>
+				<app-marketplace-app [MarketplaceApp]="item" style="width: 100%;" (Selected)="onSelectedForInstall($event)"></app-marketplace-app>
 			</vscode-data-grid-cell>
 		</vscode-data-grid-row>
 	</vscode-data-grid>

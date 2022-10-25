@@ -14,6 +14,10 @@ export class CatalogComponent implements OnInit {
 	public unFilteredCatalog : Array<IMarketplaceApp> = new Array<IMarketplaceApp>();
 	public catalog : Array<IMarketplaceApp> = this.unFilteredCatalog;
 
+	public selectedApps : number[]=[];
+
+	public selectedAppsString : string;
+
 	private imageUri;
 	public environmentName;
 	public circleImageUri;
@@ -53,7 +57,7 @@ export class CatalogComponent implements OnInit {
 		this.imageUri = history.state.imageUri;
 		this.environmentName = history.state.environmentName;
 		this.circleImageUri = this.imageUri+'/'+"creatio-square.svg";
-		//console.log(`catalog.component.ts environmentName: ${this.environmentName}`);
+		this.selectedAppsString = '';
 	}
 	ngOnInit(): void {
 		//Ask extension to run clio catalog
@@ -78,6 +82,15 @@ export class CatalogComponent implements OnInit {
 		});
 	}
 
+
+	public onSelectedForInstall(nid: number){
+		const _tempIndex = this.selectedApps.findIndex(app=> app === nid);
+		if(_tempIndex===-1){
+			this.selectedApps.push(nid);
+
+			this.selectedAppsString = `clio install-many-aps --list ${this.selectedApps.toString()} --with-repack -e ${this.environmentName}`;
+		}
+	}
 }
 
 export interface IMarketplaceApp {
@@ -93,7 +106,6 @@ export interface IMarketplaceApp {
 	totalViews: number;
 	totalDownloads: number;
 }
-
 
 export enum ModerationState{
 	published = 0,
