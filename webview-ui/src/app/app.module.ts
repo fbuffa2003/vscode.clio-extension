@@ -1,7 +1,7 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { BrowserModule } from '@angular/platform-browser';
-
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CatalogComponent } from './catalog/catalog.component';
@@ -27,7 +27,7 @@ import { MarketplaceAppComponent } from './marketplace-app/marketplace-app.compo
 		ComparerComponent,
 		MarketplaceAppComponent
 	],
-	imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, AgGridModule],
+	imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, AgGridModule, DragDropModule],
 	providers: [VscodeDataProviderService],
 	bootstrap: [AppComponent],
 	schemas: [CUSTOM_ELEMENTS_SCHEMA],

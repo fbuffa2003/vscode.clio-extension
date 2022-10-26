@@ -12,8 +12,9 @@
 						#myData	(keyup)="search(myData)" ngDefaultControl>
 						<span slot="start" class="codicon codicon-search"></span>
 					</vscode-text-field>
-					<div class="tag-container">
-						<vscode-tag class="tag-item" ngDefaultControl *ngFor="let tag of selectedApps" >
+
+					<div class="tag-container example-list" cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="drop($event)">
+						<vscode-tag class="tag-item example-box" ngDefaultControl *ngFor="let tag of selectedApps" cdkDrag>
 							{{tag}}
 							<span class="codicon codicon-close icon" (click)="removeFromSelectedApps(tag)"></span>
 						</vscode-tag>

@@ -1,8 +1,8 @@
 import { Component, OnInit, HostListener} from '@angular/core';
+import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 import { vscode } from "./../utilities/vscode";
 import { provideVSCodeDesignSystem, TextField, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow, vsCodeTag, vsCodeTextField } from "@vscode/webview-ui-toolkit";
 import { VscodeDataProviderService } from '../services/vscode-data-provider.service';
-
 
 @Component({
 	selector: "app-catalog",
@@ -94,6 +94,9 @@ export class CatalogComponent implements OnInit {
 		if(_tempIndex !==1){
 			this.selectedApps.splice(_tempIndex, 1);
 		}
+	}
+	drop(event: CdkDragDrop<number[]>) {
+		moveItemInArray(this.selectedApps, event.previousIndex, event.currentIndex);
 	}
 }
 
