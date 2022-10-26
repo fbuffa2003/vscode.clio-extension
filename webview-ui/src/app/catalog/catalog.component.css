@@ -1,5 +1,5 @@
 vscode-text-field{
-	width: 80%;
+	width: 60%;
 }
 
 .logo{
@@ -39,6 +39,8 @@ vscode-button{
 	align-items:center; 
 	text-align: center;
 	display: block;
+	margin-top: 1rem;
+	width: 100%;
 }
 
 .header-row:hover{
@@ -70,15 +72,27 @@ vscode-button{
 	font-size: smaller;
 }
 
-.button-wrapper{
+
+.tag-container{
+	display: flex;
+	justify-content: center;
+	margin-top:10px;
+	width: 100%;
 
 }
-
-.button-wrapper > .button-add{
-
+.tag-item{
+	margin: 3px;
+	width: 50px;
+	display: flex;
+}
+.icon{
+	position: relative;
+	top: 4px;
 }
 
-.button-wrapper > .button-expand{
-
+.icon:hover{
+	/* position: relative;
+	top: 4px; */
+	color:#ED522F;
 }
 

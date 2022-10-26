@@ -12,9 +12,11 @@
 						#myData	(keyup)="search(myData)" ngDefaultControl>
 						<span slot="start" class="codicon codicon-search"></span>
 					</vscode-text-field>
-					<div>
-						{{selectedAppsString}}<br/>
-						Not yet implemented :(
+					<div class="tag-container">
+						<vscode-tag class="tag-item" ngDefaultControl *ngFor="let tag of selectedApps" >
+							{{tag}}
+							<span class="codicon codicon-close icon" (click)="removeFromSelectedApps(tag)"></span>
+						</vscode-tag>
 					</div>
 				</div>
 				<br/><br/>

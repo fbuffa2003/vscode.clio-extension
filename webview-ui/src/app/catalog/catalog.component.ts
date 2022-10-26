@@ -1,6 +1,6 @@
 import { Component, OnInit, HostListener} from '@angular/core';
 import { vscode } from "./../utilities/vscode";
-import { provideVSCodeDesignSystem, TextField, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow, vsCodeTextField } from "@vscode/webview-ui-toolkit";
+import { provideVSCodeDesignSystem, TextField, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow, vsCodeTag, vsCodeTextField } from "@vscode/webview-ui-toolkit";
 import { VscodeDataProviderService } from '../services/vscode-data-provider.service';
 
 
@@ -50,7 +50,7 @@ export class CatalogComponent implements OnInit {
 
 	constructor(private readonly vscodeDataProvider: VscodeDataProviderService) {
 		provideVSCodeDesignSystem().register(
-			vsCodeButton(), vsCodeCheckbox(), vsCodeTextField(),
+			vsCodeButton(), vsCodeCheckbox(), vsCodeTextField(),vsCodeTag(),
 			vsCodeDataGrid(), vsCodeDataGridRow(), vsCodeDataGridCell()
 		);
 
@@ -87,8 +87,12 @@ export class CatalogComponent implements OnInit {
 		const _tempIndex = this.selectedApps.findIndex(app=> app === nid);
 		if(_tempIndex===-1){
 			this.selectedApps.push(nid);
-
-			this.selectedAppsString = `clio install-many-aps --list ${this.selectedApps.toString()} --with-repack -e ${this.environmentName}`;
+		}
+	}
+	public removeFromSelectedApps(nid: number){
+		const _tempIndex = this.selectedApps.findIndex(app=> app === nid);
+		if(_tempIndex !==1){
+			this.selectedApps.splice(_tempIndex, 1);
 		}
 	}
 }

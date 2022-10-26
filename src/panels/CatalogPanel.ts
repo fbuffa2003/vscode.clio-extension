@@ -10,7 +10,6 @@ export class CatalogPanel {
 	private readonly _panel: WebviewPanel;
 	private _disposables: Disposable[] = [];
 	private static _envName : string | undefined;
-	private _clio: ClioExecutor;		
 	private _marketplaceCatalogue : MarketplaceCatalogue;
 	/**
 	 * The CatalogPanel class private constructor (called only from the render method).
@@ -20,7 +19,6 @@ export class CatalogPanel {
 	 */
 	private constructor(panel: WebviewPanel, extensionUri: Uri) {
 		this._panel = panel;
-		this._clio = new ClioExecutor();
 		this._marketplaceCatalogue = new MarketplaceCatalogue();
 		// Set an event listener to listen for when the panel is disposed (i.e. when the user closes
 		// the panel or when the panel is closed programmatically)
@@ -31,8 +29,6 @@ export class CatalogPanel {
 
 		// Set an event listener to listen for messages passed from the webview context
 		this._setWebviewMessageListener(this._panel.webview);
-
-		
 	}
 
 	/**
@@ -80,15 +76,18 @@ export class CatalogPanel {
 	 */
 	public dispose() {
 		CatalogPanel.currentPanel = undefined;
-
-		// Dispose of the current webview panel
-		this._panel.dispose();
-
-		// Dispose of all disposables (i.e. commands) for the current webview panel
-		while (this._disposables.length) {
-			const disposable = this._disposables.pop();
-			if (disposable) {
-				disposable.dispose();
+		
+		if(this){
+			
+			// Dispose of the current webview panel
+			this._panel.dispose();
+			
+			// Dispose of all disposables (i.e. commands) for the current webview panel
+			while (this._disposables.length) {
+				const disposable = this._disposables.pop();
+				if (disposable) {
+					disposable.dispose();
+				}
 			}
 		}
 	}

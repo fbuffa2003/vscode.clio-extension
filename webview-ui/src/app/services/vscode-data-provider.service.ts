@@ -22,7 +22,7 @@ export class VscodeDataProviderService {
 				command: commandName
 			});
 			var interval = setInterval(()=>{
-				if(this.data[commandName]){
+				if(this.data && this.data[commandName]){
 					resolve(this.data[commandName]);
 					clearInterval(interval);
 				}
@@ -36,7 +36,7 @@ export class VscodeDataProviderService {
 				command: commandName
 			});
 			var interval = setInterval(()=>{
-				if(this.data[commandName]){
+				if(this.data && this.data[commandName]){
 					resolve(this.data[commandName]);
 					clearInterval(interval);
 				}
@@ -52,7 +52,7 @@ export class VscodeDataProviderService {
 				feature: feature
 			});
 			var interval = setInterval(()=>{
-				if(this.data[commandName]){
+				if(this.data && this.data[commandName]){
 					resolve(this.data[commandName]);
 					clearInterval(interval);
 				}
@@ -67,7 +67,7 @@ export class VscodeDataProviderService {
 				feature: feature
 			});
 			var interval = setInterval(()=>{
-				if(this.data[commandName]){
+				if(this.data && this.data[commandName]){
 					resolve(this.data[commandName]);
 					clearInterval(interval);
 				}
@@ -81,7 +81,7 @@ export class VscodeDataProviderService {
 				command: commandName
 			});
 			var interval = setInterval(()=>{
-				if(this.data[commandName]){
+				if(this.data && this.data[commandName]){
 					resolve(this.data[commandName]);
 					clearInterval(interval);
 				}
@@ -97,7 +97,7 @@ export class VscodeDataProviderService {
 				environmentName: environmentName
 			});
 			var interval = setInterval(()=>{
-				if(this.data[commandName]){
+				if(this.data && this.data[commandName]){
 					resolve(this.data[commandName]);
 					clearInterval(interval);
 				}
@@ -131,7 +131,7 @@ export class VscodeDataProviderService {
 				internalNid: nid
 			});
 			var interval = setInterval(()=>{
-				if(this.data[commandName]){
+				if(this.data && this.data[commandName]){
 					resolve(this.data[commandName] as IMarketplaceAppDetail);
 					clearInterval(interval);
 				}
