@@ -1,10 +1,12 @@
 import * as vscode from "vscode";
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
 import { getUri } from "../utilities/getUri";
+import { getNonce } from "./getNonce";
 
 export class ConnectionPanel {
 	public static currentPanel: ConnectionPanel | undefined;
-	private readonly _panel: WebviewPanel;
+	private readonly _panel: vscode.WebviewPanel;
+	private readonly _extensionUri: vscode.Uri;
 	private _disposables: Disposable[] = [];
 	private static _envName : string | undefined;
 
@@ -16,13 +18,14 @@ export class ConnectionPanel {
 	 */
 	private constructor(panel: WebviewPanel, extensionUri: Uri) {
 		this._panel = panel;
-		
+		this._extensionUri = extensionUri;
+
 		// Set an event listener to listen for when the panel is disposed (i.e. when the user closes
 		// the panel or when the panel is closed programmatically)
-		this._panel.onDidDispose(this.dispose, null, this._disposables);
+		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
 		// Set the HTML content for the webview panel
-		this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri);
+		this._panel.webview.html = this._getWebviewContent(this._panel.webview, this._extensionUri);
 
 		// Set an event listener to listen for messages passed from the webview context
 		this._setWebviewMessageListener(this._panel.webview);		
@@ -34,7 +37,7 @@ export class ConnectionPanel {
 	 *
 	 * @param extensionUri The URI of the directory containing the extension.
 	 */
-	public static render(extensionUri: Uri) {
+	public static render(extensionUri: vscode.Uri) {
 
 		if (ConnectionPanel.currentPanel) {
 		// If the webview panel already exists reveal it
@@ -83,11 +86,12 @@ export class ConnectionPanel {
 		this._panel.dispose();
 
 		// Dispose of all disposables (i.e. commands) for the current webview panel
-		while (this._disposables.length) {
-		const disposable = this._disposables.pop();
-		if (disposable) {
-			disposable.dispose();
-		}
+		while (this._disposables.length) 
+		{
+			const disposable = this._disposables.pop();
+			if (disposable) {
+				disposable.dispose();
+			}
 		}
 	}
 
@@ -110,8 +114,11 @@ export class ConnectionPanel {
 		const polyfillsUri = getUri(webview, extensionUri, ["webview-ui", "build", "polyfills.js"]);
 		const scriptUri = getUri(webview, extensionUri, ["webview-ui", "build", "main.js"]);
 		const imagesUri = getUri(webview, extensionUri, ["resources", "icon"]);
+		const nonce = getNonce();
 	
-	
+		//Cannot get it to work
+		/*<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}'; font-src 'none';">*/
+
 		// Tip: Install the es6-string-html VS Code extension to enable code highlighting below
 		return /*html*/ `
 		<!DOCTYPE html>
@@ -147,15 +154,15 @@ export class ConnectionPanel {
 	 */
 	private _setWebviewMessageListener(webview: Webview) {
 		webview.onDidReceiveMessage(
-		async (message: any) => {
-			const command = message.command;
-			switch (command) {
-				case "regWebApp":
-					vscode.commands.executeCommand("ClioSQL.RegisterWebApp", message.data);
-			}
-		},
-		undefined,
-		this._disposables
+			async (message: any) => {
+				const command = message.command;
+				switch (command) {
+					case "regWebApp":
+						vscode.commands.executeCommand("ClioSQL.RegisterWebApp", message.data);
+				}
+			},
+			null,
+			this._disposables
 		);
 	}
 
@@ -166,7 +173,6 @@ export class ConnectionPanel {
 		this._panel.webview.postMessage(msg);
 	}
 }
-
 
 
 /**

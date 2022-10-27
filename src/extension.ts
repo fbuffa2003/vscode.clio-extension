@@ -168,20 +168,6 @@ export function activate(context: vscode.ExtensionContext) {
 		//Show my panel;
 		SqlPanel.render(context.extensionUri, envName as string);
 		SqlPanel.currentPanel?.sendMessage(result);
-
-		/*
-		await vscode.commands.executeCommand("workbench.action.editorLayoutTwoRows");
-				
-		vscode.workspace.openTextDocument({
-			language: 'text',
-			content : (result|| '').toString()
-		})
-		.then((doc: vscode.TextDocument)=>{
-			vscode.window.showTextDocument(doc, {
-				viewColumn: vscode.ViewColumn.Two
-			});
-		});
-		*/
 	}));
 
 	context.subscriptions.push(

@@ -1,5 +1,4 @@
 import { exec } from 'child_process';
-import { StringifyOptions } from 'querystring';
 import * as vscode from 'vscode';
 
 export class ClioExecutor {

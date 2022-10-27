@@ -246,24 +246,60 @@ export class Environment extends CreatioTreeItem {
 		this.healthStatus = status;
 	}
 	private setUnknownHealthIcon(): void {
-		this.iconPath = {
-			light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'creatio-circle-white.svg'),
-			dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'creatio-circle-white.svg')
-		};
+
+
+		const date = new Date();
+		const month = date.getMonth();
+		const day = date.getDate();
+
+
+		if(month === 9 && day>20){
+			this.iconPath = {
+				light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'pumpkin','pumpkin-unknown.svg'),
+				dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'pumpkin','pumpkin-unknown.svg')
+			};
+		}else{
+			this.iconPath = {
+				light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'creatio-circle-white.svg'),
+				dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'creatio-circle-white.svg')
+			};
+
+		}
 		this._onDidStatusUpdate?.fire(this);
 	}
 	private setHealthyIcon(): void {
-		this.iconPath = {
-			light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'circle-green-bottom.svg'),
-			dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'circle-green-bottom.svg')
-		};
+		const date = new Date();
+		const month = date.getMonth();
+		const day = date.getDate();
+		if(month === 9 && day>20){
+			this.iconPath = {
+				light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'pumpkin','pumpkin-green.svg'),
+				dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'pumpkin','pumpkin-green.svg')
+			};
+		}else{
+			this.iconPath = {
+				light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'circle-green-bottom.svg'),
+				dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'circle-green-bottom.svg')
+			};
+		}
+		
 		this._onDidStatusUpdate?.fire(this);
 	}
 	private setUnhealthyIcon(): void {
-		this.iconPath = {
-			light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'circle-red-bottom.svg'),
-			dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'circle-red-bottom.svg')
-		};
+		const date = new Date();
+		const month = date.getMonth();
+		const day = date.getDate();
+		if(month === 9 && day>25){
+			this.iconPath = {
+				light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'pumpkin','pumpkin-red.svg'),
+				dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'pumpkin','pumpkin-red.svg')
+			};
+		}else{
+			this.iconPath = {
+				light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'circle-red-bottom.svg'),
+				dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'circle-red-bottom.svg')
+			};
+		}
 		this._onDidStatusUpdate?.fire(this);
 	}
 	
