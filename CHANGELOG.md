@@ -3,13 +3,8 @@
 ## Upcoming RC
 
 - Log from Creatio
-- Install multiple apps from Marketplace (savable scenario ?)
-  - Download all, repack, send to Creatio;
----
 - Welcome journey
 - Edit existing connection
-  - Open other schemas in in Creatio
-
 
 # PRTNER RELEASE
 
@@ -21,7 +16,8 @@
 
 - OAuth support
 - Edit SourceCodeSchema (CS, JS, SQL), implemented FileSystemProvider
-
+- Added option to install multiple applications
+- Open other schemas in Creatio
 
 ## [0.0.10] Initial release  - Oct 20, 2022
 

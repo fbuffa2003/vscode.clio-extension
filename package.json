@@ -176,6 +176,11 @@
 					"group": "inline@2"
 				},
 				{
+					"command": "ClioSQL.OpenSchemaContent",
+					"when": "viewItem =~ /entityModuleSchema|dataSchema|businessProcessSchema|webServiceSchema|caseSchema|userTaskSchema|addOnSchema/",
+					"group": "inline@2"
+				},
+				{
 					"submenu": "ClioSQL.OverflowMenu",
 					"when": "viewItem == CreatioInstance",
 					"group": "inline@5"
@@ -361,6 +366,11 @@
 				"command": "ClioSQL.ShowSchemaContent",
 				"title": "Show Content",
 				"icon": "$(file-code)"
+			},
+			{
+				"command": "ClioSQL.OpenSchemaContent",
+				"title": "Navigate to Content",
+				"icon": "$(home)"
 			},
 			{
 				"command": "ClioSQL.Listen",

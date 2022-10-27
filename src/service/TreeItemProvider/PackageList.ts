@@ -98,10 +98,8 @@ export class PackageList extends CreatioTreeItem {
 
 	private handleLockStatusUpdate(pkg : Package) {
 		this.sort();
-		console.log("Sort done");
 	}
 
-	
 }
 
 export class Package extends CreatioTreeItem {
@@ -266,7 +264,7 @@ export class Package extends CreatioTreeItem {
 	}
 
 	public async GetPackageProperties(){
-		const properties = await (this.parent?.parent as Environment).creatioClient.GetPackageProperties(this.uId);
+		await (this.parent?.parent as Environment).creatioClient.GetPackageProperties(this.uId);
 	}
 
 	public async unlock(){
@@ -295,7 +293,6 @@ export class Package extends CreatioTreeItem {
 		}
 	}
 
-	
 	public async lock(){
 		
 		const args : IUnlockPkgArgs= {
@@ -349,20 +346,24 @@ export class WorkSpaceItem extends CreatioTreeItem{
 		const env = this.parent?.parent?.parent as Environment;
 		let language = '';
 		let fileName = this.name;
+		let isFileContent = false;
 		switch(this.itemType){
 			case ItemType.clientModuleSchema:{
 				language = 'javascript';
 				fileName +='.js';
+				isFileContent = true;
 				break;
 			}
 			case ItemType.sqlScriptSchema:{
 				language = 'sql';
 				fileName +='.sql';
+				isFileContent = true;
 				break;
 			}
 			case ItemType.sourceCodeSchema:{
 					language = 'csharp';
 					fileName +='.cs';
+					isFileContent = true;
 					break;
 				};
 			default : {
@@ -370,6 +371,60 @@ export class WorkSpaceItem extends CreatioTreeItem{
 			}
 		}
 		
+		if(!isFileContent){
+
+			const appPath = (env.connectionSettings.isNetCore) ? "":"0";
+			let link : vscode.Uri | undefined;
+			
+			switch(this.itemType){
+				case ItemType.entitySchema:{
+					const linkText = `${env.connectionSettings.uri}${appPath}/ClientApp/#/EntitySchemaDesigner/${this.uId}?packageId=${this.parent.uId}&packageName=${this.parent.name}&useFullHierarchy=true`;
+					link = vscode.Uri.parse(linkText);
+					break;
+				}
+				case ItemType.dataSchema:{
+					const linkText = `${env.connectionSettings.uri}${appPath}/ClientApp/#/SchemaDataDesigner/${this.uId}`;
+					link = vscode.Uri.parse(linkText);
+					break;
+				}
+				case ItemType.businessProcessSchema:{
+					//http://k_krylov_n:8005/0/Nui/ViewModule.aspx?vm=SchemaDesigner#process/da145d55-9e13-4850-b793-d144131e3849
+					const linkText = `${env.connectionSettings.uri}${appPath}/Nui/ViewModule.aspx?vm=SchemaDesigner#process/${this.uId}`;
+					link = vscode.Uri.parse(linkText);
+					break;
+				}
+				case ItemType.webServiceSchema:{
+					//http://k_krylov_n:8005/0/Nui/ViewModule.aspx?vm=WebServicesDesigner#CardModuleV2/WebServiceV2Page/edit/eaab0cb8-b7c8-4fc7-9ff0-535be5f59413
+					const linkText = `${env.connectionSettings.uri}${appPath}/Nui/ViewModule.aspx?vm=WebServicesDesigner#CardModuleV2/WebServiceV2Page/edit/${this.uId}`;
+					link = vscode.Uri.parse(linkText);
+					break;
+				}
+				case ItemType.caseSchema:{
+					//http://k_krylov_n:8005/0/Nui/ViewModule.aspx?vm=DcmDesigner#case/19f1d457-2bc6-48f9-ab6c-a5a697f30c47
+					const linkText = `${env.connectionSettings.uri}${appPath}/Nui/ViewModule.aspx?vm=DcmDesigner#case/${this.uId}`;
+					link = vscode.Uri.parse(linkText);
+					break;
+				}
+				case ItemType.userTaskSchema:{
+					//http://k_krylov_n:8005/0/ClientApp/#/UserTaskSchemaDesigner/b5c726f2-af5b-4381-bac6-913074144308
+					const linkText = `${env.connectionSettings.uri}${appPath}/ClientApp/#/UserTaskSchemaDesigner/${this.uId}`;
+					link = vscode.Uri.parse(linkText);
+					break;
+				}
+				case ItemType.addOnSchema:{
+					//http://k_krylov_n:8005/0/ClientApp/#/SchemaMetaDataDesigner/97376e01-6bb8-4cdf-a7d4-face0ff7bebe/11/06d9ef10-51d8-122c-8933-9212e84236c9
+					const linkText = `${env.connectionSettings.uri}${appPath}/ClientApp/#/SchemaMetaDataDesigner/${this.uId}/${this.parent.pkgType}/${this.parent.uId}`;
+					link = vscode.Uri.parse(linkText);
+					break;
+				}
+			}
+			
+			if(link){
+				vscode.env.openExternal(link);
+			}
+			return;
+		}
+
 		vscode.window.withProgress({
 				location : vscode.ProgressLocation.Notification,
 				title: "Getting schema content"
@@ -381,18 +436,6 @@ export class WorkSpaceItem extends CreatioTreeItem{
 				.then((doc: vscode.TextDocument)=>{
 					vscode.window.showTextDocument(doc);
 				});
-
-				// const schema = await (this.parent?.parent?.parent as Environment)
-				// 	.creatioClient.GetSchemaAsync(this.itemType, this.uId, false);
-
-				// 	vscode.window.showTextDocument(
-				// 		await vscode.workspace.openTextDocument({
-				// 			language: language,
-				// 			content: schema
-				// 		}), 
-				// 		vscode.ViewColumn.One, 
-				// 		true
-				// 	);
 
 				progress.report({ 
 					increment: 100, 

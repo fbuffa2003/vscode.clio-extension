@@ -361,7 +361,7 @@ export class CreatioClient {
 			data: {packageUId}
 		};
 		const response = await this.PostAsync(options);
-		const json = JSON.parse(response.body);
+		//const json = JSON.parse(response.body);
 		return response;
 	}
 

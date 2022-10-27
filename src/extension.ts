@@ -90,7 +90,6 @@ export function activate(context: vscode.ExtensionContext) {
 					title: "Getting packages data"
 				},
 				async(progress, token)=>{
-					//TODO: Change to clio when available
 					await (event.element as PackageList).getPackagesDev();
 					treeProvider.refresh();
 					
@@ -118,7 +117,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 			items.forEach((item)=>{
 				
-				
 				switch(item.itemType){
 					case ItemType.clientModuleSchema:
 						const jsFileName = item.name+'.js';
@@ -132,16 +130,12 @@ export function activate(context: vscode.ExtensionContext) {
 						creatioFS.writeFile(csFileUri, new Uint8Array(0), {create:true, overwrite:true, isInit: true, itemType: item.itemType});
 						break;
 					
-					case ItemType.sourceCodeSchema:
-						const sqlFileName = item.name+'.cs';
+					case ItemType.sqlScriptSchema:
+						const sqlFileName = item.name+'.sql';
 						const sqlFileUri = vscode.Uri.parse(`creatio:/${creatioPackage.parent?.parent?.label}/${creatioPackage.name}/${sqlFileName}`);
 						creatioFS.writeFile(sqlFileUri, new Uint8Array(0), {create:true, overwrite:true,isInit: true, itemType: item.itemType});
 						break;
 				}
-
-				
-
-
 			});
 
 		}
@@ -432,6 +426,11 @@ export function activate(context: vscode.ExtensionContext) {
 	//#region Commands : schema
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.ShowSchemaContent", async (node: WorkSpaceItem)=>{
+			node.showContent();
+		})
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.OpenSchemaContent", async (node: WorkSpaceItem)=>{
 			node.showContent();
 		})
 	);

@@ -265,7 +265,7 @@ export class KnownRoutes {
 	private set SaveSourceCodeSchema(v : string) {
 		this._saveSourceCodeSchema = v;
 	}
-	
+
 	private _getSqlSchema : string = "/ServiceModel/SqlScriptSchemaDesignerService.svc/GetSchema";
 	public get GetSqlSchema() : string {
 		return this.getRoute(this._getSqlSchema);

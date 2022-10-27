@@ -1,12 +1,8 @@
-import { debug } from "console";
 import path = require("path");
 import { TextEncoder } from "util";
 import * as vscode from "vscode";
 import { CreatioClient } from "../common/CreatioClient/CreatioClient";
 import { ItemType } from "../service/TreeItemProvider/ItemType";
-import {createHash, Hash} from 'node:crypto'
-import { createReadStream } from "fs";
-import { fileURLToPath } from "url";
 
 export class CreatioFS implements vscode.FileSystemProvider {
 	root = new Directory("");
@@ -57,7 +53,7 @@ export class CreatioFS implements vscode.FileSystemProvider {
 			const parts = uri.path.split("/");
 			const envName = parts[1];
 			if (!envName) {
-				throw vscode.FileSystemError.FileNotFound("Could not environment");
+				throw vscode.FileSystemError.FileNotFound("Could not get environment");
 			}
 			const client = this._clients.find((c) => c.name === envName)?.client;
 
@@ -166,7 +162,6 @@ export class CreatioFS implements vscode.FileSystemProvider {
 	): void | Thenable<void> {
 		throw new Error("Method not implemented.");
 	}
-
 
 	// --- lookup
 
