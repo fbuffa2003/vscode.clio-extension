@@ -3,7 +3,7 @@ import { StringifyOptions } from 'querystring';
 import * as vscode from 'vscode';
 
 export class ClioExecutor {
-    private clioPath = 'clio-dev';
+    private clioPath = 'clio';
     private terminal: vscode.Terminal | undefined;
     private isWin = process.platform === 'win32';
 
