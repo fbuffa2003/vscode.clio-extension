@@ -13,6 +13,7 @@ vscode-text-field{
 
 .creatio-button {
 	background-color: #ED522F;
+	margin-left: 10px;
 }
 .creatio-button:hover {
 	background-color: #b53c21;

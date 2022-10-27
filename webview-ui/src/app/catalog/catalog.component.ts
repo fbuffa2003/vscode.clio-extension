@@ -72,13 +72,13 @@ export class CatalogComponent implements OnInit {
 		this.catalog = this.unFilteredCatalog.filter(c=> c.title.toLowerCase().includes(searchData.toLowerCase()));
 	}
 
-	public install(appId: number){
-		console.log(`Installing app with id : ${appId}`);
+	public install(){
+		console.log(`Installing app with id : ${this.selectedApps.toString()}`);
 		//Ask extension to run clio catalog
 		vscode.postMessage({
 			command: "install",
 			environmentName: this.environmentName,
-			appId: appId
+			appId: this.selectedApps
 		});
 	}
 

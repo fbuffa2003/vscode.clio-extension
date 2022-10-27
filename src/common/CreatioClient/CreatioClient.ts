@@ -932,7 +932,7 @@ export class CreatioClient {
 			}
 			return h as unknown as OutgoingHttpHeaders;
 		}
-		//return headers;
+		return headers;
 	}
 
 	private resolveClient(options: RequestOptions, callBack?: (res : IncomingMessage)=>void): ClientRequest {

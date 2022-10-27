@@ -5,6 +5,7 @@
 				<div class="logo">
 					<img class="logo-img"src={{circleImageUri}} alt="logo">
 					<span class="logo-text">Install an app on {{environmentName}}</span>
+					<vscode-button *ngIf="selectedApps.length>0" class="creatio-button" (click)="install()">Install</vscode-button>
 				</div>
 				<br/>
 				<div>
@@ -20,7 +21,6 @@
 						</vscode-tag>
 					</div>
 				</div>
-				<br/><br/>
 			</div>
 			
 			<vscode-data-grid-cell cell-type="columnheader" grid-column="1">

@@ -140,7 +140,7 @@ export class CatalogPanel {
 	 * Sets up an event listener to listen for messages passed from the webview context and
 	 * executes code based on the message that is received.
 	 *
-	 * @param webview A reference to the extension webview
+	 * @param webview A reference to the extension webview 
 	 * @param context A reference to the extension context
 	 */
 	private _setWebviewMessageListener(webview: Webview) {
@@ -180,7 +180,7 @@ export class CatalogPanel {
 				}
 				case "install":{
 					//console.log(command);
-					const appId = message.appId;
+					const appId: number[] = message.appId;
 				
 					vscode.window.withProgress(
 						{
@@ -189,7 +189,8 @@ export class CatalogPanel {
 						},
 						async(progress, token)=>{
 							const clioExecutor = new ClioExecutor();
-							clioExecutor.executeCommandByTerminal(`install --id ${appId} -e ${environmentName}`);
+
+							clioExecutor.executeCommandByTerminal(`install --id ${appId.toString().replace(',',' ')} -e ${environmentName}`);
 							//const result = await this._clio.ExecuteClioCommand(`clio install --id ${appId} -e ${environmentName}`);
 							progress.report({ 
 								increment: 100,
