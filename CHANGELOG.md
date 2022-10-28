@@ -5,6 +5,7 @@
 - Log from Creatio
 - Welcome journey
 - Edit existing connection
+- Save live logs to file
 
 # PRTNER RELEASE
 

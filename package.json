@@ -2,7 +2,7 @@
 	"name": "clio-explorer",
 	"displayName": "Clio explorer",
 	"description": "Control your Creatio environments, and perform clio actions on them",
-	"version": "0.0.10",
+	"version": "0.0.11",
 	"publisher": "AdvanceTechnologiesFoundation",
 	"license": "MIT",
 	"icon": "resources/creatio-triangle.png",
@@ -103,16 +103,6 @@
 					"command": "ClioSQL.Listen",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-6@1"
-				},
-				{
-					"command": "creatioFS/getFile",
-					"when": "viewItem == CreatioInstance",
-					"group": "group-7@1"
-				},
-				{
-					"command": "ClioSQL.GetCatalogue",
-					"when": "viewItem == CreatioInstance",
-					"group": "group-8@1"
 				}
 			],
 			"ClioSQL.OverflowHeaderMenu": [
