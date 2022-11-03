@@ -92,7 +92,8 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 		
-		if(event.element instanceof PackageList){
+		if(event.element instanceof PackageList && !(event.element as PackageList).isPackageRetrievalInProgress){
+
 			vscode.window.withProgress(
 				{
 					location : vscode.ProgressLocation.Notification,
@@ -119,8 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 		if(event.element instanceof Package){
-
-			console.log("Package expanded");
+			//console.log("Package expanded");
 			const creatioPackage = event.element as Package;
 			const items = creatioPackage.items as WorkSpaceItem[];
 
@@ -503,6 +503,5 @@ function checkClioLatestVersion(nugetClient: NugetClient, executor: ClioExecutor
 				});
 				break;
 		}
-		
 	})();
 }

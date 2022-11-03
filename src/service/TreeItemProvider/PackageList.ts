@@ -53,14 +53,27 @@ export class PackageList extends CreatioTreeItem {
 			await this.sort();
 		}
 	}
+	
+	private _isPackageRetrievalInProgress : boolean = false;
+	public get isPackageRetrievalInProgress() : boolean {
+		return this._isPackageRetrievalInProgress;
+	}
+	private set isPackageRetrievalInProgress(v : boolean) {
+		this._isPackageRetrievalInProgress = v;
+	}
+	
+
 
 	public async getPackagesDev(): Promise<void>{
 		// const args : IGetPackagesArgs = {
 		// 	environmentName :  this.parent?.label as string
 		// };
 
+		if(this._isPackageRetrievalInProgress){
+			return;
+		}
+		this._isPackageRetrievalInProgress = true;
 		const pkgs = await (this.parent as Environment).creatioClient.GetPackages();	
-
 		const body = JSON.parse(pkgs.body);
 		if(!body['success']){
 			vscode.window.showErrorMessage(
@@ -81,6 +94,7 @@ export class PackageList extends CreatioTreeItem {
 			this.items.push(p);
 		});
 		await this.sort();
+		this._isPackageRetrievalInProgress = false;
 	}
 
 	private async sort(): Promise<void>{
@@ -250,7 +264,7 @@ export class Package extends CreatioTreeItem {
 								message: "Done"
 							});
 							if(result && result.success){
-								vscode.commands.executeCommand("revealFileInOS", folderUri[0].path);
+								vscode.commands.executeCommand("revealFileInOS", folderUri[0]);
 							}else{
 								vscode.window.showErrorMessage(result.message as string);
 							}

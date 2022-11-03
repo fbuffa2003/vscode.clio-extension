@@ -11,7 +11,20 @@
 
 - **NoCode+real code collaboration**
 
-## [0.0.11] Initial release  - Oct 27, 2022
+
+## [0.0.12] release  - Nov 03, 2022
+
+### Added
+
+- Automatically check for the latest clio version on NuGet, compare to currently installed, suggest update when available. Compatible with clio 3.0.1.36 and up
+- Prevented multiple execution of getPackages per environment;
+
+### Bug Fix
+
+- Stop live logging in webview dispose
+- Fixed open folder path when downloading package
+
+## [0.0.11] release  - Oct 27, 2022
 
 ### Added
 
@@ -20,13 +33,13 @@
 - Added option to install multiple applications
 - Open other schemas in Creatio
 
-## [0.0.10] Initial release  - Oct 20, 2022
+## [0.0.10] release  - Oct 20, 2022
 
 ### Added
 
 - Live logging / WebSocket nlog appender (see clio gate release ver: 3.0.1.33)
 
-## [0.0.9] Initial release  - Oct 13, 2022
+## [0.0.9] release  - Oct 13, 2022
 
 ### Changed
 
@@ -38,7 +51,7 @@
 - Fixed spelling on Lock/Unlock command
 
 
-## [0.0.8] Initial release  - Oct 6, 2022
+## [0.0.8] release  - Oct 6, 2022
 
 ### Added
 
@@ -55,7 +68,7 @@
 - `Install/Update clio` with `--no-cache` option
 
 
-## [0.0.7] Initial release  - Sep 22, 2022
+## [0.0.7] release  - Sep 22, 2022
 
 ### Added
 
@@ -67,7 +80,7 @@
 
 - FlushDb, Restart, Ping command to utilize CreatioClient
 
-## [0.0.6] Initial release  - Sep 20, 2022
+## [0.0.6] release  - Sep 20, 2022
 
 ### Added
 
