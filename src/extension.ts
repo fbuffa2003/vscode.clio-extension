@@ -19,12 +19,21 @@ import { CreatioFS } from './file-system-provider/fileSystemProvider';
 import { ItemType } from './service/TreeItemProvider/ItemType';
 import { MarketplaceCatalogue } from './common/MarketplaceClient/MarketplaceCatalogue';
 import { ModerationState, ProductCategory } from './common/MarketplaceClient/marketplaceApp';
+import { NugetClient } from './common/NugetClient/NugetClient';
+import { mySemVer } from './utilities/mySemVer';
 
 export function activate(context: vscode.ExtensionContext) {
-	const clio = new Clio();
+	
 	const executor = new ClioExecutor();	
+	const nugetClient = new NugetClient();
+	const treeProvider = new CreatioTreeItemProvider();
+	const clio = new Clio();
 	const _marketplaceCatalogue = new MarketplaceCatalogue();
 
+	//Check clio latest version!
+	checkClioLatestVersion(nugetClient, executor);
+		
+	
 	//#region FileSystemProvider
 	const creatioFS = new CreatioFS();
 	const registration = vscode.workspace.registerFileSystemProvider("creatio", creatioFS, {
@@ -55,7 +64,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	//#endregion
 
-	const treeProvider = new CreatioTreeItemProvider();
+	
 	//vscode.window.registerTreeDataProvider('vscode-clio-extension.creatioExplorer', treeProvider);
 	const treeView = vscode.window.createTreeView("vscode-clio-extension.creatioExplorer", {
 		treeDataProvider: treeProvider
@@ -450,3 +459,50 @@ export function activate(context: vscode.ExtensionContext) {
 
 }
 export function deactivate() {}
+
+function checkClioLatestVersion(nugetClient: NugetClient, executor: ClioExecutor){
+	(async()=>{
+		await nugetClient.getServiceIndex();
+		const latestNuGetClioVersion = await nugetClient.searchClioHighestVersion();
+		const _lv = new mySemVer(latestNuGetClioVersion);
+		
+		//TODO: Change to clio ver --clio when new version is published
+		const commandResponse = await executor.ExecuteClioCommand(`clio-dev ver --clio`);
+		const _commandParts = commandResponse.split(' ');
+
+		let _installedVersion = new mySemVer("0.0.0.0");
+		if(_commandParts && _commandParts[3]){
+			_installedVersion = new mySemVer(_commandParts[3]);
+		}
+		
+		const _compResult = _lv.compare(_installedVersion);
+		switch(_compResult){
+			case 0:
+				console.log("Clio is of the latest version");
+				break;
+			case 1:
+				vscode.window.showInformationMessage(
+					`Would you like to update clio to the latest version **${_lv}** ?
+					Your version is: ${_installedVersion.toString()}`,
+					"UPDATE", "SKIP"
+				).then(answer => {
+					if (answer === "UPDATE") {
+						vscode.commands.executeCommand("ClioSQL.UpdateClioCli");
+					}
+				});
+				break;
+			case -1:
+				vscode.window.showInformationMessage(
+					`This is impossible, installed version of clio ${_installedVersion.toString()} is greater than the latest available version. 
+					Would you like to update to the latest available version ?`,
+					"UPDATE", "SKIP"
+				).then(answer => {
+					if (answer === "UPDATE") {
+						vscode.commands.executeCommand("ClioSQL.UpdateClioCli");
+					}
+				});
+				break;
+		}
+		
+	})();
+}

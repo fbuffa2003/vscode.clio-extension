@@ -58,7 +58,7 @@ export class ClioExecutor {
 	    return procData;
     }
 
-	public async ExecuteClioCommand(command: string): Promise<String>{
+	public async ExecuteClioCommand(command: string): Promise<string>{
 		
 		return new Promise<string>((resolve, reject)=>{
 			exec(command, (error, stdout, stderr )=>{

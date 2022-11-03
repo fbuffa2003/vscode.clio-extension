@@ -81,13 +81,16 @@ export class WebSocketMessagesPanel {
 	 * Cleans up and disposes of webview resources when the webview panel is closed.
 	 */
 	public dispose() {
-		WebSocketMessagesPanel.environment?.StopListening();
+		//WebSocketMessagesPanel.environment?.StopListening();
+		(async()=>{
+			await WebSocketMessagesPanel.environment?.StopLogBroadcast();
+		}
+		)();
 		WebSocketMessagesPanel.currentPanel = undefined;
 		
 		// Dispose of the current webview panel
 		this._panel.dispose();
 		
-
 		// Dispose of all disposables (i.e. commands) for the current webview panel
 		while (this._disposables.length) {
 		const disposable = this._disposables.pop();
