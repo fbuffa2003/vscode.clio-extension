@@ -63,7 +63,7 @@ export class ClioExecutor {
 		return new Promise<string>((resolve, reject)=>{
 			exec(command, (error, stdout, stderr )=>{
 				if(error){
-					resolve(error?.message);
+					resolve(error?.message as string || error.toString());
 				}
 				if(stdout){
 					resolve(stdout);

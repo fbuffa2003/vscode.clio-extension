@@ -671,9 +671,14 @@ export class CreatioClient {
 				"Accept-Encoding":"gzip, deflate, br"
 			};
 
-			if(this.CookieValues.length === 0){
-				await this.Login();
+			if(this._credentialsFlow === CredentialsFlow.Form){
+				if(this.CookieValues.length === 0){
+					await this.Login();
+				}
+			}else{
+				await this.GetTokenAsync();
 			}
+
 
 			const options  = {
 				headers: this.setHeaders(headers)
@@ -686,7 +691,12 @@ export class CreatioClient {
 				console.log(error.message);
 				if(error.message ==='Unexpected server response: 302'){
 					console.log("Attempting to login ...");
-					const r = await this.Login();
+					//const r = await this.Login();
+					if(this._credentialsFlow === CredentialsFlow.Form){
+						await this.Login();
+					}else{
+						await this.GetTokenAsync();
+					}
 				}
 				resolve(await this.Listen());
 			});

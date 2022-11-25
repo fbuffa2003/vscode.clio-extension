@@ -12,11 +12,11 @@
 - **NoCode+real code collaboration**
 
 
-## [0.0.12] release  - Nov 03, 2022
+## [0.0.12] release  - Nov 25, 2022
 
 ### Added
 
-- Automatically check for the latest clio version on NuGet, compare to currently installed, suggest update when available. Compatible with clio 3.0.1.36 and up
+- Automatically check for the latest clio version on NuGet, compare to currently installed, suggest update when available.
 - Prevented multiple execution of getPackages per environment;
 
 ### Bug Fix

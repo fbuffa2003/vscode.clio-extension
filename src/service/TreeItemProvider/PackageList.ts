@@ -62,8 +62,6 @@ export class PackageList extends CreatioTreeItem {
 		this._isPackageRetrievalInProgress = v;
 	}
 	
-
-
 	public async getPackagesDev(): Promise<void>{
 		// const args : IGetPackagesArgs = {
 		// 	environmentName :  this.parent?.label as string

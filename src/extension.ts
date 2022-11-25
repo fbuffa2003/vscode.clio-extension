@@ -466,24 +466,40 @@ function checkClioLatestVersion(nugetClient: NugetClient, executor: ClioExecutor
 		const latestNuGetClioVersion = await nugetClient.searchClioHighestVersion();
 		const _lv = new mySemVer(latestNuGetClioVersion);
 		
-		//TODO: Change to clio ver --clio when new version is published
-		const commandResponse = await executor.ExecuteClioCommand(`clio-dev ver --clio`);
-		const _commandParts = commandResponse.split(' ');
+		//Clio after version 3.0.1.37 got a new command clio ver --clio
+		const commandResponse = await executor.ExecuteClioCommand(`clio ver --clio`);
 
+		//Clio pre 3.0.1.37 did not have -ver command
+		const oldClioCommandResponse = await executor.ExecuteClioCommand(`clio version`);
+		//old clio will return > Command failed: clio version\nclio 3.0.1.37
+		const oldVersion = (oldClioCommandResponse.split('\n')[1]).split(' ')[1];
+
+		let _installedOldVersion = new mySemVer("0.0.0.0");
+		if(oldVersion){
+			_installedOldVersion = new mySemVer(oldVersion);
+		}
+		
+		const _commandParts = commandResponse.split(' ');
 		let _installedVersion = new mySemVer("0.0.0.0");
 		if(_commandParts && _commandParts[3]){
 			_installedVersion = new mySemVer(_commandParts[3]);
 		}
 		
-		const _compResult = _lv.compare(_installedVersion);
+		//take highest between newClio and old clio
+		const r = _installedOldVersion.compare(_installedVersion);
+		const _currentVersion = (r===1) ? _installedOldVersion : _installedVersion;
+
+
+		const _compResult = _lv.compare(_currentVersion);
+		//const _compResult = _lv.compare(_installedVersion);
 		switch(_compResult){
 			case 0:
 				console.log("Clio is of the latest version");
 				break;
 			case 1:
 				vscode.window.showInformationMessage(
-					`Would you like to update clio to the latest version **${_lv}** ?
-					Your version is: ${_installedVersion.toString()}`,
+					`Would you like to update clio to the latest version ${_lv} ?
+					Your version is: ${_currentVersion.toString()}`,
 					"UPDATE", "SKIP"
 				).then(answer => {
 					if (answer === "UPDATE") {
@@ -493,7 +509,7 @@ function checkClioLatestVersion(nugetClient: NugetClient, executor: ClioExecutor
 				break;
 			case -1:
 				vscode.window.showInformationMessage(
-					`This is impossible, installed version of clio ${_installedVersion.toString()} is greater than the latest available version. 
+					`This is impossible, installed version of clio ${_currentVersion.toString()} is greater than the latest available version. 
 					Would you like to update to the latest available version ?`,
 					"UPDATE", "SKIP"
 				).then(answer => {
