@@ -1,5 +1,4 @@
 import { exec } from 'child_process';
-import { StringifyOptions } from 'querystring';
 import * as vscode from 'vscode';
 
 export class ClioExecutor {
@@ -59,12 +58,12 @@ export class ClioExecutor {
 	    return procData;
     }
 
-	public async ExecuteClioCommand(command: string): Promise<String>{
+	public async ExecuteClioCommand(command: string): Promise<string>{
 		
 		return new Promise<string>((resolve, reject)=>{
 			exec(command, (error, stdout, stderr )=>{
 				if(error){
-					resolve(error?.message);
+					resolve(error?.message as string || error.toString());
 				}
 				if(stdout){
 					resolve(stdout);

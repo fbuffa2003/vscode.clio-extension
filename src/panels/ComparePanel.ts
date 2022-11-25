@@ -9,7 +9,9 @@ import { getUri } from "../utilities/getUri";
 export class ComparePanel {
 	public static currentPanel: ComparePanel | undefined;
 	private readonly _panel: WebviewPanel;
+	private readonly _extensionUri: vscode.Uri;
 	private _disposables: Disposable[] = [];
+
 	private static _envName : string | undefined;
 	private _clio: ClioExecutor;
 	private static environment : Environment | undefined;
@@ -22,11 +24,12 @@ export class ComparePanel {
 	 */
 	private constructor(panel: WebviewPanel, extensionUri: Uri) {
 		this._panel = panel;
+		this._extensionUri = extensionUri;
 		this._clio = new ClioExecutor();
 
 		// Set an event listener to listen for when the panel is disposed (i.e. when the user closes
 		// the panel or when the panel is closed programmatically)
-		this._panel.onDidDispose(this.dispose, null, this._disposables);
+		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
 		// Set the HTML content for the webview panel
 		this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri);
@@ -145,113 +148,113 @@ export class ComparePanel {
 	 */
 	private _setWebviewMessageListener(webview: Webview) {
 		webview.onDidReceiveMessage(
-		async (message: any) => {
-			const command = message.command;
-			const environmentName = message.environmentName;
-			switch (command) {
-				case "getFeatures":{
-					// Code that should run in response to the hello message command
-					vscode.window.withProgress(
-						{
-							location : vscode.ProgressLocation.Notification,
-							title: "Getting Data"
-						},
-						async(progress, token)=>{
-							//const result = await this._clio.ExecuteClioCommand('clio catalog');
-							const result = await ComparePanel.environment?.getFeatures();
-							const msg = {
-								"getFeatures": result
-							};
-			
-							//raising event, angular subscribes to it
-							this._panel.webview.postMessage(msg);
-							progress.report({ 
-								increment: 100, 
-								message: "Done" 
-							});
-						}
-					);
-					break;
-				}
-				case "getOtherEnvironmentFeatures":{
-					// Code that should run in response to the hello message command
-					vscode.window.withProgress(
-						{
-							location : vscode.ProgressLocation.Notification,
-							title: "Getting Data"
-						},
-						async(progress, token)=>{
-							const result = await ComparePanel.otherEnvironments?.find(e=> e.label === environmentName)?.getFeatures();
-							const msg = {
-								"getOtherEnvironmentFeatures": result
-							};
-			
-							//raising event, angular subscribes to it
-							this._panel.webview.postMessage(msg);
-							progress.report({ 
-								increment: 100, 
-								message: "Done" 
-							});
-						}
-					);
-					break;
-				}
-				case "setFeatureState":{
-					
-					let resultMsg : IFeature | undefined;
-
-					const feature = message.feature as IFeature;
-					if(feature && feature.Code){
-						const result = await ComparePanel.environment?.setFeatureState(feature);
-						resultMsg = result;
-					}
-					
-					//return msg to webview
-					const msg = {
-						"setFeatureState": resultMsg
-					};
-					
-					this._panel.webview.postMessage(msg);
-					break;
-				}
-				case "setFeatureStateForCurrentUser": {
-
-					let resultMsg : IFeature | undefined;
-					const feature = message.feature as IFeature;
-
-					if(feature && feature.Code){
-						const result = await ComparePanel.environment?.setFeatureStateForCurrentUser(feature);
-						resultMsg = result;
-					}
-					
-					//return msg to webview
-					const msg = {
-						"setFeatureStateForCurrentUser": resultMsg
-					};
-					this._panel.webview.postMessage(msg);
-					break;
-				}
-				case "getOtherEnvironments":{
-					let resultMsg : Array<string> = [];
-					if(ComparePanel.otherEnvironments && ComparePanel.otherEnvironments?.length){
-						ComparePanel.otherEnvironments?.forEach(env=>{
-							if(env.label !== ComparePanel.environment?.label){
-								resultMsg.push(env.label);
+			async (message: any) => {
+				const command = message.command;
+				const environmentName = message.environmentName;
+				switch (command) {
+					case "getFeatures":{
+						// Code that should run in response to the hello message command
+						vscode.window.withProgress(
+							{
+								location : vscode.ProgressLocation.Notification,
+								title: "Getting Data"
+							},
+							async(progress, token)=>{
+								//const result = await this._clio.ExecuteClioCommand('clio catalog');
+								const result = await ComparePanel.environment?.getFeatures();
+								const msg = {
+									"getFeatures": result
+								};
+				
+								//raising event, angular subscribes to it
+								this._panel.webview.postMessage(msg);
+								progress.report({ 
+									increment: 100, 
+									message: "Done" 
+								});
 							}
-						});
+						);
+						break;
 					}
+					case "getOtherEnvironmentFeatures":{
+						// Code that should run in response to the hello message command
+						vscode.window.withProgress(
+							{
+								location : vscode.ProgressLocation.Notification,
+								title: "Getting Data"
+							},
+							async(progress, token)=>{
+								const result = await ComparePanel.otherEnvironments?.find(e=> e.label === environmentName)?.getFeatures();
+								const msg = {
+									"getOtherEnvironmentFeatures": result
+								};
+				
+								//raising event, angular subscribes to it
+								this._panel.webview.postMessage(msg);
+								progress.report({ 
+									increment: 100, 
+									message: "Done" 
+								});
+							}
+						);
+						break;
+					}
+					case "setFeatureState":{
+						
+						let resultMsg : IFeature | undefined;
 
-					//return msg to webview
-					const msg = {
-						"getOtherEnvironments": resultMsg
-					};
-					this._panel.webview.postMessage(msg);
-					break;
+						const feature = message.feature as IFeature;
+						if(feature && feature.Code){
+							const result = await ComparePanel.environment?.setFeatureState(feature);
+							resultMsg = result;
+						}
+						
+						//return msg to webview
+						const msg = {
+							"setFeatureState": resultMsg
+						};
+						
+						this._panel.webview.postMessage(msg);
+						break;
+					}
+					case "setFeatureStateForCurrentUser": {
+
+						let resultMsg : IFeature | undefined;
+						const feature = message.feature as IFeature;
+
+						if(feature && feature.Code){
+							const result = await ComparePanel.environment?.setFeatureStateForCurrentUser(feature);
+							resultMsg = result;
+						}
+						
+						//return msg to webview
+						const msg = {
+							"setFeatureStateForCurrentUser": resultMsg
+						};
+						this._panel.webview.postMessage(msg);
+						break;
+					}
+					case "getOtherEnvironments":{
+						let resultMsg : Array<string> = [];
+						if(ComparePanel.otherEnvironments && ComparePanel.otherEnvironments?.length){
+							ComparePanel.otherEnvironments?.forEach(env=>{
+								if(env.label !== ComparePanel.environment?.label){
+									resultMsg.push(env.label);
+								}
+							});
+						}
+
+						//return msg to webview
+						const msg = {
+							"getOtherEnvironments": resultMsg
+						};
+						this._panel.webview.postMessage(msg);
+						break;
+					}
 				}
-			}
-		},
-		undefined,
-		this._disposables
+			},
+			null,
+			this._disposables
 		);
 	}
 

@@ -1,8 +1,8 @@
-import { Component, OnInit, HostListener, Input } from '@angular/core';
+import { Component, OnInit, HostListener} from '@angular/core';
+import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 import { vscode } from "./../utilities/vscode";
-import { provideVSCodeDesignSystem, TextField, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow, vsCodeTextField } from "@vscode/webview-ui-toolkit";
+import { provideVSCodeDesignSystem, TextField, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow, vsCodeTag, vsCodeTextField } from "@vscode/webview-ui-toolkit";
 import { VscodeDataProviderService } from '../services/vscode-data-provider.service';
-
 
 @Component({
 	selector: "app-catalog",
@@ -11,13 +11,16 @@ import { VscodeDataProviderService } from '../services/vscode-data-provider.serv
 })
 export class CatalogComponent implements OnInit {
 	
-	public unFilteredCatalog : Array<CatalogItem> = new Array<CatalogItem>();
-	public catalog : Array<CatalogItem> = this.unFilteredCatalog;
+	public unFilteredCatalog : Array<IMarketplaceApp> = new Array<IMarketplaceApp>();
+	public catalog : Array<IMarketplaceApp> = this.unFilteredCatalog;
+
+	public selectedApps : number[]=[];
+
+	public selectedAppsString : string;
 
 	private imageUri;
 	public environmentName;
 	public circleImageUri;
-
 
 	@HostListener("window:message", ["$event"])
 	onMessage(ev: any){
@@ -28,30 +31,33 @@ export class CatalogComponent implements OnInit {
 	 * Parses catalog into model 
 	 * @param catalog data from clio
 	 */
-	private onGetCatalog(catalog: string){
-		const lines: string[] = catalog.split("\r\n");
-		lines.forEach(line=>{
-			const m = line.match(/\d{4,6}/);
-			if(m){
-				let id = Number.parseInt(m[0]);
-				let name = line.substring(m[0].length, line.length-m[0].length).trim();
-				let item = new CatalogItem(id, name);
-				this.unFilteredCatalog?.push(item);
-			}
-		});
+	private onGetCatalog(catalog: IMarketplaceApp[]){
+		
+		this.unFilteredCatalog = catalog;
+		
+		// const lines: string[] = catalog.split("\r\n");
+		// lines.forEach(line=>{
+		// 	const m = line.match(/\d{4,6}/);
+		// 	if(m){
+		// 		let id = Number.parseInt(m[0]);
+		// 		let name = line.substring(m[0].length, line.length-m[0].length).trim();
+		// 		let item = new CatalogItem(id, name);
+		// 		this.unFilteredCatalog?.push(item);
+		// 	}
+		// });
 		this.catalog = this.unFilteredCatalog;
 	}
 
 	constructor(private readonly vscodeDataProvider: VscodeDataProviderService) {
 		provideVSCodeDesignSystem().register(
-			vsCodeButton(), vsCodeCheckbox(), vsCodeTextField(),
+			vsCodeButton(), vsCodeCheckbox(), vsCodeTextField(),vsCodeTag(),
 			vsCodeDataGrid(), vsCodeDataGridRow(), vsCodeDataGridCell()
 		);
 
 		this.imageUri = history.state.imageUri;
 		this.environmentName = history.state.environmentName;
 		this.circleImageUri = this.imageUri+'/'+"creatio-square.svg";
-		//console.log(`catalog.component.ts environmentName: ${this.environmentName}`);
+		this.selectedAppsString = '';
 	}
 	ngOnInit(): void {
 		//Ask extension to run clio catalog
@@ -63,19 +69,76 @@ export class CatalogComponent implements OnInit {
 
 	public search(inputEl : HTMLElement ): void{
 		const searchData = (inputEl as TextField).value;
-		this.catalog = this.unFilteredCatalog.filter(c=> c.name.toLowerCase().includes(searchData.toLowerCase()));
+		this.catalog = this.unFilteredCatalog.filter(c=> c.title.toLowerCase().includes(searchData.toLowerCase()));
 	}
 
-	public install(appId: number){
-		console.log(`Installing app with id : ${appId}`);
+	public install(){
+		console.log(`Installing app with id : ${this.selectedApps.toString()}`);
 		//Ask extension to run clio catalog
 		vscode.postMessage({
 			command: "install",
 			environmentName: this.environmentName,
-			appId: appId
+			appId: this.selectedApps
 		});
 	}
 
+
+	public onSelectedForInstall(nid: number){
+		const _tempIndex = this.selectedApps.findIndex(app=> app === nid);
+		if(_tempIndex===-1){
+			this.selectedApps.push(nid);
+		}
+	}
+	public removeFromSelectedApps(nid: number){
+		const _tempIndex = this.selectedApps.findIndex(app=> app === nid);
+		if(_tempIndex !==1){
+			this.selectedApps.splice(_tempIndex, 1);
+		}
+	}
+	drop(event: CdkDragDrop<number[]>) {
+		moveItemInArray(this.selectedApps, event.previousIndex, event.currentIndex);
+	}
+}
+
+export interface IMarketplaceApp {
+	id: string;
+	internalNid: number;
+	internalVid: number;
+	isCertified: boolean;
+	moderationState: ModerationState
+	shortDescription: string;
+	longDescription: string;
+	title: string;
+	_path: string;
+	totalViews: number;
+	totalDownloads: number;
+}
+
+export enum ModerationState{
+	published = 0,
+	upcoming = 1
+}
+
+export enum DbmsCompatibility{
+	Unknown = 0,
+	All = 1,
+	MsSql = 2,
+	Oracle = 3,
+	PgSql = 4
+}
+
+export enum CompatiblePlatform{
+	Unknown = 0,
+	All = 1,
+	NetCore = 2,
+	NetFramework=3
+}
+
+export enum ProductCategory{
+	Unknown = 0,
+	SoftwareSolution = 1,
+	Connector = 2,
+	AddOn = 3
 }
 
 export class CatalogItem {

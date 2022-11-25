@@ -1,5 +1,5 @@
 import { Component, HostListener, OnInit } from "@angular/core";
-import { Checkbox, provideVSCodeDesignSystem, vsCodeBadge, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow, vsCodeProgressRing, vsCodeTextField } from '@vscode/webview-ui-toolkit';
+import { provideVSCodeDesignSystem, vsCodeBadge, vsCodeButton, vsCodeCheckbox, vsCodeDataGrid, vsCodeDataGridCell, vsCodeDataGridRow, vsCodeProgressRing, vsCodeTextField } from '@vscode/webview-ui-toolkit';
 import { LogLevel, VscodeDataProviderService } from "../services/vscode-data-provider.service";
 
 @Component({
@@ -10,13 +10,12 @@ import { LogLevel, VscodeDataProviderService } from "../services/vscode-data-pro
 export class WebSocketMessagesComponent implements OnInit {
 	
 	private _imageUri;
+	private _loadingMaskVisible : boolean = false;
 	public environmentName;
 	public circleImageUri;
-
 	public loggerName = '';
 	public defaultLoggerName = 'ExceptNoisyLoggers';
 	public logLevel = '';
-	
 	public buttonText: string = 'Start';
 
 	private _isBroadcastStarted :boolean = false;
@@ -24,7 +23,6 @@ export class WebSocketMessagesComponent implements OnInit {
 		return this._isBroadcastStarted;
 	}
 	public set IsBroadcastStarted(v :boolean) {
-
 		if(v){
 			this.buttonText = "Stop";
 		}else{
@@ -34,9 +32,6 @@ export class WebSocketMessagesComponent implements OnInit {
 		this._isBroadcastStarted = v;
 	}
 	
-
-
-
 	mainTableCss:string = "main-table";
 	
 	private _searchValue : string = '';
@@ -55,23 +50,19 @@ export class WebSocketMessagesComponent implements OnInit {
 		this._messages = v;
 	}
 	
-
 	private _logMessagesFiltered : Array<ILogPortionItem> = [];
 	public get LogMessagesFiltered() : Array<ILogPortionItem> {
 
 		if(this.SearchValue.length >0){
-			debugger;
 			return this.LogMessages.filter(item=> item.message.includes(this.SearchValue));
 		}
 		else{
 			return this.LogMessages;
 		}
-		//return this._logMessagesFiltered;
 	}
 	private set LogMessagesFiltered(v : Array<ILogPortionItem>) {
 		this._logMessagesFiltered = v;
 	}
-
 
 	private _logMessages : Array<ILogPortionItem> = [];
 	public get LogMessages() : Array<ILogPortionItem> {
@@ -81,11 +72,10 @@ export class WebSocketMessagesComponent implements OnInit {
 		this._logMessages = v;
 	}
 
-	
-	private _loadingMaskVisible : boolean = false;
 	public get LoadingMaskVisible() : boolean {
 		return this._loadingMaskVisible;
 	}
+
 	private set LoadingMaskVisible(v : boolean) {
 		this._loadingMaskVisible = v;
 		if(v){
@@ -115,14 +105,12 @@ export class WebSocketMessagesComponent implements OnInit {
 		this.circleImageUri = this._imageUri+'/'+"creatio-square.svg";
 	}
 	
-
 	@HostListener("window:message", ["$event"])
 	onMessage(ev: any) {
 		const msg = (ev.data as IWebSocketMessage);
 		if(msg.Header.Sender === "TelemetryService"){
 			const log = msg.Body as ILogMessage;
 			if(log && log.logPortion){
-				//console.log(log.logPortion[0].message);
 				const n = ((msg.Body as any).logPortion[0].date as string).substring(6,24).split('+');
 				const item: ILogPortionItem = {
 					date: new Date(parseInt(n[0])+parseInt(n[1])),
@@ -131,17 +119,13 @@ export class WebSocketMessagesComponent implements OnInit {
 					message: log.logPortion[0].message
 				};
 				this.LogMessages.unshift(item);
-				debugger;
 			}
 		}
-		// else{
-		// 	msg.BodyTxt = JSON.stringify(msg.Body);
-		// 	this.Messages.unshift(msg);
-		// }
 	}
 
 	ngOnInit(): void {
 	}
+
 	toggleBroadcast(){
 		if(this.IsBroadcastStarted){
 			this.vscodeDataProvider.stopLogBroadcast(this.environmentName);
@@ -157,11 +141,8 @@ export class WebSocketMessagesComponent implements OnInit {
 		this.loggerName ="";
 	}
 	clearGrid(){
-		//this.Messages = [];
 		this.LogMessages = [];
-		
 	}
-
 }
 
 
@@ -175,7 +156,6 @@ export interface IWebSocketMessage{
 	BodyTxt: string|undefined
 
 }
-
 
 export interface ILogMessage{
 	cpu: number

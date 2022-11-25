@@ -8,6 +8,7 @@ export class SqlPanel {
 	public static currentPanel: SqlPanel | undefined;
 	private readonly _panel: WebviewPanel;
 	private _disposables: Disposable[] = [];
+	private readonly _extensionUri: vscode.Uri;
 	private static _envName : string | undefined;
 	private _clio: ClioExecutor;
 
@@ -19,14 +20,15 @@ export class SqlPanel {
 	 */
 	private constructor(panel: WebviewPanel, extensionUri: Uri) {
 		this._panel = panel;
+		this._extensionUri = extensionUri;
 		this._clio = new ClioExecutor();
 
 		// Set an event listener to listen for when the panel is disposed (i.e. when the user closes
 		// the panel or when the panel is closed programmatically)
-		this._panel.onDidDispose(this.dispose, null, this._disposables);
+		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
 		// Set the HTML content for the webview panel
-		this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri);
+		this._panel.webview.html = this._getWebviewContent(this._panel.webview, this._extensionUri);
 
 		// Set an event listener to listen for messages passed from the webview context
 		this._setWebviewMessageListener(this._panel.webview);
@@ -86,9 +88,9 @@ export class SqlPanel {
 		// Dispose of all disposables (i.e. commands) for the current webview panel
 		while (this._disposables.length) {
 		const disposable = this._disposables.pop();
-		if (disposable) {
-			disposable.dispose();
-		}
+			if (disposable) {
+				disposable.dispose();
+			}
 		}
 	}
 
@@ -148,60 +150,57 @@ export class SqlPanel {
 	 */
 	private _setWebviewMessageListener(webview: Webview) {
 		webview.onDidReceiveMessage(
-		async (message: any) => {
-			const command = message.command;
-			const environmentName = message.environmentName;
-
-			switch (command) {
-				case "getCatalog":{
-					// Code that should run in response to the hello message command
-					vscode.window.withProgress(
-						{
-							location : vscode.ProgressLocation.Notification,
-							title: "Getting Data"
-						},
-						async(progress, token)=>{
-							const result = await this._clio.ExecuteClioCommand('clio catalog');
-							const msg = {
-								"getCatalog": result
-							};
-			
-							//raising event, angular subscribes to it
-							this._panel.webview.postMessage(msg);
-							progress.report({ 
-								increment: 100, 
-								message: "Done" 
-							});
-						}
-					);
-					break;
-				}
-				case "install":{
-					console.log(command);
-					const appId = message.appId;
+			async (message: any) => {
+				const command = message.command;
+				const environmentName = message.environmentName;
+				switch (command) {
+					case "getCatalog":{
+						// Code that should run in response to the hello message command
+						vscode.window.withProgress(
+							{
+								location : vscode.ProgressLocation.Notification,
+								title: "Getting Data"
+							},
+							async(progress, token)=>{
+								const result = await this._clio.ExecuteClioCommand('clio catalog');
+								const msg = {
+									"getCatalog": result
+								};
 				
-					vscode.window.withProgress(
-						{
-							location : vscode.ProgressLocation.Notification,
-							title: `Installing app with id ${appId}`
-						},
-						async(progress, token)=>{
-							const clioExecutor = new ClioExecutor();
-							clioExecutor.executeCommandByTerminal(`install --id ${appId} -e ${environmentName}`);
-							//const result = await this._clio.ExecuteClioCommand(`clio install --id ${appId} -e ${environmentName}`);
-							progress.report({ 
-								increment: 100,
-								message: "Done"
-							});
-							//vscode.window.showInformationMessage(result as string);
-						}
-					);
+								//raising event, angular subscribes to it
+								this._panel.webview.postMessage(msg);
+								progress.report({ 
+									increment: 100, 
+									message: "Done" 
+								});
+							}
+						);
+						break;
+					}
+					case "install":{
+						console.log(command);
+						const appId = message.appId;
+					
+						vscode.window.withProgress(
+							{
+								location : vscode.ProgressLocation.Notification,
+								title: `Installing app with id ${appId}`
+							},
+							async(progress, token)=>{
+								const clioExecutor = new ClioExecutor();
+								clioExecutor.executeCommandByTerminal(`install --id ${appId} -e ${environmentName}`);
+								progress.report({ 
+									increment: 100,
+									message: "Done"
+								});
+							}
+						);
+					}
 				}
-			}
-		},
-		undefined,
-		this._disposables
-		);
+			},
+			null,
+			this._disposables
+			);
 	}
 
 	public sendMessage(jsonData: any){

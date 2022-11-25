@@ -10,7 +10,9 @@ import { getUri } from "../utilities/getUri";
 export class WebSocketMessagesPanel {
 	public static currentPanel: WebSocketMessagesPanel | undefined;
 	private readonly _panel: WebviewPanel;
+	private readonly _extensionUri: vscode.Uri;
 	private _disposables: Disposable[] = [];
+
 	private static _envName : string | undefined;
 	private _webSocketEventEvent: vscode.Disposable | undefined;
 	private _isSubscribed: boolean = false;
@@ -25,14 +27,15 @@ export class WebSocketMessagesPanel {
 	 */
 	private constructor(panel: WebviewPanel, extensionUri: Uri) {
 		this._panel = panel;
+		this._extensionUri = extensionUri;
 		//this._clio = new ClioExecutor();
 
 		// Set an event listener to listen for when the panel is disposed (i.e. when the user closes
 		// the panel or when the panel is closed programmatically)
-		this._panel.onDidDispose(this.dispose, null, this._disposables);
+		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
 		// Set the HTML content for the webview panel
-		this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri);
+		this._panel.webview.html = this._getWebviewContent(this._panel.webview, this._extensionUri);
 
 		// Set an event listener to listen for messages passed from the webview context
 		this._setWebviewMessageListener(this._panel.webview);
@@ -78,12 +81,16 @@ export class WebSocketMessagesPanel {
 	 * Cleans up and disposes of webview resources when the webview panel is closed.
 	 */
 	public dispose() {
+		//WebSocketMessagesPanel.environment?.StopListening();
+		(async()=>{
+			await WebSocketMessagesPanel.environment?.StopLogBroadcast();
+		}
+		)();
 		WebSocketMessagesPanel.currentPanel = undefined;
-		WebSocketMessagesPanel.environment?.StopListening();
 		
 		// Dispose of the current webview panel
 		this._panel.dispose();
-
+		
 		// Dispose of all disposables (i.e. commands) for the current webview panel
 		while (this._disposables.length) {
 		const disposable = this._disposables.pop();
@@ -147,31 +154,31 @@ export class WebSocketMessagesPanel {
 	 */
 	private _setWebviewMessageListener(webview: Webview) {
 		webview.onDidReceiveMessage(
-		async (message: any) => {
-			const command = message.command;
-			const str : keyof typeof LogLevel = message.logLevel;
-			//console.log(LogLevel[str]);
+			async (message: any) => {
+				const command = message.command;
+				const str : keyof typeof LogLevel = message.logLevel;
+				//console.log(LogLevel[str]);
 
-			switch (command) {
-				case "startLogBroadcast":{
-					this._webSocketEventEvent = WebSocketMessagesPanel.environment?.onWebSocketMessage(msg=>{
-						this._panel.webview.postMessage(msg);
-					});
-					await WebSocketMessagesPanel.environment?.StartLogBroadcast(
-						LogLevel[str],
-						message.loggerPattern
-					);
-					break;
+				switch (command) {
+					case "startLogBroadcast":{
+						this._webSocketEventEvent = WebSocketMessagesPanel.environment?.onWebSocketMessage(msg=>{
+							this._panel.webview.postMessage(msg);
+						});
+						await WebSocketMessagesPanel.environment?.StartLogBroadcast(
+							LogLevel[str],
+							message.loggerPattern
+						);
+						break;
+					}
+					case "stopLogBroadcast":{
+						this._webSocketEventEvent?.dispose();
+						await WebSocketMessagesPanel.environment?.StopLogBroadcast();
+						break;
+					}
 				}
-				case "stopLogBroadcast":{
-					this._webSocketEventEvent?.dispose();
-					await WebSocketMessagesPanel.environment?.StopLogBroadcast();
-					break;
-				}
-			}
-		},
-		undefined,
-		this._disposables
+			},
+			null,
+			this._disposables
 		);
 	}
 }

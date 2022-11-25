@@ -4,55 +4,78 @@ import { request as httpRequest } from "http";
 import { request as httpsRequest} from "https";
 import { IRequestOptions, IResponse } from "../interfaces";
 import { HttpMethod } from "../Enums";
+import { isArrayBufferView } from "util/types";
 
 export class NugetClient {
 	
-	constructor(
-			public url: URL,
-			public username: string,
-			public password: string,
-			public isNetCore: boolean
-		) {}
+	private _indexUrl : URL;
+	private readonly _searchQueryService: IService[] = [];
 
-	public async getAsync(options: IRequestOptions): Promise<IResponse>{
+	constructor() {
+		this._indexUrl = new URL("https://api.nuget.org");
+	}
 
-		const headers : OutgoingHttpHeaders = {
-			"Accept-Encoding":"gzip, deflate, br",
+	/**
+	 * The service index is a JSON document that is the entry point for a NuGet package source 
+	 * and allows a client implementation to discover the package source's capabilities. 
+	 * The service index is a JSON object with two required properties: 
+	 * version (the schema version of the service index) and resources (the endpoints or capabilities of the package source).
+	 * nuget.org's service index is located at https://api.nuget.org/v3/index.json.
+	 * See {@link https://learn.microsoft.com/en-us/nuget/api/service-index service index} for more details
+	 */
+	public async getServiceIndex() : Promise<void>{
+		const options : IRequestOptions = {
+			path: "/v3/index.json"
 		};
+		const response =  await this.getAsync(options, this._indexUrl);
 
-		const firstRequest =  await this.execute(
-			options.path,
-			HttpMethod.GET, headers);
-		if(firstRequest.statusCode === 401){
-			const result =  await this.execute(
-				options.path,
-				HttpMethod.GET, headers);
-			return result;
-		} else {
-			return firstRequest;
+		if(response.statusCode === 200){
+			const serviceIndex = JSON.parse(response.body) as IIndexResponse;
+
+			const _sqs = serviceIndex.resources.find(resource=> resource["@type"] === "SearchQueryService");
+			if(_sqs){
+				this._searchQueryService?.push(_sqs as IService);
+			}
 		}
 	}
 
-	public async postAsync(options: IRequestOptions): Promise<IResponse>{
+	public async searchClioHighestVersion(): Promise<string>{
+
+		if(this._searchQueryService && this._searchQueryService[0]){
+			const options : IRequestOptions = {
+				path: new URL(this._searchQueryService[0]["@id"]).pathname+"?q=clio&packagetype=dotnettool&prerelease=false"
+			};
+			const response = await this.getAsync(options, new URL(this._searchQueryService[0]["@id"]));
+			if (response.statusCode ===200){
+				return JSON.parse(response.body)['data'][0]['version'];
+			}
+		}
+		return '';
+	}
+
+
+	public async getAsync(options: IRequestOptions, baseUrl?: URL): Promise<IResponse>{
+		const headers : OutgoingHttpHeaders = {
+			"Accept-Encoding":"gzip, deflate, br",
+		};
+		return await this.execute(options.path, HttpMethod.GET, headers, undefined ,baseUrl);
+	}
+
+	public async postAsync(options: IRequestOptions,baseUrl?: URL): Promise<IResponse>{
 		const headers : OutgoingHttpHeaders = {
 			"Content-Type":"application/json",
 			"Accept-Encoding":"gzip, deflate, br",
 			"Content-Length": Buffer.byteLength(JSON.stringify(options.data), "utf8")
 		};
-		const firstRequest =  await this.execute(options.path, HttpMethod.POST, headers, options.data);
-		if(firstRequest.statusCode === 401 || firstRequest.statusCode === 403){
-			return this.execute(options.path, HttpMethod.POST, headers, options.data);
-		} else {
-			return firstRequest;
-		}
+		return await this.execute(options.path, HttpMethod.POST, headers, options.data, baseUrl);
 	}
 	
-	private async execute(path: string, method: HttpMethod, headers?: OutgoingHttpHeaders, data?: any) : Promise<IResponse>{
+	private async execute(path: string, method: HttpMethod, headers?: OutgoingHttpHeaders, data?: any, baseUrl?: URL) : Promise<IResponse>{
 		return new Promise<IResponse>((resolve, reject)=>{
 			const options = {
-				host: this.url.hostname,
+				host: baseUrl?.hostname,
 				path: path,
-				port: this.url.port,
+				port: 443,
 				method: HttpMethod[method],
 			} as RequestOptions;
 
@@ -84,7 +107,8 @@ export class NugetClient {
 				});
 			};
 
-			const request : ClientRequest = this.resolveClient(options, callBack);
+			
+			const request : ClientRequest = httpsRequest(options, callBack);;
 			if(data){
 				request.write(JSON.stringify(data));
 			}
@@ -99,16 +123,30 @@ export class NugetClient {
 			});
 		});
 	}
+}
 
-	private resolveClient(options: RequestOptions, callBack?: (res : IncomingMessage)=>void): ClientRequest {
-		if(this.url.protocol === "http:") {
-			return httpRequest(options, callBack);
-		} 
-		else if (this.url.protocol === "https:") {
-			return httpsRequest(options, callBack);
-		}
-		else {
-			throw new Error('Supported protocols either http or https');
-		}
-	}
+
+
+
+export interface IIndexResponse{
+	version: string,
+	resources: Array<IService>
+}
+
+export interface IService{
+	/**
+	 * The URL to the resource
+	 */
+	"@id": string,
+
+	/**
+	 * A string constant representing the resource type
+	 * {RESOURCE_NAME}/{RESOURCE_VERSION}
+	 */
+	"@type": string
+
+	/**
+	 * A human readable description of the resource
+	 */
+	comment?: string
 }

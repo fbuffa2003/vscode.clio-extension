@@ -73,7 +73,14 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 
 	//#region Methods : Private
 	private getClioEnvironments() : Map<string, IConnectionSettings> {
-		let file = fs.readFileSync(
+		
+		const _filePath : string = getAppDataPath() + "\\..\\Local\\creatio\\clio\\appsettings.json";
+		let _fileExists : boolean = fs.existsSync(_filePath);
+		
+		if(!_fileExists){
+			return new Map<string, IConnectionSettings>();
+		}
+		const file = fs.readFileSync(
 			path.join(getAppDataPath() + "\\..\\Local\\creatio\\clio\\appsettings.json"),
 			{
 				encoding: "utf-8"
@@ -81,8 +88,6 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 		);
 
 		const json = JSON.parse(file);
-
-
 		const environments = json['Environments'];
 		let keys : string[] = [];
 		Object.keys(environments).forEach(key =>{
@@ -98,12 +103,15 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 
 			const env : IConnectionSettings = {
 				uri: new URL(environment['Uri']),
-				login: environment['Login'],
-				password: environment['Password'],
-				maintainer: environment['Maintainer'],
-				isNetCore: environment['IsNetCore'],
-				isSafe: environment['Safe'],
-				isDeveloperMode: environment['DeveloperModeEnabled']
+				login: environment['Login'] ?? '',
+				password: environment['Password'] ?? '',
+				maintainer: environment['Maintainer'] ?? '',
+				isNetCore: environment['IsNetCore'] ?? false,
+				isSafe: environment['Safe'] ?? false,
+				isDeveloperMode: environment['DeveloperModeEnabled'],
+				oauthUrl: environment['AuthAppUri'] !== undefined ? new URL(environment['AuthAppUri']) : undefined,
+				clientId: environment['ClientId'] !== undefined ? environment['ClientId'] : undefined,
+				clientSecret: environment['ClientSecret'] !== undefined ? environment['ClientSecret'] : undefined
 			};
 			map.set(keyName as string, env);
 		});

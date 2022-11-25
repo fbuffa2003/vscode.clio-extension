@@ -3,29 +3,43 @@
 ## Upcoming RC
 
 - Log from Creatio
-- Install multiple apps from Marketplace (savable scenario ?)
-  - Download all, repack, send to Creatio;
-
----
-
 - Welcome journey
 - Edit existing connection
-- Edit SourceCodeSchema (CS, JS, SQL)
-  - Implement [FileSystemProvider] for CS, JS, SQL
-  - Open other schemas in in Creatio
-- WebSocket nlog appender
+- Save live logs to file
 
 # PRTNER RELEASE
 
 - **NoCode+real code collaboration**
 
-## [0.0.10] Initial release  - Oct 20, 2022
+
+## [0.0.12] release  - Nov 25, 2022
 
 ### Added
-- Live logging
 
+- Automatically check for the latest clio version on NuGet, compare to currently installed, suggest update when available.
+- Prevented multiple execution of getPackages per environment;
 
-## [0.0.9] Initial release  - Oct 13, 2022
+### Bug Fix
+
+- Stop live logging in webview dispose
+- Fixed open folder path when downloading package
+
+## [0.0.11] release  - Oct 27, 2022
+
+### Added
+
+- OAuth support
+- Edit SourceCodeSchema (CS, JS, SQL), implemented FileSystemProvider
+- Added option to install multiple applications
+- Open other schemas in Creatio
+
+## [0.0.10] release  - Oct 20, 2022
+
+### Added
+
+- Live logging / WebSocket nlog appender (see clio gate release ver: 3.0.1.33)
+
+## [0.0.9] release  - Oct 13, 2022
 
 ### Changed
 
@@ -37,7 +51,7 @@
 - Fixed spelling on Lock/Unlock command
 
 
-## [0.0.8] Initial release  - Oct 6, 2022
+## [0.0.8] release  - Oct 6, 2022
 
 ### Added
 
@@ -54,7 +68,7 @@
 - `Install/Update clio` with `--no-cache` option
 
 
-## [0.0.7] Initial release  - Sep 22, 2022
+## [0.0.7] release  - Sep 22, 2022
 
 ### Added
 
@@ -66,7 +80,7 @@
 
 - FlushDb, Restart, Ping command to utilize CreatioClient
 
-## [0.0.6] Initial release  - Sep 20, 2022
+## [0.0.6] release  - Sep 20, 2022
 
 ### Added
 

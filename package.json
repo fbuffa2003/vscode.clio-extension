@@ -2,7 +2,7 @@
 	"name": "clio-explorer",
 	"displayName": "Clio explorer",
 	"description": "Control your Creatio environments, and perform clio actions on them",
-	"version": "0.0.10",
+	"version": "0.0.12",
 	"publisher": "AdvanceTechnologiesFoundation",
 	"license": "MIT",
 	"icon": "resources/creatio-triangle.png",
@@ -10,11 +10,14 @@
 		"vscode": "^1.54.0"
 	},
 	"categories": [
-		"Other", "Visualization", "Programming Languages"
+		"Other",
+		"Visualization",
+		"Programming Languages"
 	],
 	"keywords": [
 		"Creatio",
-		"Clio", "Clio explorer",
+		"Clio",
+		"Clio explorer",
 		"CRM",
 		"Awesome",
 		"FreedomUI",
@@ -72,7 +75,6 @@
 					"group": "group-2@2"
 				},
 				{
-
 					"command": "ClioSQL.HealthCheck",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-3@1"
@@ -103,7 +105,7 @@
 					"group": "group-6@1"
 				}
 			],
-			"ClioSQL.OverflowHeaderMenu":[
+			"ClioSQL.OverflowHeaderMenu": [
 				{
 					"command": "ClioSQL.UpdateClioCli",
 					"title": "Install/Update clio",
@@ -125,7 +127,6 @@
 					"submenu": "ClioSQL.OverflowHeaderMenu",
 					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
 					"group": "navigation@1"
-					
 				}
 			],
 			"view/item/context": [
@@ -162,6 +163,11 @@
 				{
 					"command": "ClioSQL.ShowSchemaContent",
 					"when": "viewItem =~ /sqlScriptSchema|clientModuleSchema|sourceCodeSchema/",
+					"group": "inline@2"
+				},
+				{
+					"command": "ClioSQL.OpenSchemaContent",
+					"when": "viewItem =~ /entityModuleSchema|dataSchema|businessProcessSchema|webServiceSchema|caseSchema|userTaskSchema|addOnSchema/",
 					"group": "inline@2"
 				},
 				{
@@ -351,13 +357,26 @@
 				"title": "Show Content",
 				"icon": "$(file-code)"
 			},
-			
+			{
+				"command": "ClioSQL.OpenSchemaContent",
+				"title": "Navigate to Content",
+				"icon": "$(home)"
+			},
 			{
 				"command": "ClioSQL.Listen",
 				"title": "Logs",
 				"icon": "$(symbol-event)"
+			},
+			{
+				"command": "creatioFS/getFile",
+				"title": "Get File",
+				"icon": "$(file-code)"
+			},
+			{
+				"command": "ClioSQL.GetCatalogue",
+				"title": "Get Catalogue",
+				"icon": "$(file-code)"
 			}
-			
 		],
 		"colors": [
 			{
@@ -423,10 +442,11 @@
 		"@types/mocha": "^9.1.1",
 		"@types/node": "16.x",
 		"@types/vscode": "^1.54.0",
+		"@types/ws": "^8.5.3",
 		"@typescript-eslint/eslint-plugin": "^5.31.0",
 		"@typescript-eslint/parser": "^5.31.0",
 		"@vscode/test-electron": "^2.1.5",
-		"@types/ws": "^8.5.3",
+		"@types/semver": "^7.3.12",
 		"eslint": "^8.20.0",
 		"glob": "^8.0.3",
 		"mocha": "^10.0.0",
@@ -435,6 +455,7 @@
 	"dependencies": {
 		"@vscode/codicons": "^0.0.32",
 		"appdata-path": "^1.0.0",
+		"semver": "^7.3.8",
 		"ws": "^8.9.0"
 	}
 }

@@ -1,16 +1,18 @@
 import * as vscode from "vscode";
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
 import { ClioExecutor } from "../Common/clioExecutor";
+import { MarketplaceCatalogue } from "../common/MarketplaceClient/MarketplaceCatalogue";
 import { Environment } from "../service/TreeItemProvider/Environment";
 import { getUri } from "../utilities/getUri";
+import { getNonce } from "./getNonce";
 
 export class CatalogPanel {
 	public static currentPanel: CatalogPanel | undefined;
 	private readonly _panel: WebviewPanel;
 	private _disposables: Disposable[] = [];
+	private readonly _extensionUri: vscode.Uri;
 	private static _envName : string | undefined;
-	private _clio: ClioExecutor;
-
+	private _marketplaceCatalogue : MarketplaceCatalogue;
 	/**
 	 * The CatalogPanel class private constructor (called only from the render method).
 	 *
@@ -19,19 +21,18 @@ export class CatalogPanel {
 	 */
 	private constructor(panel: WebviewPanel, extensionUri: Uri) {
 		this._panel = panel;
-		this._clio = new ClioExecutor();
+		this._extensionUri = extensionUri;
 
+		this._marketplaceCatalogue = new MarketplaceCatalogue();
 		// Set an event listener to listen for when the panel is disposed (i.e. when the user closes
 		// the panel or when the panel is closed programmatically)
-		this._panel.onDidDispose(this.dispose, null, this._disposables);
+		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
 		// Set the HTML content for the webview panel
-		this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri);
+		this._panel.webview.html = this._getWebviewContent(this._panel.webview, this._extensionUri);
 
 		// Set an event listener to listen for messages passed from the webview context
 		this._setWebviewMessageListener(this._panel.webview);
-
-		
 	}
 
 	/**
@@ -84,11 +85,12 @@ export class CatalogPanel {
 		this._panel.dispose();
 
 		// Dispose of all disposables (i.e. commands) for the current webview panel
-		while (this._disposables.length) {
-		const disposable = this._disposables.pop();
-		if (disposable) {
-			disposable.dispose();
-		}
+		while (this._disposables.length) 
+		{
+			const disposable = this._disposables.pop();
+			if (disposable) {
+				disposable.dispose();
+			}
 		}
 	}
 
@@ -113,6 +115,7 @@ export class CatalogPanel {
 		const imagesUri = getUri(webview, extensionUri, ["resources", "icon"]);
 		
 		// Tip: Install the es6-string-html VS Code extension to enable code highlighting below
+		
 		return /*html*/ `
 		<!DOCTYPE html>
 		<html lang="en">
@@ -140,66 +143,106 @@ export class CatalogPanel {
 	 * Sets up an event listener to listen for messages passed from the webview context and
 	 * executes code based on the message that is received.
 	 *
-	 * @param webview A reference to the extension webview
-	 * @param context A reference to the extension context
+	 * @param webview A reference to the extension webview 
 	 */
 	private _setWebviewMessageListener(webview: Webview) {
-		webview.onDidReceiveMessage(
-		async (message: any) => {
-			const command = message.command;
-			const environmentName = message.environmentName;
+			webview.onDidReceiveMessage(
+			async (message: any) => {
+				const command = message.command;
+				const environmentName = message.environmentName;
+				const nid = message.internalNid;
 
-			switch (command) {
-				case "getCatalog":{
-					// Code that should run in response to the hello message command
-					vscode.window.withProgress(
-						{
-							location : vscode.ProgressLocation.Notification,
-							title: "Getting Data"
-						},
-						async(progress, token)=>{
-							const result = await this._clio.ExecuteClioCommand('clio catalog');
-							const msg = {
-								"getCatalog": result
-							};
-			
-							//raising event, angular subscribes to it
-							this._panel.webview.postMessage(msg);
-							progress.report({ 
-								increment: 100, 
-								message: "Done" 
-							});
-						}
-					);
-					break;
-				}
-				case "install":{
-					//console.log(command);
-					const appId = message.appId;
+				switch (command) {
+					case "getCatalog":{
+						// Code that should run in response to the hello message command
+						vscode.window.withProgress(
+							{
+								location : vscode.ProgressLocation.Notification,
+								title: "Getting Data"
+							},
+							async(progress, token)=>{
+
+								if(this._marketplaceCatalogue.Applications.length === 0){
+									await this._marketplaceCatalogue.FillCatalogueAsync();
+								}
+
+								const msg = {
+									"getCatalog": this._marketplaceCatalogue.Applications
+								};
 				
-					vscode.window.withProgress(
-						{
-							location : vscode.ProgressLocation.Notification,
-							title: `Installing app with id ${appId}`
-						},
-						async(progress, token)=>{
-							const clioExecutor = new ClioExecutor();
-							clioExecutor.executeCommandByTerminal(`install --id ${appId} -e ${environmentName}`);
-							//const result = await this._clio.ExecuteClioCommand(`clio install --id ${appId} -e ${environmentName}`);
-							progress.report({ 
-								increment: 100,
-								message: "Done"
-							});
-							//vscode.window.showInformationMessage(result as string);
-						}
-					);
+								//raising event, angular subscribes to it
+								this._panel.webview.postMessage(msg);
+								progress.report({ 
+									increment: 100, 
+									message: "Done" 
+								});
+							}
+						);
+						break;
+					}
+					case "install":{
+						//console.log(command);
+						const appId: number[] = message.appId;
+					
+						vscode.window.withProgress(
+							{
+								location : vscode.ProgressLocation.Notification,
+								title: `Installing app with id ${appId}`
+							},
+							async(progress, token)=>{
+								const clioExecutor = new ClioExecutor();
+
+								clioExecutor.executeCommandByTerminal(`install --id ${appId.toString().replace(',',' ')} -e ${environmentName}`);
+								//const result = await this._clio.ExecuteClioCommand(`clio install --id ${appId} -e ${environmentName}`);
+								progress.report({ 
+									increment: 100,
+									message: "Done"
+								});
+								
+							}
+						);
+					}
+					case "getMarketplaceAppDetails":{
+						vscode.window.withProgress(
+							{
+								location : vscode.ProgressLocation.Notification,
+								title: "Getting Application Details"
+							},
+							async(progress, token)=>{
+
+								const appIndex = this._marketplaceCatalogue.Applications.findIndex(app=> app.internalNid === nid);
+								if( appIndex === -1) {return;}
+
+								await this._marketplaceCatalogue.Applications[appIndex].FillAllPropertiesAsync();
+								const app = this._marketplaceCatalogue.Applications[appIndex];
+								const msg = {
+									"getMarketplaceAppDetails": {
+										languages : app.AppLanguages,
+										developer: app.AppDeveloper,
+										dbms: app.AppCompatibleDbms,
+										map: app.ApplicationMap,
+										productCategory: app.AppProductCategory,
+										compatibility: app.AppCompatibility,
+										minVersion: app.AppCompatibilityVersion.toString(),
+										platform: app.AppCompatiblePlatform,
+										appLogo: app.AppLogo
+									}
+								};
+				
+								//raising event, angular subscribes to it
+								this._panel.webview.postMessage(msg);
+								progress.report({ 
+									increment: 100, 
+									message: "Done" 
+								});
+							}
+						);
+						break;
+					}
 				}
-			}
-		},
-		undefined,
-		this._disposables
+			},
+			null,
+			this._disposables
 		);
 	}
-
-	
 }

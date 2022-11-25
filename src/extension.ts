@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { InstallMarketplaceApp } from './panels/MarketplaceApp';
 import { Clio } from './commands/Clio';
 import { IRegisterWebAppArgs } from './commands/RegisterWebAppCommand';
 import { TextEditor } from 'vscode';
@@ -16,12 +15,56 @@ import { SqlPanel } from './panels/SqlPanel';
 import { FeaturesPanel } from './panels/FeaturesPanel';
 import { WebSocketMessagesPanel } from './panels/WebSocketMessagesPanel';
 import { ComparePanel } from './panels/ComparePanel';
+import { CreatioFS } from './file-system-provider/fileSystemProvider';
+import { ItemType } from './service/TreeItemProvider/ItemType';
+import { MarketplaceCatalogue } from './common/MarketplaceClient/MarketplaceCatalogue';
+import { ModerationState, ProductCategory } from './common/MarketplaceClient/marketplaceApp';
+import { NugetClient } from './common/NugetClient/NugetClient';
+import { mySemVer } from './utilities/mySemVer';
 
 export function activate(context: vscode.ExtensionContext) {
-	const clio = new Clio();
-	const executor = new ClioExecutor();
-
+	
+	const executor = new ClioExecutor();	
+	const nugetClient = new NugetClient();
 	const treeProvider = new CreatioTreeItemProvider();
+	const clio = new Clio();
+	const _marketplaceCatalogue = new MarketplaceCatalogue();
+
+	//Check clio latest version!
+	checkClioLatestVersion(nugetClient, executor);
+		
+	
+	//#region FileSystemProvider
+	const creatioFS = new CreatioFS();
+	const registration = vscode.workspace.registerFileSystemProvider("creatio", creatioFS, {
+		isCaseSensitive : true,
+		isReadonly : false
+	});
+	context.subscriptions.push(registration);
+
+	let initialized = false;
+	
+	context.subscriptions.push(vscode.commands.registerCommand("creatioFS/getFile", _=>{
+		//const file_uri = vscode.Uri.parse(`creatio:/environment-name/afile.cs`);
+		const file_uri = vscode.Uri.parse(`creatio:/environment-name/afile.cs?uid=$some-guid-here&itemType=some-type-here`);
+		vscode.workspace.openTextDocument(file_uri)
+		.then((doc: vscode.TextDocument)=>{
+			vscode.window.showTextDocument(doc);
+		});
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('creatioFS.workspaceInit', _ => {
+		vscode.workspace.updateWorkspaceFolders(
+			0, 
+			0, 
+			{ uri: vscode.Uri.parse('creatio:/'), 
+			name: "creatioFS - Sample" });
+	}));
+
+
+	//#endregion
+
+	
 	//vscode.window.registerTreeDataProvider('vscode-clio-extension.creatioExplorer', treeProvider);
 	const treeView = vscode.window.createTreeView("vscode-clio-extension.creatioExplorer", {
 		treeDataProvider: treeProvider
@@ -36,33 +79,74 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 	
-
 	treeView.onDidChangeSelection(async (event: vscode.TreeViewSelectionChangeEvent<CreatioTreeItem>)=>{
 		
 	});
 
 	treeView.onDidExpandElement(async (event: vscode.TreeViewExpansionEvent<CreatioTreeItem>)=>{
 		if(event.element instanceof Environment){
+			creatioFS.addClient({
+				client: event.element.creatioClient,
+				name : event.element.label
+			});
 			return;
 		}
 		
-		if(event.element instanceof PackageList){
+		if(event.element instanceof PackageList && !(event.element as PackageList).isPackageRetrievalInProgress){
+
 			vscode.window.withProgress(
 				{
 					location : vscode.ProgressLocation.Notification,
 					title: "Getting packages data"
 				},
 				async(progress, token)=>{
-					//TODO: Change to clio when available
 					await (event.element as PackageList).getPackagesDev();
 					treeProvider.refresh();
 					
+					const packages = (event.element.items as Package[]);
+					packages.forEach((p, index)=>{
+
+						const u = vscode.Uri.parse(`creatio:/${event.element.parent?.label}/${p.name}`);
+						creatioFS.createDirectory(u);
+					});
+
 					progress.report({
 						increment: 100,
 						message: "Done"
 					});
 				}
 			);
+		}
+
+
+		if(event.element instanceof Package){
+			//console.log("Package expanded");
+			const creatioPackage = event.element as Package;
+			const items = creatioPackage.items as WorkSpaceItem[];
+
+			items.forEach((item)=>{
+				
+				switch(item.itemType){
+					case ItemType.clientModuleSchema:
+						const jsFileName = item.name+'.js';
+						const jsFileUri = vscode.Uri.parse(`creatio:/${creatioPackage.parent?.parent?.label}/${creatioPackage.name}/${jsFileName}`);
+						creatioFS.writeFile(jsFileUri, new Uint8Array(0), {create:true, overwrite:true, isInit: true, itemType: item.itemType});
+						break;
+					
+					case ItemType.sourceCodeSchema:
+						const csFileName = item.name+'.cs';
+						const csFileUri = vscode.Uri.parse(`creatio:/${creatioPackage.parent?.parent?.label}/${creatioPackage.name}/${csFileName}`);
+						creatioFS.writeFile(csFileUri, new Uint8Array(0), {create:true, overwrite:true, isInit: true, itemType: item.itemType});
+						break;
+					
+					case ItemType.sqlScriptSchema:
+						const sqlFileName = item.name+'.sql';
+						const sqlFileUri = vscode.Uri.parse(`creatio:/${creatioPackage.parent?.parent?.label}/${creatioPackage.name}/${sqlFileName}`);
+						creatioFS.writeFile(sqlFileUri, new Uint8Array(0), {create:true, overwrite:true,isInit: true, itemType: item.itemType});
+						break;
+				}
+			});
+
 		}
 		
 		if(event.element instanceof ProcessList){
@@ -93,20 +177,6 @@ export function activate(context: vscode.ExtensionContext) {
 		//Show my panel;
 		SqlPanel.render(context.extensionUri, envName as string);
 		SqlPanel.currentPanel?.sendMessage(result);
-
-		/*
-		await vscode.commands.executeCommand("workbench.action.editorLayoutTwoRows");
-				
-		vscode.workspace.openTextDocument({
-			language: 'text',
-			content : (result|| '').toString()
-		})
-		.then((doc: vscode.TextDocument)=>{
-			vscode.window.showTextDocument(doc, {
-				viewColumn: vscode.ViewColumn.Two
-			});
-		});
-		*/
 	}));
 
 	context.subscriptions.push(
@@ -333,7 +403,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	//#endregion
 
-
 	//#region Commands : Package
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.UnlockPackage", async (node: Package)=>{
@@ -355,7 +424,100 @@ export function activate(context: vscode.ExtensionContext) {
 			node.showContent();
 		})
 	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.OpenSchemaContent", async (node: WorkSpaceItem)=>{
+			node.showContent();
+		})
+	);
+	//#endregion
+
+	//#region Experemental
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.GetCatalogue", async ()=>{
+			await _marketplaceCatalogue.FillCatalogueAsync();
+			
+			const apps = _marketplaceCatalogue.Applications.filter(app=>app.moderationState === ModerationState.published);
+			await apps[0].FillAllPropertiesAsync();
+			const app = apps[0];
+
+			console.log(`Title: ${app.title}`);
+			console.log(`Languages: ${app.AppLanguages}`);
+			console.log(`Certified: ${app.isCertified}`);
+			console.log(`MarketplaceUrl: ${app.MarketplaceUrl.toString()}`);
+			console.log(`Product Category: ${ProductCategory[app.AppProductCategory]}`);
+			console.log(`Application Map: ${app.ApplicationMap}`);
+			console.log(`Compatibility: ${app.AppCompatibility}`);
+			console.log(`Compatible Version: ${app.AppCompatibilityVersion}`);
+			console.log(`Compatible dbms: ${app.AppCompatibleDbms}`);
+			console.log(`Compatible platform: ${app.AppCompatiblePlatform}`);
+			console.log(`Developer: ${app.AppDeveloper}`);
+			
+			console.log(`Logo: ${app.AppLogo}`);
+		})
+	);
 	//#endregion
 
 }
 export function deactivate() {}
+
+function checkClioLatestVersion(nugetClient: NugetClient, executor: ClioExecutor){
+	(async()=>{
+		await nugetClient.getServiceIndex();
+		const latestNuGetClioVersion = await nugetClient.searchClioHighestVersion();
+		const _lv = new mySemVer(latestNuGetClioVersion);
+		
+		//Clio after version 3.0.1.37 got a new command clio ver --clio
+		const commandResponse = await executor.ExecuteClioCommand(`clio ver --clio`);
+
+		//Clio pre 3.0.1.37 did not have -ver command
+		const oldClioCommandResponse = await executor.ExecuteClioCommand(`clio version`);
+		//old clio will return > Command failed: clio version\nclio 3.0.1.37
+		const oldVersion = (oldClioCommandResponse.split('\n')[1]).split(' ')[1];
+
+		let _installedOldVersion = new mySemVer("0.0.0.0");
+		if(oldVersion){
+			_installedOldVersion = new mySemVer(oldVersion);
+		}
+		
+		const _commandParts = commandResponse.split(' ');
+		let _installedVersion = new mySemVer("0.0.0.0");
+		if(_commandParts && _commandParts[3]){
+			_installedVersion = new mySemVer(_commandParts[3]);
+		}
+		
+		//take highest between newClio and old clio
+		const r = _installedOldVersion.compare(_installedVersion);
+		const _currentVersion = (r===1) ? _installedOldVersion : _installedVersion;
+
+
+		const _compResult = _lv.compare(_currentVersion);
+		//const _compResult = _lv.compare(_installedVersion);
+		switch(_compResult){
+			case 0:
+				console.log("Clio is of the latest version");
+				break;
+			case 1:
+				vscode.window.showInformationMessage(
+					`Would you like to update clio to the latest version ${_lv} ?
+					Your version is: ${_currentVersion.toString()}`,
+					"UPDATE", "SKIP"
+				).then(answer => {
+					if (answer === "UPDATE") {
+						vscode.commands.executeCommand("ClioSQL.UpdateClioCli");
+					}
+				});
+				break;
+			case -1:
+				vscode.window.showInformationMessage(
+					`This is impossible, installed version of clio ${_currentVersion.toString()} is greater than the latest available version. 
+					Would you like to update to the latest available version ?`,
+					"UPDATE", "SKIP"
+				).then(answer => {
+					if (answer === "UPDATE") {
+						vscode.commands.executeCommand("ClioSQL.UpdateClioCli");
+					}
+				});
+				break;
+		}
+	})();
+}

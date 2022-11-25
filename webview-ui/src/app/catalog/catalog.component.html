@@ -1,10 +1,11 @@
 <div *ngIf="unFilteredCatalog.length>0"  class="main-table" >
-	<vscode-data-grid aria-label="Catalog" grid-template-columns="100px 1fr 50px" generate-Header="sticky">
+	<vscode-data-grid aria-label="Catalog" grid-template-columns="1fr" generate-Header="sticky">
 		<vscode-data-grid-row row-type="sticky-header" class="header-row">
 			<div class="header">
-				<div >
+				<div class="logo">
 					<img class="logo-img"src={{circleImageUri}} alt="logo">
 					<span class="logo-text">Install an app on {{environmentName}}</span>
+					<vscode-button *ngIf="selectedApps.length>0" class="creatio-button" (click)="install()">Install</vscode-button>
 				</div>
 				<br/>
 				<div>
@@ -12,27 +13,27 @@
 						#myData	(keyup)="search(myData)" ngDefaultControl>
 						<span slot="start" class="codicon codicon-search"></span>
 					</vscode-text-field>
+
+					<div class="tag-container example-list" cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="drop($event)">
+						<vscode-tag class="tag-item example-box" ngDefaultControl *ngFor="let tag of selectedApps" cdkDrag>
+							{{tag}}
+							<span class="codicon codicon-close icon" (click)="removeFromSelectedApps(tag)"></span>
+						</vscode-tag>
+					</div>
 				</div>
-				<br/><br/>
-			
 			</div>
 			
-			<vscode-data-grid-cell cell-type="columnheader" grid-column="1">App Id</vscode-data-grid-cell>
-			<vscode-data-grid-cell cell-type="columnheader" grid-column="2">App Name</vscode-data-grid-cell>
-			<vscode-data-grid-cell cell-type="columnheader" grid-column="3" class="install">Add</vscode-data-grid-cell>
-		</vscode-data-grid-row>
-		<vscode-data-grid-row *ngFor="let item of catalog">
-			<vscode-data-grid-cell grid-column="1" class="content-cell">{{item.id}}</vscode-data-grid-cell>
-			<vscode-data-grid-cell grid-column="2" class="content-cell">
-				<span *ngIf="item.id==23425" class="codicon codicon-star-full" style="color: yellow;"></span>
-				<span *ngIf="item.id==10096" class="codicon codicon-star-full" style="color: yellow;"></span>
-				<span *ngIf="item.id==22966" class="codicon codicon-star-full" style="color: yellow;"></span>
-				{{item.name}}
+			<vscode-data-grid-cell cell-type="columnheader" grid-column="1">
+				<div class="header-title">
+					<div>App Id</div>
+					<div>App Name</div>
+					<div>Action</div>
+				</div>
 			</vscode-data-grid-cell>
-			<vscode-data-grid-cell grid-column="3">
-				<vscode-button class="creatio-button install">
-					<span class="codicon codicon-add" id={{item.id}} (click)="install(item.id)"></span>
-				</vscode-button>
+		</vscode-data-grid-row>
+		<vscode-data-grid-row *ngFor="let item of catalog" #dataItem #myRowData>
+			<vscode-data-grid-cell grid-column="1" class="content-cell" style="grid-column: 1 / -1;">
+				<app-marketplace-app [MarketplaceApp]="item" style="width: 100%;" (Selected)="onSelectedForInstall($event)"></app-marketplace-app>
 			</vscode-data-grid-cell>
 		</vscode-data-grid-row>
 	</vscode-data-grid>
