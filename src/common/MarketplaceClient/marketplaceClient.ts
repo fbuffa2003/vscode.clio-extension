@@ -321,11 +321,22 @@ export class MarketplaceClient{
 			const _title: string = element['attributes']['title'] as string;
 			const _moderationState: ModerationState = element['attributes']['moderation_state'] === 'published' ? ModerationState.published : ModerationState.upcoming;
 			
-			let _shortDescription: string = element['attributes']['field_app_short_description']['processed'] as string;
-			let _longDescription: string = element['attributes']['field_app_product_description']['processed'] as string;
-			//strip HTML tags
-			_shortDescription = _shortDescription.replace(/(<([^>]+)>)/gi, "");
-			_longDescription = _longDescription.replace(/(<([^>]+)>)/gi, "");
+			let _shortDescription: string = "";
+			if(element && element['attributes'] && element['attributes']['field_app_short_description'] && element['attributes']['field_app_short_description']['processed']){
+				_shortDescription = element['attributes']['field_app_short_description']['processed'] as string;
+				
+				//strip HTML tags
+				_shortDescription = _shortDescription.replace(/(<([^>]+)>)/gi, "");
+			}
+			
+			let _longDescription: string  = "";
+			if(element && element['attributes'] && element['attributes']['field_app_product_description'] && element['attributes']['field_app_product_description']['processed']){
+				_longDescription = element['attributes']['field_app_product_description']['processed'] as string;
+				
+				//strip HTML tags
+				_longDescription = _longDescription.replace(/(<([^>]+)>)/gi, "");
+			}
+
 
 			const _path: string = element['attributes']['path']['alias'] as string;
 			const _isCertified: boolean = element['attributes']['field_app_certificate'] as boolean;

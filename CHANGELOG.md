@@ -12,6 +12,12 @@
 - **NoCode+real code collaboration**
 
 
+## [0.0.13] release  - Dev 02, 2022
+
+### Bug Fix
+- Added null check for Marketplace API
+
+
 ## [0.0.12] release  - Nov 25, 2022
 
 ### Added
