@@ -19,8 +19,6 @@ export class instalationInpitValidator{
 		this._takenNames = v;
 	}
 	
-
-
 	/**
 	 *
 	 */
@@ -36,6 +34,11 @@ export class instalationInpitValidator{
 		if(ps.hadErrors){
 			return;
 		}
+
+		if(ps.raw.startsWith('{')){
+            ps.raw = `[${ps.raw}]`;
+        }
+
 
 		const json : Array<IiisBindingDto> = JSON.parse(ps.raw) as Array<IiisBindingDto>;
 

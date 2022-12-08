@@ -58,8 +58,6 @@ export class pgClient{
 			console.log(msg);
 			throw new Error(`COULD NOT GET Templates FROM DB ${err.message}`);
 		}
-
-
 	}
 
 	public async dropIfExistsAsync(dbName: string): Promise<void>{
