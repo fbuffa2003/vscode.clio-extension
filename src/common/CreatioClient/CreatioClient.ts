@@ -1,14 +1,12 @@
 import * as vscode from 'vscode';
-import { ClientRequest, IncomingMessage, OutgoingHttpHeaders } from "http";
-import { RequestOptions } from "https";
-import { request as httpRequest } from "http";
-import { request as httpsRequest} from "https";
+import { request as httpRequest, ClientRequest, IncomingMessage, OutgoingHttpHeaders } from "http";
+import { request as httpsRequest, RequestOptions} from "https";
 import { ColumnUsage, DataValueType, LogLevel, ParameterDirection, ProcessDataValueType } from "./enums";
 import { KnownRoutes } from "./KnownRoutes";
 import { ItemType } from "../../service/TreeItemProvider/ItemType";
 import { IRequestOptions, IResponse } from "../interfaces";
 import { HttpMethod } from "../Enums";
-import  { WebSocket, ClientOptions } from 'ws';
+import { WebSocket, ClientOptions } from 'ws';
 import { IConnectionSettings } from '../../service/TreeItemProvider/Environment';
 
 

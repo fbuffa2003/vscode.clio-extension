@@ -1,0 +1,124 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgadmin
+  namespace: creatio
+  labels:
+    app: pgadmin
+spec:
+  selector:
+   app: pgadmin
+  type: NodePort
+  ports:
+   - port: 80
+     nodePort: 30200
+
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pgadmin-pv-volume
+  labels:
+    type: local
+    app: pgadmin
+spec:
+  storageClassName: ""
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/pgadmin"
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pgadmin-pv-claim
+  namespace: creatio
+  labels:
+    app: pgadmin
+spec:
+  storageClassName: ""
+  volumeName: pgadmin-pv-volume
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ name: pgadmin-config
+ namespace: creatio
+data:
+ servers.json: |
+   {
+       "Servers": {
+         "1": {
+           "Name": "PostgreSQL 15",
+           "Group": "Servers",
+           "Port": 5432,
+           "Username": "postgres",
+           "Password": "root",
+           "Host": "postgres",
+           "SSLMode": "prefer",
+           "MaintenanceDB": "postgres"
+         }
+       }
+   }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin
+  namespace: creatio
+spec:
+  selector:
+    matchLabels:
+      app: pgadmin
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      initContainers:
+        - name: hack
+          image: busybox
+          command: ["sh", "-c", "chown -R 5050:5050 /var/lib/pgadmin;", "sh", "-c", "chown -R 5050:5050 /pgadmin4/servers.json"]
+          volumeMounts:
+            - name: pgadmin
+              mountPath: /var/lib/pgadmin
+            - name: pgadmin-config
+              mountPath: /pgadmin4/servers.json
+              subPath: servers.json
+      containers:
+        - name: pgadmin4
+          image: dpage/pgadmin4:latest
+          env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              value: "root@creatio.com"
+            - name: PGADMIN_DEFAULT_PASSWORD
+              value: "root"
+            - name: PGADMIN_PORT
+              value: "80"
+          volumeMounts:
+            - mountPath: /var/lib/pgadmin
+              name: pgadmin
+            - mountPath: /pgadmin4/servers.json
+              name: pgadmin-config
+              subPath: servers.json
+              readOnly: true
+          ports:
+            - containerPort: 80
+              name: pgadminport
+      volumes:
+      - name: pgadmin
+        persistentVolumeClaim:
+          claimName: pgadmin-pv-claim
+      - name: pgadmin-config
+        configMap:
+          name: pgadmin-config
