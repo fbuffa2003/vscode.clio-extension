@@ -21,6 +21,12 @@ import { MarketplaceCatalogue } from './common/MarketplaceClient/MarketplaceCata
 import { ModerationState, ProductCategory } from './common/MarketplaceClient/marketplaceApp';
 import { NugetClient } from './common/NugetClient/NugetClient';
 import { mySemVer } from './utilities/mySemVer';
+import { RequiredFeatures } from './common/WindowsOptionalFeature';
+import { installer } from './common/installer';
+import { instalationInpitValidator } from './common/InputValidator/instalationInpitValidator';
+import * as fs from 'node:fs/promises';
+import { PowerShell } from 'node-powershell/dist';
+import { decompressor } from './common/TemplateWorker/decompressor';
 
 export function activate(context: vscode.ExtensionContext) {
 	
@@ -31,8 +37,11 @@ export function activate(context: vscode.ExtensionContext) {
 	const _marketplaceCatalogue = new MarketplaceCatalogue();
 
 	//Check clio latest version!
-	checkClioLatestVersion(nugetClient, executor);
-		
+	//checkClioLatestVersion(nugetClient, executor);
+	(async()=>{
+		await forceUpdateClio(executor);
+	})();
+
 	
 	//#region FileSystemProvider
 	const creatioFS = new CreatioFS();
@@ -74,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
 		if(event.element instanceof PackageList){
 			//TODO: Change to clio when available
 			//await (event.element as PackageList).getPackages()
-			(event.element as PackageList).items = [];
+			//(event.element as PackageList).items = [];
 			treeProvider.refresh();
 		}
 	});
@@ -92,7 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 		
-		if(event.element instanceof PackageList && !(event.element as PackageList).isPackageRetrievalInProgress){
+		if(event.element instanceof PackageList && !(event.element as PackageList).isPackageRetrievalInProgress && (event.element as PackageList).items.length === 0){
 
 			vscode.window.withProgress(
 				{
@@ -204,7 +213,10 @@ export function activate(context: vscode.ExtensionContext) {
 				isNetCore: args.isNetCore,
 				isSafe: args.isSafe,
 				isDeveloperModeEnabled: args.isDeveloperModeEnabled,
-				environmentName: args.name
+				environmentName: args.name,
+				clientId : args.clientId,
+				clientSecret : args.clientSecret
+
 			};
 			const isArgValid = clio.registerWebApp.canExecute(commandArgs);
 			if(!isArgValid.success){
@@ -221,7 +233,10 @@ export function activate(context: vscode.ExtensionContext) {
 					maintainer: args.maintainer,
 					isNetCore: args.isNetCore,
 					isSafe: args.isSafe,
-					isDeveloperMode: args.isDeveloperModeEnabled
+					isDeveloperMode: args.isDeveloperModeEnabled,
+					clientId : args.clientId,
+					clientSecret : args.clientSecret
+
 				} as IConnectionSettings);
 
 				ConnectionPanel.kill();
@@ -234,7 +249,9 @@ export function activate(context: vscode.ExtensionContext) {
 					maintainer: args.maintainer,
 					isNetCore: args.isNetCore,
 					isSafe: args.isSafe,
-					isDeveloperMode: args.isDeveloperModeEnabled
+					isDeveloperMode: args.isDeveloperModeEnabled,
+					clientId : args.clientId,
+					clientSecret : args.clientSecret
 				} as IConnectionSettings);
 				vscode.window.showErrorMessage(result.message.toString(), "OK")
 				.then(answer => {
@@ -250,6 +267,11 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.RefreshConnection", async (node: WorkSpaceItem)=>{
+			treeProvider.reload();
+		})
+	);
 
 	//#region Commands : Environment
 
@@ -400,6 +422,39 @@ export function activate(context: vscode.ExtensionContext) {
 			WebSocketMessagesPanel.render(context.extensionUri, node);
 		})
 	);
+	
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.RefreshPackages", (node: PackageList)=>{
+			if(!node.isPackageRetrievalInProgress){
+				node.items = new Array<Package>();
+				vscode.window.withProgress(
+					{
+						location : vscode.ProgressLocation.Notification,
+						title: "Getting packages data"
+					},
+					async(progress, token)=>{
+						await node.getPackagesDev();
+						treeProvider.refresh();
+						
+						const packages = (node.items as Package[]);
+						packages.forEach((p, index)=>{
+	
+							const u = vscode.Uri.parse(`creatio:/${node.parent?.label}/${p.name}`);
+							creatioFS.createDirectory(u);
+						});
+	
+						progress.report({
+							increment: 100,
+							message: "Done"
+						});
+					}
+				);
+			}
+			
+		})
+	);
+
+
 
 	//#endregion
 
@@ -429,6 +484,7 @@ export function activate(context: vscode.ExtensionContext) {
 			node.showContent();
 		})
 	);
+
 	//#endregion
 
 	//#region Experemental
@@ -455,11 +511,173 @@ export function activate(context: vscode.ExtensionContext) {
 			console.log(`Logo: ${app.AppLogo}`);
 		})
 	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.WinFeatureTest", async (node: WorkSpaceItem)=>{
+			var rf = new RequiredFeatures();
+			rf.Items.forEach(async(feature)=>{
+				
+				await feature.describeAsync();
+				if(!feature.IsEnabled){
+					console.log(`Feature ${feature.FeatureName}: ${feature.DisplayName} is Enabled: ${feature.IsEnabled}`);
+					await feature.enableAsync();
+				}
+			});
+			console.log(`Feature check completed`);
+		})
+	);
+	
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.CopyScripts", async (node: WorkSpaceItem)=>{
+			const infrastructure = vscode.Uri.joinPath(context.extensionUri, "resources","scripts", "infrastructure");
+			const configuration = vscode.workspace.getConfiguration();
+			const deployFolder = configuration.get<string>("k8s.workloads") ?? '';
+
+			let exists = false;
+			try {
+				const dFolder = await fs.stat(deployFolder);
+				if(dFolder.isDirectory()){
+					exists = true;
+				}
+				
+			} catch (error) {
+				await fs.mkdir(deployFolder);
+			}
+			await fs.cp(infrastructure.fsPath, deployFolder,{recursive:true});
+		})
+	);
+	
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.InstallCreatio", async (node: WorkSpaceItem)=>{
+
+			const uiPrompt = new UIPrompt();
+			const foldername = await uiPrompt.getFolder();
+			const appName = await uiPrompt.getAppName();
+			const iis_port = await uiPrompt.getIISPortNumber();
+			const redis_dbNum = await uiPrompt.getRedisDbNumber();
+
+
+			const choice = await vscode.window.showInformationMessage(
+				`We will install ${foldername}\n, name it ${appName}, expose it on port ${iis_port} with redisdb ${redis_dbNum}`
+				, "INSTALL"
+				,"ABORT");
+
+			if(choice === "ABORT"){
+				return;
+			}
+			const inst = new installer(appName, foldername, iis_port, redis_dbNum);
+			
+			try{
+				await inst.renameTemplateAsync();
+			}
+			catch(error) {
+				const errorCode = ((error as object) as any)['code'];
+				if(errorCode === 'ENOENT' ){
+					await inst.createTemplateDirectory();
+					await inst.renameTemplateAsync();
+				}
+			}
+
+			await inst.createDbFromTemplateAsync();
+			vscode.window.showInformationMessage("Restore db from template completed");
+			await inst.updateConnectionString();
+			vscode.window.showInformationMessage("Update connection string completed");
+			await inst.createIISSiteAsync();
+			vscode.window.showInformationMessage("Create IIS completed");
+		
+			const url = `http://localhost:${iis_port}`;
+			vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+		
+			vscode.window.withProgress(
+				{
+					location : vscode.ProgressLocation.Notification,
+					title: "Creating new template folder"
+				},
+				async(progress, token)=>{
+					await inst.createTemplateDirectory();
+					progress.report({
+						increment: 100,
+						message: "Done"
+					});
+				}
+			);
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.DeployInfrastructure", async (node: WorkSpaceItem)=>{
+			
+			const configuration = vscode.workspace.getConfiguration();
+			const deployFolder = configuration.get<string>("k8s.workloads") ?? '';
+			const ns = vscode.Uri.joinPath(vscode.Uri.file(deployFolder), "creatio-namespace.yaml");
+			const pgadmin = vscode.Uri.joinPath(vscode.Uri.file(deployFolder), "pgadmin");
+			const postgres = vscode.Uri.joinPath(vscode.Uri.file(deployFolder), "postgres");
+			const redis = vscode.Uri.joinPath(vscode.Uri.file(deployFolder), "redis");
+
+			//console.log(`kubectl apply -f ${ns.fsPath}`);
+			
+			await PowerShell.$`kubectl apply -f ${ns.fsPath}`;
+			await PowerShell.$`kubectl apply -f ${pgadmin.fsPath}`;
+			await PowerShell.$`kubectl apply -f ${postgres.fsPath}`;
+			await PowerShell.$`kubectl apply -f ${redis.fsPath}`;
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.PrepareTemplateFromZip", async (node: WorkSpaceItem)=>{
+			
+			const configuration = vscode.workspace.getConfiguration();
+			const deployFolder = configuration.get<string>("archivePath");
+
+			if(!deployFolder){
+				vscode.window.showErrorMessage("archivePath cannot be empty, check your preferences");
+				return;
+			}
+
+			const options : vscode.OpenDialogOptions = {
+				canSelectFiles: true,
+				canSelectFolders: false,
+				canSelectMany: false,
+				defaultUri: vscode.Uri.file(deployFolder),
+				filters : {
+					'Archives': ['zip']
+				}
+			};
+			const selectedFileUri = await vscode.window.showOpenDialog(options);
+			
+			if(!selectedFileUri || !selectedFileUri[0]){
+				vscode.window.showErrorMessage("You have to select one zip file");
+				return;
+			}
+			const dc = new decompressor(selectedFileUri[0]);
+
+
+			vscode.window.withProgress(
+				{
+					location : vscode.ProgressLocation.Notification,
+					title: "Prepare template from Zip"
+				},
+				async(progress, token)=>{
+					await dc.Execute(progress);
+				}
+			);
+		})
+	);
 	//#endregion
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.Settings", async (node: Environment)=>{
+			//const commandResponse = await executor.ExecuteClioCommand(`clio cfg open`);
+			executor.executeCommandByTerminal(`cfg open`);
+
+		})
+	);
 
 }
 export function deactivate() {}
 
+
+//this method is not used since we are now force updating clio and registering context menu
 function checkClioLatestVersion(nugetClient: NugetClient, executor: ClioExecutor){
 	(async()=>{
 		await nugetClient.getServiceIndex();
@@ -520,4 +738,123 @@ function checkClioLatestVersion(nugetClient: NugetClient, executor: ClioExecutor
 				break;
 		}
 	})();
+}
+
+/**
+ * Forces to update clio to the latest version and registers context menu
+ * Triggered onAppStart event see L42
+ * @param executor command line executor
+ */
+async function forceUpdateClio(executor: ClioExecutor){
+
+	console.log("Updating clio");
+	await vscode.commands.executeCommand("ClioSQL.UpdateClioCli");
+
+	console.log("Registering context menu");
+	await executor.ExecuteClioCommand("clio register");
+}
+
+
+export class UIPrompt{
+	private _iisValidator = new instalationInpitValidator();
+
+	private readonly _hostname : string = 'localhost';
+	private readonly _archivePath : string;
+	private readonly _installRoot : string;
+	private readonly _templatePrefix: string;
+
+	/**
+	 *
+	 */
+	constructor() {
+		const configuration = vscode.workspace.getConfiguration();
+		this._archivePath = configuration.get<string>("archivePath") ?? '';
+		this._installRoot = configuration.get<string>("installRoot") ?? '';
+		this._templatePrefix = configuration.get<string>("templatePrefix") ?? '';
+	}
+
+
+	//private _getAppNameAttempt = 0;
+	public async getAppName(): Promise<string>{
+		return await vscode.window.showInputBox({
+			title: "How would you like to call your Creatio",
+			prompt: "This will be IIS application Name",
+			ignoreFocusOut: true,
+			validateInput: text=>{
+				if(this._iisValidator.takenNames.find(n=> n.toLowerCase() === text.trim().toLowerCase())){
+					return "ERROR -This name is already taken, think of something new";
+				}
+			}
+		}) ?? '';
+	}
+
+	public async getIISPortNumber(): Promise<number>{
+		const _pornNumber = await vscode.window.showInputBox({
+			title: "IIS Port",
+			prompt: "This is IIS port where Creatio will be available",
+			validateInput: text=>{
+				const portNumber = parseInt(text);
+				if(this._iisValidator.takenPorts.find(p=> p===portNumber)){
+					return "ERROR - This port is already taken, think of a new number";
+				}
+			}
+		}) ?? '';
+		return parseInt(_pornNumber);
+	}
+
+	public async getRedisDbNumber(): Promise<number>{
+		const _dbNumber = await vscode.window.showInputBox({
+			title: "Redis db number",
+			prompt: "Enter redis db number, values between 0 and 15",
+			validateInput: text=>{
+				const dbNumber = parseInt(text);
+				if(dbNumber < 0 || dbNumber > 15){
+					return "ERROR - Redis db can be between 0 and 15";
+				}
+			}
+		}) ?? '';
+		
+		const dbNumber = parseInt(_dbNumber);
+		return dbNumber;
+	}
+	
+	public async getFolder(): Promise<string>{
+		const folders = await this.getAvailableTemplateFolders();
+		const opt : vscode.QuickPickOptions = {
+			canPickMany: false,
+			title: "Select template folder",
+			ignoreFocusOut: true
+		};
+		const folder = await vscode.window.showQuickPick(folders, opt);
+		return folder ?? '' ;	
+	}
+
+	private async getAvailableTemplateFolders(): Promise<string[]>{
+		const subs = await fs.readdir(this._installRoot);
+		const result = new Array<string>();
+		for(let i:number = 0; i< subs.length; i++){
+			console.log(i);
+			if(subs[i].startsWith(this._templatePrefix)){
+				const subfolder = `${this._installRoot}\\${subs[i]}`;
+				const isDir = await this.checkIsFolder(subfolder);
+				if(isDir){
+					const folderName = subs[i].substring(9);
+					result.push(folderName);
+				}
+			}
+		}
+		return result;
+	}
+
+	private async checkIsFolder(path: string): Promise<boolean>{
+		try{
+			const myStat = await fs.stat(path);
+			const isFolder =  myStat.isDirectory();
+			return isFolder;
+		}
+		catch(error){
+			console.log(error);
+			return false;
+		}
+	}
 }

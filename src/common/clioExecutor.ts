@@ -1,10 +1,12 @@
 import { exec } from 'child_process';
 import * as vscode from 'vscode';
 
+
 export class ClioExecutor {
     private clioPath = 'clio';
     private terminal: vscode.Terminal | undefined;
     private isWin = process.platform === 'win32';
+	
 
     private createTerminal() : vscode.Terminal {
         this.terminal = this.terminal || vscode.window.createTerminal('clio console', this.isWin ? 'C:\\Windows\\System32\\cmd.exe' : undefined);

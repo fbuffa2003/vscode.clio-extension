@@ -41,6 +41,10 @@ export interface IRegisterWebAppArgs extends ICommandArgs{
 	  * Will unlock packages
 	  */
 	 isDeveloperModeEnabled: Boolean;
+
+
+	 clientId: string,
+	 clientSecret: string
 }
 
 /**
@@ -88,7 +92,10 @@ export class RegisterWebApp extends BaseCommand implements ICommand<IRegisterWeb
 			throw new Error(`${this._validationResult.message}`);
 		}
 
-		const cmd = `clio reg-web-app ${args.environmentName} -u ${args.url} -l ${args.username} -p ${args.password} -m ${args.maintainer} -i ${args.isNetCore} -c ${args.isDeveloperModeEnabled} -s ${args.isSafe}`;
+		const oauthUri = args.url.replace('.creatio.com', '-is.creatio.com/connect/token');
+
+		//TODO: do better
+		const cmd = `clio reg-web-app ${args.environmentName} -u ${args.url} -l \"${args.username}\" -p \"${args.password}\" -m ${args.maintainer} -i ${args.isNetCore} -c ${args.isDeveloperModeEnabled} -s ${args.isSafe} --clientId \"${args.clientId}\" --clientSecret \"${args.clientSecret}\" --authAppUri ${oauthUri}`;
 		const result = await this.executor.ExecuteClioCommand(cmd);
 		return this.convertResult(result, args);
 	}

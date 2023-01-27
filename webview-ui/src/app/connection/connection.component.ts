@@ -22,7 +22,9 @@ export class ConnectionComponent implements OnInit {
 		maintainer: "Customer",
 		isNetCore: false,
 		isSafe: false,
-		isDeveloperMode: false
+		isDeveloperMode: false,
+		clientId: "",
+		clientSecret: ""
 	};
 
 	constructor() {
@@ -49,7 +51,9 @@ export class ConnectionComponent implements OnInit {
 					maintainer: this.data.maintainer,
 					isNetCore: this.data.isNetCore,
 					isSafe: this.data.isSafe,
-					isDeveloperModeEnabled: this.data.isDeveloperMode
+					isDeveloperModeEnabled: this.data.isDeveloperMode,
+					clientId : this.data.clientId,
+					clientSecret : this.data.clientSecret
 				}
 			});
 		} else{

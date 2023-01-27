@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: creatio
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:latest
+          env:
+           - name: ALLOW_EMPTY_PASSWORD
+             value: "yes"
+          ports:
+            - containerPort: 6379
+              name: redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: creatio
+  labels:
+    app: redis
+spec:
+  selector:
+    app: redis
+  type: NodePort
+  ports:
+   - port: 6379
+     nodePort: 30379

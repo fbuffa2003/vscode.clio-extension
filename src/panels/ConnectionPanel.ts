@@ -219,4 +219,10 @@ export class ConnectionPanel {
 	 * Will unlock packages
 	 */
 	isDeveloperModeEnabled: boolean;
+
+
+	clientId: string,
+
+	clientSecret: string
+
 }

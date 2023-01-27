@@ -1,0 +1,130 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: creatio
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest
+          imagePullPolicy: "IfNotPresent"
+          envFrom:
+            - configMapRef:
+                name: postgres-config
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgredb
+            - mountPath: /usr/local/dbimages
+              name: dbimages
+      volumes:
+      - name: postgredb
+        persistentVolumeClaim:
+          claimName: postgres-pv-claim
+      - name: dbimages
+        persistentVolumeClaim:
+          claimName: dbimages-pv-claim
+
+---
+    kind: PersistentVolume
+    apiVersion: v1
+    metadata:
+      name: postgres-pv-volume
+      labels:
+        type: local
+        app: postgres
+    spec:
+      capacity:
+        storage: 50Gi
+      accessModes:
+        - ReadWriteOnce
+      hostPath:
+        path: "/mnt/data"
+
+---
+    kind: PersistentVolume
+    apiVersion: v1
+    metadata:
+      name: dbimages-pv-volume
+      labels:
+        type: local
+        app: postgres
+    spec:
+      capacity:
+        storage: 5Gi
+      accessModes:
+        - ReadWriteOnce
+      hostPath:
+        path: "/mnt/dbimages"
+
+---
+    kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: postgres-pv-claim
+      namespace: creatio
+      labels:
+        app: postgres
+    spec:
+      storageClassName: ""
+      accessModes:
+        - ReadWriteOnce
+      volumeName: postgres-pv-volume
+      resources:
+        requests:
+          storage: 50Gi
+    
+---
+    kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: dbimages-pv-claim
+      namespace: creatio
+      labels:
+        app: postgres
+    spec:
+      storageClassName: ""
+      accessModes:
+        - ReadWriteOnce
+      volumeName: dbimages-pv-volume
+      resources:
+        requests:
+          storage: 5Gi
+
+---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: postgres-config
+      namespace: creatio
+      labels:
+        app: postgres
+    data:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+
+---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: postgres
+      namespace: creatio
+      labels:
+        app: postgres
+    spec:
+       ports:
+        - name: postgres
+          port: 5432
+          nodePort: 30432
+       type: NodePort
+       selector:
+        app: postgres
