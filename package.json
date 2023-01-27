@@ -2,7 +2,7 @@
 	"name": "clio-explorer",
 	"displayName": "Clio explorer",
 	"description": "Control your Creatio environments, and perform clio actions on them",
-	"version": "0.0.14",
+	"version": "0.0.15",
 	"publisher": "AdvanceTechnologiesFoundation",
 	"license": "MIT",
 	"icon": "resources/creatio-triangle.png",
@@ -68,6 +68,12 @@
 			}
 		],
 		"menus": {
+			"ClioSQL.CreatioPackageListMenu":[
+				{
+					"command": "ClioSQL.RestoreConfiguration",
+					"group": "group-2@2"
+				}	
+			],
 			"ClioSQL.OverflowMenu": [
 				{
 					"command": "ClioSQL.InstallPackage",
@@ -112,15 +118,24 @@
 			],
 			"ClioSQL.OverflowHeaderMenu": [
 				{
+					"command": "ClioSQL.Settings",
+					"title": "Settings",
+					"icon": "$(code)",
+					"group": "group-1@1"
+				},
+				{
 					"command": "ClioSQL.UpdateClioCli",
 					"title": "Install/Update clio",
-					"icon": "$(code)"
+					"icon": "$(code)",
+					"group": "group-1@2"
 				},
 				{
 					"command": "ClioSQL.UninstallClioCli",
 					"title": "Uninstall clio",
-					"icon": "$(code)"
+					"icon": "$(code)",
+					"group": "group-1@3"
 				}
+				
 			],
 			"view/title": [
 				{
@@ -129,9 +144,14 @@
 					"group": "navigation@1"
 				},
 				{
+					"command": "ClioSQL.RefreshConnection",
+					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
+					"group": "navigation@2"
+				},
+				{
 					"submenu": "ClioSQL.OverflowHeaderMenu",
 					"when": "view =~ /vscode-clio-extension.creatioExplorer/",
-					"group": "navigation@1"
+					"group": "navigation@3"
 				}
 			],
 			"view/item/context": [
@@ -179,6 +199,11 @@
 					"submenu": "ClioSQL.OverflowMenu",
 					"when": "viewItem == CreatioInstance",
 					"group": "inline@5"
+				},
+				{
+					"command": "ClioSQL.RefreshPackages",
+					"when": "viewItem == CreatioPackageList",
+					"group": "inline@0"
 				}
 			],
 			"editor/title": [
@@ -216,6 +241,7 @@
 			}
 		],
 		"commands": [
+			
 			{
 				"command": "ClioSQL.ExecuteSql",
 				"title": "Clio - execute sql",
@@ -227,10 +253,12 @@
 			{
 				"command": "ClioSQL.AddConnection",
 				"title": "Add Connection",
-				"icon": {
-					"light": "resources/icon/Add.svg",
-					"dark": "resources/icon/Add.svg"
-				}
+				"icon": "$(diff-insert)"
+			},
+			{
+				"command": "ClioSQL.RefreshConnection",
+				"title": "Refresh Connection",
+				"icon": "$(search-refresh)"
 			},
 			{
 				"command": "ClioSQL.InstallMarketplaceApp",
@@ -343,6 +371,11 @@
 				"icon": "$(code)"
 			},
 			{
+				"command": "ClioSQL.Settings",
+				"title": "Settings",
+				"icon": "$(code)"
+			},
+			{
 				"command": "ClioSQL.DownloadPackage",
 				"title": "Download package",
 				"icon": "$(cloud-download)"
@@ -401,6 +434,11 @@
 			{
 				"command": "ClioSQL.PrepareTemplateFromZip",
 				"title": "Clio prepare template from zip file"
+			},
+			{
+				"command": "ClioSQL.RefreshPackages",
+				"title": "Refresh",
+				"icon": "$(search-refresh)"
 			}
 		],
 		"colors": [

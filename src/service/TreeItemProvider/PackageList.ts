@@ -54,6 +54,31 @@ export class PackageList extends CreatioTreeItem {
 		}
 	}
 	
+	public async refreshPackages(): Promise<void>{
+		const args : IGetPackagesArgs = {
+			environmentName :  this.parent?.label as string
+		};
+
+		if(this.clio.getPackages.canExecute(args).success){
+			const pkgs = await this.clio.getPackages.executeAsync(args);
+
+			pkgs.data.forEach(pkg => {
+				const p = new Package(pkg.name, pkg.version, pkg.maintainer, pkg.uId, 0, true, 
+					
+					new Array<IWorkSpaceItem>(),
+					this);
+				p.onLockStatusUpdate((target: Package)=>{
+					this.handleLockStatusUpdate(target);
+				});
+				this.items.push(p);
+			});
+
+			await this.sort();
+		}
+	}
+
+
+
 	private _isPackageRetrievalInProgress : boolean = false;
 	public get isPackageRetrievalInProgress() : boolean {
 		return this._isPackageRetrievalInProgress;

@@ -71,6 +71,16 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 		this._onDidChangeTreeData.fire();
 	}
 
+	public async reload(){
+
+		(async()=>{
+			await this.dispose();
+		})();
+		
+		this.environments = new Array<Environment>();
+		this.refresh();
+	}
+
 	//#region Methods : Private
 	private getClioEnvironments() : Map<string, IConnectionSettings> {
 		
@@ -129,6 +139,15 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 			this.environments.splice(removedIndex,1);
 		}
 		this._onDidChangeTreeData.fire();
+	}
+
+	private async dispose(): Promise<void>{
+		for (let index = 0; index < this.environments.length; index++) {
+			const environment = this.environments[index];
+			await environment.StopLogBroadcast();
+			environment.StopListening();
+		}
+		this.environments = new Array<Environment>();
 	}
 	//#endregion
 }

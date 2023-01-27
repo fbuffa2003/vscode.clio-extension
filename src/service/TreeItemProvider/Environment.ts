@@ -145,25 +145,8 @@ export class Environment extends CreatioTreeItem {
 		const rresult = await this.creatioClient.ExecuteSqlScript(sqlText as string);
 		const json = JSON.parse(JSON.parse(rresult.body));
 		return JSON.stringify(json);
-
-		//TODO: lines below are temporarely commented out untill clio-cli can return json
-		const args: ISqlArgs = {
-			sqlText: sqlText,
-			environmentName: this.label
-		};
-		const validationResult = this.clio.sql.canExecute(args);
-
-		if (!validationResult.success) {
-			throw new Error(validationResult.message.toString());
-		}
-
-		const result = await this.clio.sql.executeAsync(args);
-		if (result.success) {
-			return result.message;
-		} else {
-			throw new Error(result.message.toString());
-		}
 	}
+	
 	public async getFeatures(): Promise<IFeature[]>{
 		return this.creatioClient.GetFeatures();
 	}
@@ -253,10 +236,10 @@ export class Environment extends CreatioTreeItem {
 		const day = date.getDate();
 
 
-		if(month === 9 && day>20){
+		if((month === 11 && day>22) || (month===0 && day < 7) ){
 			this.iconPath = {
-				light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'pumpkin','pumpkin-unknown.svg'),
-				dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'pumpkin','pumpkin-unknown.svg')
+				light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'xtree','white.svg'),
+				dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'xtree','white.svg')
 			};
 		}else{
 			this.iconPath = {
@@ -271,10 +254,10 @@ export class Environment extends CreatioTreeItem {
 		const date = new Date();
 		const month = date.getMonth();
 		const day = date.getDate();
-		if(month === 9 && day>20){
+		if((month === 11 && day>22) || (month===0 && day < 7) ){
 			this.iconPath = {
-				light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'pumpkin','pumpkin-green.svg'),
-				dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'pumpkin','pumpkin-green.svg')
+				light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'xtree','green.svg'),
+				dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'xtree','green.svg')
 			};
 		}else{
 			this.iconPath = {
@@ -289,10 +272,10 @@ export class Environment extends CreatioTreeItem {
 		const date = new Date();
 		const month = date.getMonth();
 		const day = date.getDate();
-		if(month === 9 && day>25){
+		if((month === 11 && day>22) || (month===0 && day < 7) ){
 			this.iconPath = {
-				light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'pumpkin','pumpkin-red.svg'),
-				dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'pumpkin','pumpkin-red.svg')
+				light: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'xtree','red.svg'),
+				dark: path.join(__filename, '..', '..', '..','..', 'resources', 'icon', 'xtree','red.svg')
 			};
 		}else{
 			this.iconPath = {

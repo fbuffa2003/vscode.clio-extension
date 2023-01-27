@@ -37,8 +37,11 @@ export function activate(context: vscode.ExtensionContext) {
 	const _marketplaceCatalogue = new MarketplaceCatalogue();
 
 	//Check clio latest version!
-	checkClioLatestVersion(nugetClient, executor);
-		
+	//checkClioLatestVersion(nugetClient, executor);
+	(async()=>{
+		await forceUpdateClio(executor);
+	})();
+
 	
 	//#region FileSystemProvider
 	const creatioFS = new CreatioFS();
@@ -80,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
 		if(event.element instanceof PackageList){
 			//TODO: Change to clio when available
 			//await (event.element as PackageList).getPackages()
-			(event.element as PackageList).items = [];
+			//(event.element as PackageList).items = [];
 			treeProvider.refresh();
 		}
 	});
@@ -98,7 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 		
-		if(event.element instanceof PackageList && !(event.element as PackageList).isPackageRetrievalInProgress){
+		if(event.element instanceof PackageList && !(event.element as PackageList).isPackageRetrievalInProgress && (event.element as PackageList).items.length === 0){
 
 			vscode.window.withProgress(
 				{
@@ -210,7 +213,10 @@ export function activate(context: vscode.ExtensionContext) {
 				isNetCore: args.isNetCore,
 				isSafe: args.isSafe,
 				isDeveloperModeEnabled: args.isDeveloperModeEnabled,
-				environmentName: args.name
+				environmentName: args.name,
+				clientId : args.clientId,
+				clientSecret : args.clientSecret
+
 			};
 			const isArgValid = clio.registerWebApp.canExecute(commandArgs);
 			if(!isArgValid.success){
@@ -227,7 +233,10 @@ export function activate(context: vscode.ExtensionContext) {
 					maintainer: args.maintainer,
 					isNetCore: args.isNetCore,
 					isSafe: args.isSafe,
-					isDeveloperMode: args.isDeveloperModeEnabled
+					isDeveloperMode: args.isDeveloperModeEnabled,
+					clientId : args.clientId,
+					clientSecret : args.clientSecret
+
 				} as IConnectionSettings);
 
 				ConnectionPanel.kill();
@@ -240,7 +249,9 @@ export function activate(context: vscode.ExtensionContext) {
 					maintainer: args.maintainer,
 					isNetCore: args.isNetCore,
 					isSafe: args.isSafe,
-					isDeveloperMode: args.isDeveloperModeEnabled
+					isDeveloperMode: args.isDeveloperModeEnabled,
+					clientId : args.clientId,
+					clientSecret : args.clientSecret
 				} as IConnectionSettings);
 				vscode.window.showErrorMessage(result.message.toString(), "OK")
 				.then(answer => {
@@ -256,6 +267,11 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.RefreshConnection", async (node: WorkSpaceItem)=>{
+			treeProvider.reload();
+		})
+	);
 
 	//#region Commands : Environment
 
@@ -406,6 +422,39 @@ export function activate(context: vscode.ExtensionContext) {
 			WebSocketMessagesPanel.render(context.extensionUri, node);
 		})
 	);
+	
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.RefreshPackages", (node: PackageList)=>{
+			if(!node.isPackageRetrievalInProgress){
+				node.items = new Array<Package>();
+				vscode.window.withProgress(
+					{
+						location : vscode.ProgressLocation.Notification,
+						title: "Getting packages data"
+					},
+					async(progress, token)=>{
+						await node.getPackagesDev();
+						treeProvider.refresh();
+						
+						const packages = (node.items as Package[]);
+						packages.forEach((p, index)=>{
+	
+							const u = vscode.Uri.parse(`creatio:/${node.parent?.label}/${p.name}`);
+							creatioFS.createDirectory(u);
+						});
+	
+						progress.report({
+							increment: 100,
+							message: "Done"
+						});
+					}
+				);
+			}
+			
+		})
+	);
+
+
 
 	//#endregion
 
@@ -435,6 +484,7 @@ export function activate(context: vscode.ExtensionContext) {
 			node.showContent();
 		})
 	);
+
 	//#endregion
 
 	//#region Experemental
@@ -615,9 +665,19 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	//#endregion
 
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.Settings", async (node: Environment)=>{
+			//const commandResponse = await executor.ExecuteClioCommand(`clio cfg open`);
+			executor.executeCommandByTerminal(`cfg open`);
+
+		})
+	);
+
 }
 export function deactivate() {}
 
+
+//this method is not used since we are now force updating clio and registering context menu
 function checkClioLatestVersion(nugetClient: NugetClient, executor: ClioExecutor){
 	(async()=>{
 		await nugetClient.getServiceIndex();
@@ -679,6 +739,21 @@ function checkClioLatestVersion(nugetClient: NugetClient, executor: ClioExecutor
 		}
 	})();
 }
+
+/**
+ * Forces to update clio to the latest version and registers context menu
+ * Triggered onAppStart event see L42
+ * @param executor command line executor
+ */
+async function forceUpdateClio(executor: ClioExecutor){
+
+	console.log("Updating clio");
+	await vscode.commands.executeCommand("ClioSQL.UpdateClioCli");
+
+	console.log("Registering context menu");
+	await executor.ExecuteClioCommand("clio register");
+}
+
 
 export class UIPrompt{
 	private _iisValidator = new instalationInpitValidator();

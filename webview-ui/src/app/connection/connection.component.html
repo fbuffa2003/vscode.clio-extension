@@ -38,31 +38,53 @@
 	
 	<vscode-text-field 
 		type="text" id="username" name="username" size="40" placeholder="Supervisor"
-		required [(ngModel)]="data.userName" ngDefaultControl
+		 [(ngModel)]="data.userName" ngDefaultControl
 		#trackUsername="ngModel">
 			Username:
 			<span slot="end" class="codicon codicon-account"></span>
 			<span slot="start" *ngIf="!trackUsername.valid && trackUsername.touched" 
 				class="codicon codicon-error invalid-icon"></span>
 	</vscode-text-field>
-	<div class="invalid-input" *ngIf="!trackUsername.valid && trackUsername.touched">
+	<!-- <div class="invalid-input" *ngIf="!trackUsername.valid && trackUsername.touched">
 		<span>Username is required</span>
-	</div>
+	</div> -->
 	<br><br>
 	
 	<vscode-text-field 
 		type="password" id="password" name="password" size="40" placeholder="Supervisor"
-		required [(ngModel)]="data.password" ngDefaultControl
+		 [(ngModel)]="data.password" ngDefaultControl
 		#trackPassword="ngModel">
 			Password:
 			<span slot="end" class="codicon codicon-key"></span>
 			<span slot="start" *ngIf="!trackPassword.valid && trackPassword.touched" 
 				class="codicon codicon-error invalid-icon"></span>
 	</vscode-text-field>
-	<div class="invalid-input" *ngIf="!trackPassword.valid && trackPassword.touched">
+	<!-- <div class="invalid-input" *ngIf="!trackPassword.valid && trackPassword.touched">
 		<span>Password is required</span>
-	</div>
+	</div> -->
 	<br><br>
+
+	<vscode-text-field 
+		type="clientId" id="clientid" name="clientid" size="40" placeholder="oauth-clientid"
+		 [(ngModel)]="data.clientId" ngDefaultControl
+		#trackPassword="ngModel">
+			OAuth Client Id:
+			<span slot="end" class="codicon codicon-device-mobile"></span>
+			<span slot="start" *ngIf="!trackPassword.valid && trackPassword.touched" 
+				class="codicon codicon-error invalid-icon"></span>
+	</vscode-text-field>
+	<br /><br />
+	<vscode-text-field 
+		type="clientSecret" id="clientSecret" name="clientSecret" size="40" placeholder="oauth-client-secret"
+		 [(ngModel)]="data.clientSecret" ngDefaultControl
+		#trackPassword="ngModel">
+			OAuth Client Secret:
+			<span slot="end" class="codicon codicon-shield"></span>
+			<span slot="start" *ngIf="!trackPassword.valid && trackPassword.touched" 
+				class="codicon codicon-error invalid-icon"></span>
+	</vscode-text-field>
+	<br /><br />
+
 	
 	<vscode-text-field 
 		type="text" id="maintainer" name="maintainer" placeholder="Customer"

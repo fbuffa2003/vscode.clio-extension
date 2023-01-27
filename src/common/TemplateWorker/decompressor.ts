@@ -263,7 +263,7 @@ export class decompressor {
 
 	private async createTemplateFolderInInstallRoot(): Promise<void>{
 
-		this.unzippedFolder = vscode.Uri.file("C:\\Build\\8.0.6.3191_SalesEnterprise_Marketing_ServiceEnterprise_Softkey_PostgreSQL_ENU");
+		//this.unzippedFolder = vscode.Uri.file("C:\\Build\\8.0.6.3191_SalesEnterprise_Marketing_ServiceEnterprise_Softkey_PostgreSQL_ENU");
 
 		if(!this._unzippedFolder){
 			vscode.window.showErrorMessage("unzippedFolder is empty");
