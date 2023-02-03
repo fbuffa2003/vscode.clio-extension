@@ -183,11 +183,11 @@
 					"group": "group-2@1"
 				},
 				{
-					"command": "ClioSQL.run-all-platfrom-build-sdk",
+					"command": "ClioSQL.run-all-platfrom-build",
 					"group": "group-3@1"
 				},
 				{
-					"command": "ClioSQL.run-all-platfrom-build",
+					"command": "ClioSQL.run-all-platfrom-build-sdk",
 					"group": "group-3@2"
 				}
 
@@ -389,37 +389,35 @@
 
 			{
 				"command": "ClioSQL.build-framework-sdk",
-				"title": "Clio - build-framework-sdk",
-				"shortTitle": "build-framework-sdk",
+				"title": "Build Framework SDK",
 				"icon": "$(play)"
 			},
 			{
 				"command": "ClioSQL.build-framework",
-				"title": "Clio - build-framework",
-				"shortTitle": "build-framework",
+				"title": "Build Framework",
 				"icon": "$(play)"
 			},
 			{
 				"command": "ClioSQL.build-netcore-sdk",
-				"title": "Clio - build-netcore-sdk",
+				"title": "Build NetCore SDK",
 				"shortTitle": "build-netcore-sdk",
 				"icon": "$(play)"
 			},
 			{
 				"command": "ClioSQL.build-netcore",
-				"title": "Clio - build-netcore",
+				"title": "Build NetCore",
 				"shortTitle": "build-netcore",
 				"icon": "$(play)"
 			},
 			{
 				"command": "ClioSQL.open-solution-framework-sdk",
-				"title": "Clio - open-solution-framework-sdk",
+				"title": "Open Solution Framework SDK",
 				"shortTitle": "open-solution-framework-sdk",
 				"icon": "$(play)"
 			},
 			{
 				"command": "ClioSQL.open-solution-framework",
-				"title": "Clio - open-solution-framework",
+				"title": "Open Solution Framework",
 				"shortTitle": "open-solution-framework",
 				"icon": {
 					"light": "resources/icon/vs/vs-ide.svg",
@@ -428,7 +426,7 @@
 			},
 			{
 				"command": "ClioSQL.open-solution-netcore-sdk",
-				"title": "Clio - open-solution-netcore-sdk",
+				"title": "Open Solution NetCore SDK",
 				"shortTitle": "open-solution-netcore-sdk",
 				"icon": {
 					"light": "resources/icon/vs/vs-ide.svg",
@@ -437,7 +435,7 @@
 			},
 			{
 				"command": "ClioSQL.open-solution-netcore",
-				"title": "Clio - open-solution-netcore",
+				"title": "Open Solution NetCore",
 				"shortTitle": "open-solution-netcore",
 				"icon": {
 					"light": "resources/icon/vs/vs-ide.svg",
@@ -446,13 +444,13 @@
 			},
 			{
 				"command": "ClioSQL.run-all-platfrom-build-sdk",
-				"title": "Clio - run-all-platfrom-build-sdk",
+				"title": "Run all platfrom build SDK",
 				"shortTitle": "run-all-platfrom-build-sdk",
 				"icon": "$(play)"
 			},
 			{
 				"command": "ClioSQL.run-all-platfrom-build",
-				"title": "Clio - run-all-platfrom-build",
+				"title": "Run all platfrom build",
 				"shortTitle": "run-all-platfrom-build",
 				"icon": "$(play)"
 			},
