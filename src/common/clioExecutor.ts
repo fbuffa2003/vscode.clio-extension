@@ -1,12 +1,12 @@
 import { exec } from 'child_process';
+import { cwd } from 'process';
 import * as vscode from 'vscode';
 
 
 export class ClioExecutor {
     private clioPath = 'clio';
     private terminal: vscode.Terminal | undefined;
-    private isWin = process.platform === 'win32';
-	
+    private isWin = process.platform === 'win32';	
 
     private createTerminal() : vscode.Terminal {
         this.terminal = this.terminal || vscode.window.createTerminal('clio console', this.isWin ? 'C:\\Windows\\System32\\cmd.exe' : undefined);
@@ -72,6 +72,24 @@ export class ClioExecutor {
 				}
 				if(stderr){
 					resolve(stderr);
+				}
+			});
+		});
+	}
+
+
+	public async ExecuteTaskCommand(folder: vscode.Uri, command: string): Promise<string>{
+		return new Promise<string>((resolve, reject)=>{
+
+			exec(command, {cwd: folder.fsPath},(error, stdout, stderr )=>{
+				if(error){
+					reject(error?.message as string || error.toString());
+				}
+				if(stdout){
+					resolve(stdout);
+				}
+				if(stderr){
+					reject(stderr);
 				}
 			});
 		});

@@ -29,6 +29,8 @@ export class Environment extends CreatioTreeItem {
 	private _isSubscribed:boolean = false;
 	private _logLevel: LogLevel = LogLevel.Info;
 	private _loggerPattern : string = 'ExceptNoisyLoggers';
+	private _isGateInstalled : boolean = false;
+	private _gateVersion : string = '';
 
 
 	constructor(label: string, connectionSettings :IConnectionSettings)
@@ -41,10 +43,17 @@ export class Environment extends CreatioTreeItem {
 		this.creatioClient = new CreatioClient(connectionSettings);
 		this.setHealthStatus(HealthStatus.unknown);
 		this.checkHealth();
+		this.isGateInstalled();
 	}
 
 	//#region Public methods
 	
+
+	public async isGateInstalled(): Promise<void>{
+		var isInstalled = await this.creatioClient.IsClioGateInstalled();
+	}
+
+
 	/**
 	* Checks creatio health
 	*/
@@ -133,7 +142,7 @@ export class Environment extends CreatioTreeItem {
 	}
 
 	public async installGate(): Promise<void> {
-		this.clioExecutor.executeCommandByTerminal(`installgate "${this.label}"`);
+		this.clioExecutor.executeCommandByTerminal(`install-gate -e "${this.label}"`);
 	}
 
 	public async installPackage(filePath: String): Promise<void> {

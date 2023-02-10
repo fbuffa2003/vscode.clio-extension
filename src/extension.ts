@@ -27,6 +27,8 @@ import { instalationInpitValidator } from './common/InputValidator/instalationIn
 import * as fs from 'node:fs/promises';
 import { PowerShell } from 'node-powershell/dist';
 import { decompressor } from './common/TemplateWorker/decompressor';
+import { Workspace, WorkspaceTreeViewProvider } from './service/workspaceTreeViewProvider/WorkspaceTreeViewProvider';
+
 
 export function activate(context: vscode.ExtensionContext) {
 	
@@ -37,10 +39,10 @@ export function activate(context: vscode.ExtensionContext) {
 	const _marketplaceCatalogue = new MarketplaceCatalogue();
 
 	//Check clio latest version!
-	//checkClioLatestVersion(nugetClient, executor);
-	(async()=>{
-		await forceUpdateClio(executor);
-	})();
+	checkClioLatestVersion(nugetClient, executor);
+	// (async()=>{
+	// 	await forceUpdateClio(executor);
+	// })();
 
 	
 	//#region FileSystemProvider
@@ -73,8 +75,31 @@ export function activate(context: vscode.ExtensionContext) {
 
 	//#endregion
 
+	// Register Workspace tree view provider	
+	const _workspaceTreeViewProvider = new WorkspaceTreeViewProvider(vscode.workspace.workspaceFolders);
+	vscode.workspace.onDidChangeWorkspaceFolders(async(event: vscode.WorkspaceFoldersChangeEvent)=>{
+		console.info('folder added');
+		if(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0){
+			_workspaceTreeViewProvider.updateWorkspaceRoot(vscode.workspace.workspaceFolders);
+		}
+		return;
+	});
+
 	
-	//vscode.window.registerTreeDataProvider('vscode-clio-extension.creatioExplorer', treeProvider);
+	const workspaceTreeView = vscode.window.createTreeView("clio.workspaces", {
+		treeDataProvider : _workspaceTreeViewProvider,
+		showCollapseAll: true,
+		canSelectMany: true
+		
+	});
+	if(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length>0){
+		workspaceTreeView.message = `Workspaces derived from folder ${vscode.workspace.workspaceFolders[0].uri.fsPath}`;
+	}else{
+		workspaceTreeView.message = `Workspaces derived from folder`;
+	}
+	workspaceTreeView.description = "Its a description, do I need it?";
+
+
 	const treeView = vscode.window.createTreeView("vscode-clio-extension.creatioExplorer", {
 		treeDataProvider: treeProvider
 	});
@@ -167,26 +192,30 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.ExecuteSql', async (doc) => {
-		let commandsDocument = vscode.window.activeTextEditor?.document;
-		let text : String = commandsDocument?.getText() as string;
-		let sqlText: String[] = text.split(/^-- connection_env:.*/, 2);
-		let envName: String = "";
-		let m =  text.match(/^-- connection_env:.*/);
-		
-		if(m){
-			envName = m[0].split(':',2)[1];
-		}
-		if(!sqlText[1] || !envName){
-			return;
-		}
-		const sqlCmd = sqlText[1].replace('\r','').replace('\n','').trim();		
-		const result = await treeProvider.findInstanceByName(envName)?.executeSql(sqlCmd);
-		await vscode.commands.executeCommand("workbench.action.editorLayoutTwoRows");
-		//Show my panel;
-		SqlPanel.render(context.extensionUri, envName as string);
-		SqlPanel.currentPanel?.sendMessage(result);
-	}));
+
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ClioSQL.ExecuteSql', async (doc) => {
+			let commandsDocument = vscode.window.activeTextEditor?.document;
+			let text : String = commandsDocument?.getText() as string;
+			let sqlText: String[] = text.split(/^-- connection_env:.*/, 2);
+			let envName: String = "";
+			let m =  text.match(/^-- connection_env:.*/);
+			
+			if(m){
+				envName = m[0].split(':',2)[1];
+			}
+			if(!sqlText[1] || !envName){
+				return;
+			}
+			const sqlCmd = sqlText[1].replace('\r','').replace('\n','').trim();		
+			const result = await treeProvider.findInstanceByName(envName)?.executeSql(sqlCmd);
+			await vscode.commands.executeCommand("workbench.action.editorLayoutTwoRows");
+			//Show my panel;
+			SqlPanel.render(context.extensionUri, envName as string);
+			SqlPanel.currentPanel?.sendMessage(result);
+		})
+	);
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ClioSQL.UpdateClioCli', async () => {
@@ -270,6 +299,13 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.RefreshConnection", async (node: WorkSpaceItem)=>{
 			treeProvider.reload();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.Settings", async (node: Environment)=>{
+			executor.executeCommandByTerminal(`cfg open`);
+
 		})
 	);
 
@@ -487,7 +523,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	//#endregion
 
-	//#region Experemental
+	//#region Experimental
+
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.GetCatalogue", async ()=>{
 			await _marketplaceCatalogue.FillCatalogueAsync();
@@ -665,13 +702,171 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	//#endregion
 
+	//#region Workspaces
 	context.subscriptions.push(
-		vscode.commands.registerCommand("ClioSQL.Settings", async (node: Environment)=>{
-			//const commandResponse = await executor.ExecuteClioCommand(`clio cfg open`);
-			executor.executeCommandByTerminal(`cfg open`);
-
+		vscode.commands.registerCommand("ClioSQL.createw", async (tree: vscode.TreeView<vscode.TreeItem>)=>{
+			const a = tree;
 		})
 	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.dconf", async (item: Workspace)=>{
+			vscode.window.withProgress(
+				{
+					location : vscode.ProgressLocation.Notification,
+					title: "Downloading configuration"
+				},
+				async(progress, token)=>{
+					await item.dconf();
+					progress.report({
+						increment: 100,
+						message: "Done"
+					});
+				}
+			);
+		})
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.pushw", async (item: Workspace)=>{
+			vscode.window.withProgress(
+				{
+					location : vscode.ProgressLocation.Notification,
+					title: "Pushing workspace"
+				},
+				async(progress, token)=>{
+					await item.pushw();
+					progress.report({
+						increment: 100,
+						message: "Done"
+					});
+				}
+			);
+		})
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.restorew", async (item: Workspace)=>{
+			vscode.window.withProgress(
+				{
+					location : vscode.ProgressLocation.Notification,
+					title: "Restoring workspace"
+				},
+				async(progress, token)=>{
+					await item.restorew();
+					progress.report({
+						increment: 100,
+						message: "Done"
+					});
+				}
+			);
+		})
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.compress", async (item: Package)=>{
+			const a = item;
+		})
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.openGitRepository", async (item: Workspace)=>{
+			vscode.commands.executeCommand('vscode.open', item.remote);
+		})
+	);
+	//#endregion 
+	
+	//#region Workspace: tasks
+	
+	//open
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.open-solution-framework", async (item: Workspace)=>{
+
+			try{
+				const result = await item.openSolutionFramework();
+				console.info(result);
+			}
+			catch(error){
+				vscode.window.showErrorMessage(error as string);
+			}
+		})
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.open-solution-framework-sdk", async (item: Workspace)=>{
+			try{
+				const result = await item.openSolutionFrameworkSdk();
+				console.info(result);
+			}
+			catch(error){
+				vscode.window.showErrorMessage(error as string);
+			}
+		})
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.open-solution-netcore", async (item: Workspace)=>{
+			try{
+				const result = await item.openSolutionNetcore();
+				console.info(result);
+			}
+			catch(error){
+				vscode.window.showErrorMessage(error as string);
+			}
+		})
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.open-solution-netcore-sdk", async (item: Workspace)=>{
+			try{
+				const result = await item.openSolutionNetcoreSdk();
+				console.info(result);
+			}
+			catch(error){
+				vscode.window.showErrorMessage(error as string);
+			}
+		})
+	);
+
+	//build
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.build-framework-sdk", async (item: Workspace)=>{
+			try{
+				const result = await item.buildFrameworkSdk();
+				console.info(result);
+			}
+			catch(error){
+				vscode.window.showErrorMessage(error as string);
+			}
+		})
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.build-framework", async (item: Workspace)=>{
+			try{
+				const result = await item.buildFramework();
+				console.info(result);
+			}
+			catch(error){
+				vscode.window.showErrorMessage(error as string);
+			}
+		})
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.build-netcore", async (item: Workspace)=>{
+			try{
+				const result = await item.buildNetcore();
+				console.info(result);
+			}
+			catch(error){
+				vscode.window.showErrorMessage(error as string);
+			}
+		})
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand("ClioSQL.build-netcore-sdk", async (item: Workspace)=>{
+			try{
+				const result = await item.buildNetcoreSdk();
+				console.info(result);
+			}
+			catch(error){
+				vscode.window.showErrorMessage(error as string);
+			}
+		})
+	);
+	
+	//#endregion
 
 }
 export function deactivate() {}
@@ -715,15 +910,18 @@ function checkClioLatestVersion(nugetClient: NugetClient, executor: ClioExecutor
 				console.log("Clio is of the latest version");
 				break;
 			case 1:
-				vscode.window.showInformationMessage(
-					`Would you like to update clio to the latest version ${_lv} ?
-					Your version is: ${_currentVersion.toString()}`,
-					"UPDATE", "SKIP"
-				).then(answer => {
-					if (answer === "UPDATE") {
-						vscode.commands.executeCommand("ClioSQL.UpdateClioCli");
-					}
-				});
+				(async()=>{
+					await forceUpdateClio(executor);
+				})();
+				// vscode.window.showInformationMessage(
+				// 	`Would you like to update clio to the latest version ${_lv} ?
+				// 	Your version is: ${_currentVersion.toString()}`,
+				// 	"UPDATE", "SKIP"
+				// ).then(answer => {
+				// 	if (answer === "UPDATE") {
+				// 		vscode.commands.executeCommand("ClioSQL.UpdateClioCli");
+				// 	}
+				// });
 				break;
 			case -1:
 				vscode.window.showInformationMessage(
@@ -747,11 +945,16 @@ function checkClioLatestVersion(nugetClient: NugetClient, executor: ClioExecutor
  */
 async function forceUpdateClio(executor: ClioExecutor){
 
-	console.log("Updating clio");
-	await vscode.commands.executeCommand("ClioSQL.UpdateClioCli");
+	const configuration = vscode.workspace.getConfiguration();
+	var _isAutoUpdate = configuration.get<boolean>("clio.autoUpdateCli") ?? false;
 
-	console.log("Registering context menu");
-	await executor.ExecuteClioCommand("clio register");
+	if(_isAutoUpdate){
+		console.log("Updating clio");
+		await vscode.commands.executeCommand("ClioSQL.UpdateClioCli");
+	
+		console.log("Registering context menu");
+		await executor.ExecuteClioCommand("clio register");
+	}
 }
 
 

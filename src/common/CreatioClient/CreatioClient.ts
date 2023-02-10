@@ -8,6 +8,7 @@ import { IRequestOptions, IResponse } from "../interfaces";
 import { HttpMethod } from "../Enums";
 import { WebSocket, ClientOptions } from 'ws';
 import { IConnectionSettings } from '../../service/TreeItemProvider/Environment';
+import { mySemVer } from '../../utilities/mySemVer';
 
 
 export interface ITokenModel{
@@ -34,22 +35,7 @@ export class CreatioClient {
 	private readonly password: string;
 	private readonly url: URL;
 	private oauthToken : ITokenModel | undefined;
-	/*
-	constructor(
-			public url: URL,
-			public username: string,
-			public password: string,
-			public isNetCore: boolean
-		) {
-			this._credentialsFlow = CredentialsFlow.Form;
-
-			if(url.pathname === '/'){
-				this._pathName = '';
-			}else{
-				this._pathName = url.pathname;
-			}
-		}
-	*/
+	
 
 	constructor(args: IConnectionSettings) {
 		if(args.login && args.password){
@@ -555,6 +541,64 @@ export class CreatioClient {
 		const features = JSON.parse(response.body)['rows'] as Array<IFeature>;
 		return features[0];
 	}
+
+
+	public async IsClioGateInstalled(): Promise<mySemVer>{
+		const dataServiceRequest = {
+			rootSchemaName: "SysPackage",
+			columns: {
+				items: {
+					name: {
+						expression: {
+							columnPath: "Name"
+						}
+					},
+					version: {
+						expression: {
+							columnPath: "Version"
+						}
+					},
+					id: {
+						expression: {
+							columnPath: "Id"
+						}
+					},
+					type: {
+						expression: {
+							columnPath: "Type"
+						}
+					},
+
+					uId: {
+						expression: {
+							columnPath: "UId"
+						}
+					}
+				}
+			}
+		};
+		
+		const options : IRequestOptions = {
+			path: new KnownRoutes(this.isNetCore).SelectQuery,
+			data: dataServiceRequest
+		};
+		const response = await this.PostAsync(options);
+		const packages = JSON.parse(response.body)['rows'] as Array<IPackage>;
+
+		var pp = packages.find(p=> p.name ==='cliogate');
+		
+
+
+
+		if(pp){
+			var ver = new mySemVer(pp.version);
+			return ver;
+		}else{
+			return new mySemVer("0.0.0.0");;
+		}
+	}
+
+
 
 	public async SetFeatureState(feature: IFeature): Promise<IFeature>{
 		
