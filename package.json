@@ -115,11 +115,6 @@
 					"group": "group-4@2"
 				},
 				{
-					"command": "ClioSQL.InstallMarketplaceApp",
-					"when": "viewItem == CreatioInstance",
-					"group": "group-5@1"
-				},
-				{
 					"command": "ClioSQL.Listen",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-6@1"
@@ -472,15 +467,7 @@
 				"command": "ClioSQL.RefreshConnection",
 				"title": "Refresh Connection",
 				"icon": "$(search-refresh)"
-			},
-			{
-				"command": "ClioSQL.InstallMarketplaceApp",
-				"title": "Install marketplace app",
-				"icon": {
-					"light": "resources/icon/Add.svg",
-					"dark": "resources/icon/Add.svg"
-				}
-			},
+			},	
 			{
 				"command": "ClioSQL.flushDb",
 				"title": "Flush redis",
