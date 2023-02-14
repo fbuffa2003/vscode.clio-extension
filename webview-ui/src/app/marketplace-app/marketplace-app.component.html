@@ -9,6 +9,7 @@
 		</div>
 		<div class="short-description">{{shortDescription}}</div>
 		
+		<!--
 		<div *ngIf="IsExpanded" class="expanded-details">
 			
 			<div class="wrapper">
@@ -55,6 +56,7 @@
 				{{MarketplaceApp?.longDescription}}
 			</div>
 		</div>
+		-->
 	</div>
 	<div class="cell3">
 		<div class="button-wrapper">
@@ -63,12 +65,16 @@
 					<span class="codicon codicon-add" id={{internalNid}}></span>
 				</vscode-button>
 			</div>
+
+			<!-- 
 			<div class="button-expand" >
 				<vscode-button class="creatio-button install" (click)="onExpanded()">
 					<span *ngIf="!IsExpanded" class="codicon codicon-chevron-right"></span>
 					<span *ngIf="IsExpanded" class="codicon codicon-chevron-down"></span>
 				</vscode-button>
 			</div>
+			-->
+
 		</div>
 	</div>	
 </div>
