@@ -72,16 +72,16 @@ export class ConnectionComponent implements OnInit {
 			});
 	}
 
-	getCorrectOAuthUri(ur: string){
-		if (ur.search("http://") < 0 && ur.search("https://") < 0){
-			ur = "http://" + ur;
+	getCorrectOAuthUri(url: string){
+		if (url.search("http://") < 0 && url.search("https://") < 0){
+			url = "https://" + url;
 		}
-		let rr = ur.search("/0/");
-		if (rr > -1) {
-			ur = ur.substring(0, rr);
+		let workplacePosition = url.search("/0/");
+		if (workplacePosition > -1) {
+			url = url.substring(0, workplacePosition);
 		}
-		ur = ur + "/0/shell/?autoOpenIdLogin=true#SectionModuleV2/OAuthClientAppSection";
-		return ur;
+		url = url + "/0/shell/?autoOpenIdLogin=true#SectionModuleV2/OAuthClientAppSection";
+		return url;
 	}
 
 }
