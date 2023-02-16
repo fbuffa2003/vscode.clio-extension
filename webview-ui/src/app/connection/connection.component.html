@@ -15,7 +15,7 @@
 		<span slot="end" class="codicon codicon-link"></span>
 		<span slot="start" *ngIf="!trackUrl.valid && trackUrl.touched" 
 			class="codicon codicon-error invalid-icon"></span>
-	</vscode-text-field> <vscode-button (click)="onGoOAuth(form)" style="width: 100px; height: 25.5px; position: absolute; margin-top: 20px; margin-left: 5px;">Setup OAuth</vscode-button>
+	</vscode-text-field> <vscode-button (click)="onGoOAuth(form)" style="width: 100px; height: 25.5px; position: absolute; margin-top: 20px; margin-left: 20px;">Setup OAuth</vscode-button>
 	<div class="invalid-input" *ngIf="!trackUrl.valid && trackUrl.touched">
 		<span>Connection Url is required</span>
 	</div>
@@ -89,7 +89,7 @@
 	<vscode-text-field 
 		type="text" id="maintainer" name="maintainer" placeholder="Customer"
 		[(ngModel)]="data.maintainer" ngDefaultControl
-	>Maintainer:</vscode-text-field><br><br>
+	>Maintainer:</vscode-text-field><br><br><br>
 	
 	<!--<div id="CheckBoxes">
 		<vscode-checkbox 

@@ -40,6 +40,7 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 
 				this.environments.push(instance);
 			}
+			this.environments = this.environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
 			return Promise.resolve(this.environments);
 		}
 
@@ -68,6 +69,7 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 		});
 
 		this.environments.push(newEnvironment);
+		this.environments = this.environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
 		this._onDidChangeTreeData.fire();
 	}
 

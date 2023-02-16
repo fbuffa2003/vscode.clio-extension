@@ -10,7 +10,7 @@ export class ConnectionPanel {
 	private readonly _extensionUri: vscode.Uri;
 	private readonly _formData: FormData;
 	private readonly _isEdit: boolean = false;
-	private readonly _node: Environment;
+	private readonly _node: Environment | undefined;
 	private _disposables: Disposable[] = [];
 	private static _envName: string | undefined;
 
@@ -20,7 +20,7 @@ export class ConnectionPanel {
 	 * @param panel A reference to the webview panel
 	 * @param extensionUri The URI of the directory containing the extension
 	 */
-	private constructor(panel: WebviewPanel, extensionUri: Uri, formData: FormData, isEdit: boolean, node: Environment) {
+	private constructor(panel: WebviewPanel, extensionUri: Uri, formData: FormData, isEdit: boolean, node: Environment | undefined) {
 		this._panel = panel;
 		this._extensionUri = extensionUri;
 		this._formData = formData;
@@ -44,7 +44,7 @@ export class ConnectionPanel {
 	 *
 	 * @param extensionUri The URI of the directory containing the extension.
 	 */
-	public static render(extensionUri: vscode.Uri, formData: FormData, isEdit: boolean, node: Environment) {
+	public static render(extensionUri: vscode.Uri, formData: FormData, isEdit: boolean, node: Environment | undefined) {
 
 		if (ConnectionPanel.currentPanel) {
 		// If the webview panel already exists reveal it
@@ -52,7 +52,7 @@ export class ConnectionPanel {
 		} else {
 
 			ConnectionPanel._envName = "";
-			const panelTitle = isEdit ? `Edit (${node.label})` : "New connection";
+			const panelTitle = isEdit ? `Edit (${node?.label})` : "New connection";
 			
 			// If a webview panel does not already exist create and show a new one
 			const panel = window.createWebviewPanel(
