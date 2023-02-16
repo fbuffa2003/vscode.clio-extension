@@ -1,7 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { AbstractControl, FormControl, FormGroup, NgForm, Validators } from "@angular/forms";
 import { provideVSCodeDesignSystem, vsCodeButton, vsCodeCheckbox, vsCodeLink, vsCodeTextField } from "@vscode/webview-ui-toolkit";
-import { Console } from "console";
 import { vscode } from "../utilities/vscode";
 
 
