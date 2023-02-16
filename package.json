@@ -118,6 +118,11 @@
 					"command": "ClioSQL.Listen",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-6@1"
+				},
+				{
+					"command": "ClioSQL.EditConnection",
+					"when": "viewItem == CreatioInstance",
+					"group": "group-7@1"
 				}
 			],
 			"ClioSQL.OverflowHeaderMenu": [
@@ -539,6 +544,14 @@
 			{
 				"command": "ClioSQL.HealthCheck",
 				"title": "Health check",
+				"icon": {
+					"light": "resources/icon/Health.svg",
+					"dark": "resources/icon/Health.svg"
+				}
+			},
+			{
+				"command": "ClioSQL.EditConnection",
+				"title": "Edit",
 				"icon": {
 					"light": "resources/icon/Health.svg",
 					"dark": "resources/icon/Health.svg"

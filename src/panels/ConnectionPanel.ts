@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
+import { Environment } from "../service/TreeItemProvider/Environment";
 import { getUri } from "../utilities/getUri";
 import { getNonce } from "./getNonce";
 
@@ -7,8 +8,11 @@ export class ConnectionPanel {
 	public static currentPanel: ConnectionPanel | undefined;
 	private readonly _panel: vscode.WebviewPanel;
 	private readonly _extensionUri: vscode.Uri;
+	private readonly _formData: FormData;
+	private readonly _isEdit: boolean = false;
+	private readonly _node: Environment;
 	private _disposables: Disposable[] = [];
-	private static _envName : string | undefined;
+	private static _envName: string | undefined;
 
 	/**
 	 * The CatalogPanel class private constructor (called only from the render method).
@@ -16,16 +20,19 @@ export class ConnectionPanel {
 	 * @param panel A reference to the webview panel
 	 * @param extensionUri The URI of the directory containing the extension
 	 */
-	private constructor(panel: WebviewPanel, extensionUri: Uri) {
+	private constructor(panel: WebviewPanel, extensionUri: Uri, formData: FormData, isEdit: boolean, node: Environment) {
 		this._panel = panel;
 		this._extensionUri = extensionUri;
+		this._formData = formData;
+		this._isEdit = isEdit;
+		this._node = node;
 
 		// Set an event listener to listen for when the panel is disposed (i.e. when the user closes
 		// the panel or when the panel is closed programmatically)
 		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
 		// Set the HTML content for the webview panel
-		this._panel.webview.html = this._getWebviewContent(this._panel.webview, this._extensionUri);
+		this._panel.webview.html = this._getWebviewContent(this._panel.webview, this._extensionUri, this._formData, this._isEdit);
 
 		// Set an event listener to listen for messages passed from the webview context
 		this._setWebviewMessageListener(this._panel.webview);		
@@ -37,7 +44,7 @@ export class ConnectionPanel {
 	 *
 	 * @param extensionUri The URI of the directory containing the extension.
 	 */
-	public static render(extensionUri: vscode.Uri) {
+	public static render(extensionUri: vscode.Uri, formData: FormData, isEdit: boolean, node: Environment) {
 
 		if (ConnectionPanel.currentPanel) {
 		// If the webview panel already exists reveal it
@@ -45,16 +52,17 @@ export class ConnectionPanel {
 		} else {
 
 			ConnectionPanel._envName = "";
+			const panelTitle = isEdit ? `Edit (${node.label})` : "New connection";
 			
 			// If a webview panel does not already exist create and show a new one
 			const panel = window.createWebviewPanel(
 				// Panel view type
 				"showHelloWorld",
 				// Panel title
-				"New connection",
+				panelTitle,
 				// The editor column the panel should be displayed in
-				ViewColumn.One,
 				// Extra panel configurations
+				ViewColumn.One,
 				{
 					// Enable JavaScript in the webview
 					enableScripts: true,
@@ -67,7 +75,7 @@ export class ConnectionPanel {
 				dark: vscode.Uri.joinPath(extensionUri, 'resources', 'icon', 'creatio-circle-white.svg')
 			};
 			
-			ConnectionPanel.currentPanel = new ConnectionPanel(panel, extensionUri);
+			ConnectionPanel.currentPanel = new ConnectionPanel(panel, extensionUri, formData, isEdit, node);
 		}
 	}
 	
@@ -106,7 +114,7 @@ export class ConnectionPanel {
 	 * @returns A template string literal containing the HTML that should be
 	 * rendered within the webview panel
 	 */
-	private _getWebviewContent(webview: Webview, extensionUri: Uri) {
+	private _getWebviewContent(webview: Webview, extensionUri: Uri, formData: FormData, isEdit: boolean) {
 		// The CSS file from the Angular build output
 		const stylesUri = getUri(webview, extensionUri, ["webview-ui", "build", "styles.css"]);
 		// The JS files from the Angular build output
@@ -134,9 +142,12 @@ export class ConnectionPanel {
 				<div class="hidden">
 					<i class="codicon codicon-account"></i>
 					<img src="${imagesUri}/creatio-square.svg">
-					<img src="${imagesUri}/Add.svg">
+					<img src="${imagesUri}/connection.svg">
 				</div>
-				<app-root environmentName="${ConnectionPanel._envName}" pageName="connection" imagesUri="${imagesUri}"></app-root>
+				<app-root environmentName="${ConnectionPanel._envName}" pageName="connection" imagesUri="${imagesUri}" 
+					name="${formData.name}" url="${formData.url}" username="${formData.username}" password="${formData.password}" maintainer="${formData.maintainer}"
+				 	isNetCore="${formData.isNetCore}" isSafe="${formData.isSafe}" isDeveloperModeEnabled="${formData.isDeveloperModeEnabled}"
+					clientId="${formData.clientId}" clientSecret="${formData.clientSecret}" isEdit="${isEdit}"></app-root>
 				<script type="module" src="${runtimeUri}"></script>
 				<script type="module" src="${polyfillsUri}"></script>
 				<script type="module" src="${scriptUri}"></script>
@@ -157,12 +168,17 @@ export class ConnectionPanel {
 			async (message: any) => {
 				const command = message.command;
 				switch (command) {
-					case "regWebApp":
+					case "regWebApp": {
+						if ( message.isEdit && this._node) {
+							await this._node.unregisterWebApp();
+						}
 						vscode.commands.executeCommand("ClioSQL.RegisterWebApp", message.data);
 						break;
+					}
 					case "GoOAuth":
 						var url = message.data.url;
 						vscode.env.openExternal(vscode.Uri.parse(url));
+					}						
 				}
 			},
 			null,

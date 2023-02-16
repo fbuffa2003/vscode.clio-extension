@@ -1,6 +1,6 @@
 <div class="header">
 	<img class="logo-img"src={{circleImageUri}} alt="logo">
-	<span class="logo-text">Add 
+	<span class="logo-text"> 
 		<vscode-link class="logo-link" href="https://creatio.com" target="_blank">
 			Creatio
 		</vscode-link>
@@ -91,20 +91,20 @@
 		[(ngModel)]="data.maintainer" ngDefaultControl
 	>Maintainer:</vscode-text-field><br><br>
 	
-	<div id="CheckBoxes">
+	<!--<div id="CheckBoxes">
 		<vscode-checkbox 
-			type="checkbox" id="isNetCore" name="isNetCore" value="isNetCore" 
-			required [(ngModel)]="data.isNetCore" ngDefaultControl>Is NetCore</vscode-checkbox>
+			type="checkbox" id="isNetCore" name="isNetCore"
+			required [(ngModel)]="data.isNetCore"  ngDefaultControl>Is NetCore</vscode-checkbox>
 
 		<vscode-checkbox 
-			type="checkbox" id="isSafe" name="isSafe" value="isSafe" 
-			required [(ngModel)]="data.isSafe" ngDefaultControl>IsSafe</vscode-checkbox>
+			type="checkbox" id="isSafe" name="isSafe" 
+			required [(ngModel)]="data.isSafe"  ngDefaultControl>IsSafe</vscode-checkbox>
 		
 		<vscode-checkbox 
-			type="checkbox" id="isDeveloperModeEnabled" name="isDeveloperModeEnabled" value="isDeveloperModeEnabled" 
-			required [(ngModel)]="data.isDeveloperMode" ngDefaultControl>Is Developer Mode</vscode-checkbox>
+			type="checkbox" id="isDeveloperModeEnabled" name="isDeveloperModeEnabled" 
+			required [(ngModel)]="data.isDeveloperMode"  ngDefaultControl>Is Developer Mode</vscode-checkbox>
 		<br><br><br>
-	</div>
+	</div> -->
 
 	<div id="submitButton">
 		<vscode-button (click)="onSubmit(form)" ngDefaultControl>SAVE</vscode-button>

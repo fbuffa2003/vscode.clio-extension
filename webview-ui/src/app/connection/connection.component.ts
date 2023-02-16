@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { AbstractControl, FormControl, FormGroup, NgForm, Validators } from "@angular/forms";
 import { provideVSCodeDesignSystem, vsCodeButton, vsCodeCheckbox, vsCodeLink, vsCodeTextField } from "@vscode/webview-ui-toolkit";
+import { Console } from "console";
 import { vscode } from "../utilities/vscode";
 
 
@@ -15,16 +16,16 @@ export class ConnectionComponent implements OnInit {
 	public circleImageUri;
 	public formData : any;
 	public data = {
-		connectionName: "",
-		userName: "",
-		password: "",
-		url: "",
-		maintainer: "Customer",
-		isNetCore: false,
-		isSafe: false,
-		isDeveloperMode: false,
-		clientId: "",
-		clientSecret: ""
+		connectionName: history.state.name,
+		url: history.state.url,
+		userName: history.state.username,
+		password: history.state.password,
+		maintainer: history.state.maintainer,
+		isNetCore: history.state.isNetCore,
+		isSafe: history.state.isSafe,
+		isDeveloperMode: history.state.isDeveloperModeEnabled,
+		clientId: history.state.clientId,
+		clientSecret: history.state.clientSecret
 	};
 
 	constructor() {
@@ -32,8 +33,8 @@ export class ConnectionComponent implements OnInit {
 			vsCodeButton(), vsCodeTextField(), vsCodeCheckbox(),vsCodeLink()
 			);
 		this.imageUri = history.state.imageUri;
-		//this.circleImageUri = this.imageUri+'/'+"creatio-square.svg";
-		this.circleImageUri = this.imageUri+'/'+"Add.svg";
+		this.circleImageUri = this.imageUri+'/'+"connection.svg";		
+		this.data.connectionName = history.state.name;
 	}
 
 	ngOnInit(): void {}
@@ -54,7 +55,8 @@ export class ConnectionComponent implements OnInit {
 					isDeveloperModeEnabled: this.data.isDeveloperMode,
 					clientId : this.data.clientId,
 					clientSecret : this.data.clientSecret
-				}
+				},
+				isEdit: history.state.isEdit,
 			});
 		} else{
 			console.log('Form is invalid');

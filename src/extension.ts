@@ -37,6 +37,18 @@ export function activate(context: vscode.ExtensionContext) {
 	const treeProvider = new CreatioTreeItemProvider();
 	const clio = new Clio();
 	const _marketplaceCatalogue = new MarketplaceCatalogue();
+	const _emptyFormData: FormData = {
+		name: "",
+		url : "",
+		username: "",
+		password: "",
+		maintainer: "",
+		isNetCore: false,
+		isSafe: false,
+		isDeveloperModeEnabled: false,
+		clientId: "",
+		clientSecret: ""
+	};
 
 	//Check clio latest version!
 	checkClioLatestVersion(nugetClient, executor);
@@ -232,7 +244,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("ClioSQL.RegisterWebApp", async (args: FormData )=>{
+		vscode.commands.registerCommand("ClioSQL.RegisterWebApp", async (args: FormData)=>{
 
 			const commandArgs : IRegisterWebAppArgs ={
 				url: args.url,
@@ -254,34 +266,23 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 
 			const result = await clio.registerWebApp.executeAsync(commandArgs);
+
+			treeProvider.addNewNode(args.name, {
+				uri: new URL(args.url),
+				login: args.username,
+				password: args.password,
+				maintainer: args.maintainer,
+				isNetCore: args.isNetCore,
+				isSafe: args.isSafe,
+				isDeveloperMode: args.isDeveloperModeEnabled,
+				clientId : args.clientId,
+				clientSecret : args.clientSecret
+			} as IConnectionSettings);	
+
 			if(result.success){
-				treeProvider.addNewNode(args.name, {
-					uri: new URL(args.url),
-					login: args.username,
-					password: args.password,
-					maintainer: args.maintainer,
-					isNetCore: args.isNetCore,
-					isSafe: args.isSafe,
-					isDeveloperMode: args.isDeveloperModeEnabled,
-					clientId : args.clientId,
-					clientSecret : args.clientSecret
-
-				} as IConnectionSettings);
-
 				ConnectionPanel.kill();
 				vscode.window.showInformationMessage(result.message.toString());
 			} else {
-				treeProvider.addNewNode(args.name, {
-					uri: new URL(args.url),
-					login: args.username,
-					password: args.password,
-					maintainer: args.maintainer,
-					isNetCore: args.isNetCore,
-					isSafe: args.isSafe,
-					isDeveloperMode: args.isDeveloperModeEnabled,
-					clientId : args.clientId,
-					clientSecret : args.clientSecret
-				} as IConnectionSettings);
 				vscode.window.showErrorMessage(result.message.toString(), "OK")
 				.then(answer => {
 					ConnectionPanel.kill();
@@ -292,7 +293,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ClioSQL.AddConnection", ()=>{
-			ConnectionPanel.render(context.extensionUri);
+			ConnectionPanel.render(context.extensionUri, _emptyFormData, false, undefined);
 		})
 	);
 
@@ -396,6 +397,25 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 	
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ClioSQL.EditConnection', async (node: Environment) => {
+			const connectionSettings = node.connectionSettings;
+			const formData: FormData = {
+				name: node.label ?? "",
+				url : connectionSettings.uri.toString(),
+				username: connectionSettings.login ?? "",
+				password: connectionSettings.password ?? "",
+				maintainer: connectionSettings.maintainer ?? "",
+				isNetCore: connectionSettings.isNetCore,
+				isSafe: connectionSettings.isSafe,
+				isDeveloperModeEnabled: connectionSettings.isDeveloperMode  ?? false,			
+				clientId: connectionSettings.clientId ?? "",			
+				clientSecret: connectionSettings.clientSecret ?? ""
+			};
+			ConnectionPanel.render(context.extensionUri, formData, true, node);			
+		})
+	);
+
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ClioSQL.InstallPackage', async (node: Environment) => {
 			
