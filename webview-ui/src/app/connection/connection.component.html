@@ -8,6 +8,20 @@
 </div>
 <form id='add-new-connection' class='add-new-connection' #form="ngForm" (ngSubmit)="onSubmit(form)">
 	<vscode-text-field 
+		type="text" id="url" name="url" size="40" placeholder="https://myInstance.creatio.com" 
+		required [(ngModel)]="data.url" ngDefaultControl
+		#trackUrl="ngModel"> 
+		Creatio Url:
+		<span slot="end" class="codicon codicon-link"></span>
+		<span slot="start" *ngIf="!trackUrl.valid && trackUrl.touched" 
+			class="codicon codicon-error invalid-icon"></span>
+	</vscode-text-field> <vscode-button (click)="onGoOAuth(form)" style="width: 70px; position: absolute; margin-top: 19px;" *ngIf="trackUrl.valid && trackUrl.touched">OAUTH</vscode-button>
+	<div class="invalid-input" *ngIf="!trackUrl.valid && trackUrl.touched">
+		<span>Connection Url is required</span>
+	</div>
+	<br><br>
+
+	<vscode-text-field 
 		type="text" id="cname" name="cname" placeholder="MyConnection"
 		ngDefaultControl
 		required [(ngModel)]="data.connectionName" #trackName="ngModel">
@@ -19,20 +33,6 @@
 	</vscode-text-field>
 	<div class="invalid-input" *ngIf="!trackName.valid && trackName.touched">
 		<span>Connection name required</span>
-	</div>
-	<br><br>
-	
-	<vscode-text-field 
-		type="text" id="url" name="url" size="40" placeholder="https://myInstance.creatio.com" 
-		required [(ngModel)]="data.url" ngDefaultControl
-		#trackUrl="ngModel"> 
-		Creatio Url:
-		<span slot="end" class="codicon codicon-link"></span>
-		<span slot="start" *ngIf="!trackUrl.valid && trackUrl.touched" 
-			class="codicon codicon-error invalid-icon"></span>
-	</vscode-text-field>
-	<div class="invalid-input" *ngIf="!trackUrl.valid && trackUrl.touched">
-		<span>Connection Url is required</span>
 	</div>
 	<br><br>
 	
