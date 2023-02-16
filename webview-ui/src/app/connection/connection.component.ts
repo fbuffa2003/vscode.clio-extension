@@ -65,6 +65,9 @@ export class ConnectionComponent implements OnInit {
 	}
 
 	onGoOAuth(form: NgForm){
+		if (this.data.url.length === 0) {
+			return;
+		}
 			vscode.postMessage(
 			{
 				command: 'GoOAuth',
