@@ -57,35 +57,30 @@ export class ConnectionComponent implements OnInit {
 				}
 			});
 		} else{
-			// alert('Form is invalid, you are an idiot');
 			console.log('Form is invalid');
 		}
 
 	}
 
 	onGoOAuth(form: NgForm){
-		//if (this.getCorrectOAuthUri(this.data.url)) {
 			vscode.postMessage(
 			{
 				command: 'GoOAuth',
 				data:{
-					//url: this.data.url
 					url: this.getCorrectOAuthUri(this.data.url)
 				}
 			});
-		//}
 	}
 
 	getCorrectOAuthUri(ur: string){
-		if (ur.search("http://")<0 && ur.search("https://")<0){
+		if (ur.search("http://") < 0 && ur.search("https://") < 0){
 			ur = "http://" + ur;
 		}
 		let rr = ur.search("/0/");
-		if (rr > -1){
+		if (rr > -1) {
 			ur = ur.substring(0, rr);
 		}
 		ur = ur + "/0/shell/?autoOpenIdLogin=true#SectionModuleV2/OAuthClientAppSection";
-		//return true;
 		return ur;
 	}
 
