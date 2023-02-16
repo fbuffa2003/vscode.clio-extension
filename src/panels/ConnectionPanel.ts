@@ -175,9 +175,10 @@ export class ConnectionPanel {
 						vscode.commands.executeCommand("ClioSQL.RegisterWebApp", message.data);
 						break;
 					}
-					case "GoOAuth":
+					case "GoOAuth": {
 						var url = message.data.url;
 						vscode.env.openExternal(vscode.Uri.parse(url));
+						break;
 					}						
 				}
 			},
