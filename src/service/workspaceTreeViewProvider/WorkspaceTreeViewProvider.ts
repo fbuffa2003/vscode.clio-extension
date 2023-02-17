@@ -1,30 +1,50 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import path = require('path');
-import { readdir } from 'fs/promises';
 import { mySemVer } from '../../utilities/mySemVer';
-import { cwd } from 'process';
 import { ClioExecutor } from '../../Common/clioExecutor';
-import nodeTest from 'node:test';
 import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
+import { Environment } from '../TreeItemProvider/Environment';
+import { env } from 'process';
+import { CreatioTreeItemProvider } from '../TreeItemProvider/CreatioTreeItemProvider';
+
+//import { readdir } from 'fs/promises';
+//import { cwd } from 'process';
+//import nodeTest from 'node:test';
+//import { fileURLToPath } from 'url';
 
 
+/**
+ * Creatio workspaces
+ */
 export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode.TreeItem>{
-
-	
+	private _knownEnvironments : Array<Environment> = new Array<Environment>();
 	private _workspaces : Array<Workspace> = new Array<Workspace>;
-	constructor(private workspaceRoot: readonly vscode.WorkspaceFolder[] | undefined ) {
 
-		// vscode.workspace.onDidChangeWorkspaceFolders((event: vscode.WorkspaceFoldersChangeEvent)=> {
-		// 	console.info("Folder added to workspace");
-		// });
+	/**
+	 * @param workspaceRoot array of workspace folders opened in vscode
+	 * - See _vscode_ {@link https://code.visualstudio.com/api/extension-guides/tree-view **Tree View API**} documentation
+	 */
+	constructor(
+		private workspaceRoot: readonly vscode.WorkspaceFolder[] | undefined, 
+		private environments: Array<Environment> )
+	{
 
 		const rootFolder = vscode.workspace.workspaceFolders;
 		if(rootFolder && rootFolder.length>0){
 			const rootPath : string = rootFolder[0].uri.fsPath ;
-			const dirs = fs.readdirSync(rootPath);
+			
+			if(this.isWorkspace(rootPath)){
 
+				const a = this.getConfiguredEnvironment(vscode.Uri.file(rootPath));
+				const env = environments.find(e=> e.label === a?.Environment);
+				
+				const workspace = new Workspace(rootPath, vscode.TreeItemCollapsibleState.Collapsed, vscode.Uri.file(rootPath), env, "Workspace");
+				this._workspaces.push(workspace);
+				return;
+			}
+
+			const dirs = fs.readdirSync(rootPath);
 			dirs.forEach(dir => {
 				const subDir = path.join(rootPath, dir);
 				var isWs = this.isWorkspace(subDir);
@@ -32,10 +52,30 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 				
 				if(isWs){
 
-					const workspace = new Workspace(dir, vscode.TreeItemCollapsibleState.Collapsed, vscode.Uri.file(subDir),"Workspace");
+					const a = this.getConfiguredEnvironment(vscode.Uri.file(rootPath));
+					const env = environments.find(e=> e.label === a?.Environment);
+
+					const workspace = new Workspace(dir, vscode.TreeItemCollapsibleState.Collapsed, vscode.Uri.file(subDir),env, "Workspace");
 					this._workspaces.push(workspace);
 				}
 			});
+		}
+	}
+
+	private getConfiguredEnvironment(folder: vscode.Uri) : IWorkspaceEnvironmentSettings | undefined {
+		try{
+			const workspaceEnvironmentSettingFilePath = path.join(folder.fsPath, ".clio","workspaceEnvironmentSettings.json");
+			const jsonFileContent = fs.readFileSync(workspaceEnvironmentSettingFilePath);
+			var json = jsonFileContent.toString('utf8');
+			//https://github.com/nodejs/node-v0.x-archive/issues/4039#issuecomment-8828783
+			if (json.charAt(0) === '\uFEFF'){
+				json = json.substring(1);
+			} 
+			const model = JSON.parse(json) as IWorkspaceEnvironmentSettings;
+			return model;
+		}
+		catch(error:any){
+			console.error("Could not determine default environment from workspaceEnvironmentSettings.json, using default from clio ");
 		}
 	}
 
@@ -54,6 +94,13 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 	public updateWorkspaceRoot(workspaceRoot: readonly vscode.WorkspaceFolder[]): void{
 		this.workspaceRoot = workspaceRoot;
 	}
+
+	public updateKnownEnvironments(environments: Array<Environment>){
+		if(environments.length>0){
+			this._knownEnvironments = environments;
+		}
+	}
+
 
 	getTreeItem(element: vscode.TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
 		return element;
@@ -78,25 +125,30 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 			return Promise.resolve([]);
 		}
 		else{
-			//return this.getWorkspaces();
 			return this._workspaces;
 		}
 
 	}
 
-	
+	/**
+	 * Checks if folder is a workspace, by checking if `./clio/workspaceSettings.json` file is present 
+	 * @param folderPath Folder path
+	 * @returns 
+	 * - TRUE when folder is a workspace
+	 * - FALSE when folder is NOT a workspace
+	 */ 
 	private isWorkspace(folderPath : string): boolean{	
 		const ws = path.join(folderPath, ".clio","workspaceSettings.json");
 		return fs.existsSync(ws);
 	}
-
-	
 
 	//#endregion
 }
 
 export class Workspace extends vscode.TreeItem {
 	
+	iconPath= new vscode.ThemeIcon("symbol-namespace");
+	private _currentEnvironment : Environment | undefined;
 	
 	private _remote : vscode.Uri | undefined;
 	public get remote() : vscode.Uri | undefined{
@@ -105,7 +157,6 @@ export class Workspace extends vscode.TreeItem {
 	public set value(v : vscode.Uri | undefined) {
 		this._remote = v;
 	}
-	
 	
 	private _packages : Array<Package> = new Array<Package>;
 	public get packages() : Array<Package> {
@@ -131,28 +182,53 @@ export class Workspace extends vscode.TreeItem {
 		this._clioExecutor = v;
 	}
 	
-
 	constructor(
 		public readonly label: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 		public readonly folder : vscode.Uri,
-		public readonly description? : string,
-		
+		environment?: Environment,
+		public readonly description? : string
 	) {
 		super(label, collapsibleState);
+		
+		this._currentEnvironment = environment;
+
 		this.tooltip = new vscode.MarkdownString("See workspace [documentation](https://github.com/Advance-Technologies-Foundation/clio#workspaces)");
 		this.description = description ?? '';
 		this.contextValue = "clio.Workspace";
 		this._clioExecutor = new ClioExecutor();
+		this.getDefaultEnvironment();
 
 		this.getRemote();
 		(async()=>{
-			await this.getPackagesfromJson();
+			await this.getPackagesFromJson();
 		})();
 	}
-	iconPath = new vscode.ThemeIcon("symbol-namespace");
 
-	private getPackagesfromJson() : void {
+	private getDefaultEnvironment() : void {
+		try{
+			const workspaceEnvironmentSettingFilePath = path.join(this.folder.fsPath, ".clio","workspaceEnvironmentSettings.json");
+			const jsonFileContent = fs.readFileSync(workspaceEnvironmentSettingFilePath);
+			var json = jsonFileContent.toString('utf8');
+			//https://github.com/nodejs/node-v0.x-archive/issues/4039#issuecomment-8828783
+			if (json.charAt(0) === '\uFEFF'){
+				json = json.substring(1);
+			} 
+			const model = JSON.parse(json) as IWorkspaceEnvironmentSettings;
+			if(model && model.Environment){
+				model.Environment;
+
+				//this.environment =  this._creatioTreeItemProvider?.environments.find(e=> e.label === model.Environment);
+				 //console.log(`set env to : ${this.environment?.label}`);
+				//this._currentEnvironment = this.environments.find(e=> e.label === model.Environment);
+			}
+		}
+		catch(error:any){
+			console.error("Could not determine default environment from workspaceEnvironmentSettings.json, using default from clio ");
+		}
+	}
+
+	private getPackagesFromJson() : void {
 
 		try {
 			const workspaceSettingFilePath = path.join(this.folder.fsPath, ".clio","workspaceSettings.json");
@@ -160,7 +236,7 @@ export class Workspace extends vscode.TreeItem {
 			var json = jsonFileContent.toString('utf8');
 			//https://github.com/nodejs/node-v0.x-archive/issues/4039#issuecomment-8828783
 			if (json.charAt(0) === '\uFEFF'){
-				json = json.substr(1);
+				json = json.substring(1);
 			} 
 			const model = JSON.parse(json);
 
@@ -181,11 +257,13 @@ export class Workspace extends vscode.TreeItem {
 	}
 
 
+
 	/**
-	 * Checks if Workspace contains .git forlder. If so then gets remote url
+	 * Checks if Workspace contains `.git` folder. and sets contextValue
+	 * 
 	 * @returns void
 	 */
-	private getRemote():void{
+	private getRemote(): void {
 
 		//When .git folder does not exist it cannot be a git repository
 		var dir = fs.readdirSync(this.folder.fsPath);
@@ -202,7 +280,7 @@ export class Workspace extends vscode.TreeItem {
 			this._remote = vscode.Uri.parse(url);
 			
 			this.contextValue = "clio.Workspace.gitInitialized";
-			console.info(remote);
+			//console.info(remote);
 		}
 		catch(error){
 			console.info(`${this.label} is not a git repository`);
@@ -210,7 +288,11 @@ export class Workspace extends vscode.TreeItem {
 	}
 
 	//TODO: Shold this even be here, or should I return path and call open from extension ?
-	public async openSolutionFramework():Promise<string>{
+	
+	/** Checks if in Windows, and executes `/tasks/open-solution-framework.cmd` from workspace folder
+	 * @returns response form terminal
+	 */
+	public async openSolutionFrameworkAsync():Promise<string>{
 		
 		if(process.platform !== 'win32'){
 			return Promise.reject("Unsupported platform");
@@ -221,7 +303,11 @@ export class Workspace extends vscode.TreeItem {
 			"open-solution-framework.cmd"
 		);
 	}
-	public async openSolutionFrameworkSdk():Promise<string>{
+
+	/** Checks if in Windows, and executes `/tasks/open-solution-framework-sdk.cmd` from workspace folder
+	 * @returns response form terminal
+	 */
+	public async openSolutionFrameworkSdkAsync():Promise<string>{
 		if(process.platform !== 'win32'){
 			return Promise.reject("Unsupported platform");
 		}
@@ -231,7 +317,11 @@ export class Workspace extends vscode.TreeItem {
 			"open-solution-framework-sdk.cmd"
 		);
 	}
-	public async openSolutionNetcore():Promise<string>{
+
+	/** Checks if in Windows, and executes `/tasks/open-solution-netcore.cmd` from workspace folder
+	 * @returns response form terminal
+	 */
+	public async openSolutionNetcoreAsync():Promise<string>{
 		if(process.platform !== 'win32'){
 			return Promise.reject("Unsupported platform");
 		}
@@ -240,7 +330,11 @@ export class Workspace extends vscode.TreeItem {
 			"open-solution-netcore.cmd"
 		);
 	}
-	public async openSolutionNetcoreSdk():Promise<string>{
+
+	/** Checks if in Windows, and executes `/tasks/open-solution-netcore-sdk.cmd` from workspace folder
+	 * @returns response form terminal
+	 */
+	public async openSolutionNetcoreSdkAsync():Promise<string>{
 		if(process.platform !== 'win32'){
 			return Promise.reject("Unsupported platform");
 		}
@@ -249,7 +343,11 @@ export class Workspace extends vscode.TreeItem {
 			"open-solution-netcore-sdk.cmd"
 		);
 	}
-	public async buildFramework():Promise<string>{
+
+	/** Checks if in Windows, and executes `/tasks/build-framework.cmd` from workspace folder
+	 * @returns response form terminal
+	 */
+	public async buildFrameworkAsync():Promise<string>{
 		if(process.platform !== 'win32'){
 			return Promise.reject("Unsupported platform");
 		}
@@ -258,7 +356,11 @@ export class Workspace extends vscode.TreeItem {
 			"build-framework.cmd"
 		);
 	}
-	public async buildFrameworkSdk():Promise<string>{
+
+	/** Checks if in Windows, and executes `/tasks/build-framework-sdk.cmd` from workspace folder
+	 * @returns response form terminal
+	 */
+	public async buildFrameworkSdkAsync():Promise<string>{
 		if(process.platform !== 'win32'){
 			return Promise.reject("Unsupported platform");
 		}
@@ -267,7 +369,11 @@ export class Workspace extends vscode.TreeItem {
 			"build-framework-sdk.cmd"
 		);
 	}
-	public async buildNetcore():Promise<string>{
+
+	/** Checks if in Windows, and executes `/tasks/build-netcore.cmd` from workspace folder
+	 * @returns response form terminal
+	 */
+	public async buildNetcoreAsync():Promise<string>{
 		let cmd = "build-netcore.cmd";
 		if(process.platform !== 'win32'){
 			cmd = "build-netcore.sh";
@@ -277,7 +383,11 @@ export class Workspace extends vscode.TreeItem {
 			cmd
 		);
 	}
-	public async buildNetcoreSdk():Promise<string>{
+
+	/** Checks if in not Windows, and executes `/tasks/build-netcore-sdk.sh` from workspace folder
+	 * @returns response form terminal
+	 */
+	public async buildNetcoreSdkAsync():Promise<string>{
 		let cmd = "build-netcore-sdk.cmd";
 		if(process.platform !== 'win32'){
 			cmd = "build-netcore-sdk.sh";
@@ -288,7 +398,11 @@ export class Workspace extends vscode.TreeItem {
 			cmd
 		);
 	}
-	public async runAllPlatfromBuild():Promise<string>{
+
+	/** Checks if in Windows, and executes `/tasks/run-all-platfrom-build.cmd` from workspace folder
+	 * @returns response form terminal
+	 */
+	public async runAllPlatformBuildAsync():Promise<string>{
 		
 		if(process.platform !== 'win32'){
 			return Promise.reject("Unsupported platform");
@@ -298,7 +412,11 @@ export class Workspace extends vscode.TreeItem {
 			"run-all-platfrom-build.cmd"
 		);
 	}
-	public async runAllPlatfromBuildSdk():Promise<string>{
+
+	/** Checks if in Windows, and executes `/tasks/run-all-platfrom-build-sdk.cmd` from workspace folder
+	 * @returns response form terminal
+	 */
+	public async runAllPlatformBuildSdkAsync():Promise<string>{
 		
 		if(process.platform !== 'win32'){
 			return Promise.reject("Unsupported platform");
@@ -309,12 +427,12 @@ export class Workspace extends vscode.TreeItem {
 		);
 	}
 
-	/**
-	 * Restores workspace from cloud instance, see clio restorew for details
-	 * https://github.com/Advance-Technologies-Foundation/clio#workspaces
-	 * @param env Optional environment name, if nothing is passed will use default env set in clio
+	/** Restores workspace from an environment
+	 *
+	 * See clio {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/clio/Command/RestoreWorkspaceCommand.cs **restorew**} documentation
+	 * @param env Optional environment name, uses default environment whe empty
 	 */
-	public async restorew(env?: string): Promise<void>{
+	public async restorewAsync(env?: string): Promise<void>{
 		if(env){
 			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew -e ${env}`);
 		}else{
@@ -322,12 +440,12 @@ export class Workspace extends vscode.TreeItem {
 		}
 	}
 	
-	/**
-	 * Pushes workspace to cloud instance, see clio pushw for details
-	 * https://github.com/Advance-Technologies-Foundation/clio#workspaces
-	 * @param env Optional environment name, if nothing is passed will use default env set in clio
+	/** Pushes workspace to an environment
+	 *
+	 * See clio {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/clio/Command/PushWorkspaceCommand.cs **pushw**} documentation
+	 * @param env Optional environment name, uses default environment whe empty
 	 */
-	public async pushw(env?: string): Promise<void>{
+	public async pushwAsync(env?: string): Promise<void>{
 
 		if(env){
 			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio pushw -e ${env}`);
@@ -336,12 +454,12 @@ export class Workspace extends vscode.TreeItem {
 		}
 	}
 	
-	/**
-	 * Downloads Configuration (clio dconf)
-	 * https://github.com/Advance-Technologies-Foundation/clio#workspaces
-	 * @param env Optional environment name, if nothing is passed will use default env set in clio
+	/** Downloads Configuration
+	 * 
+	 * See clio {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/clio/Command/DownloadConfigurationCommand.cs **dconf**} documentation
+	 * @param env Optional environment name, uses default environment whe empty
 	 */
-	public async dconf(env?: string): Promise<void>{
+	public async dconfAsync(env?: string): Promise<void>{
 		if(env){
 			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf -e ${env}`);
 		}else{
@@ -350,10 +468,8 @@ export class Workspace extends vscode.TreeItem {
 	}
 }
 
-
 export class Package extends vscode.TreeItem{
 	
-		
 	constructor(
 		public readonly label: string,
 		private readonly folderUri: vscode.Uri
@@ -407,4 +523,8 @@ export class Application extends vscode.TreeItem{
 export interface IWorkspaceSettings {
 	ApplicationVersion: mySemVer
 	Packages: Array<string>
+}
+
+export interface IWorkspaceEnvironmentSettings {
+	Environment: string | undefined
 }

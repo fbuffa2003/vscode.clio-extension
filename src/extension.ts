@@ -817,7 +817,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	//#region Workspace : Registration
 	
-	const _workspaceTreeViewProvider = new WorkspaceTreeViewProvider(vscode.workspace.workspaceFolders);
+	const _workspaceTreeViewProvider = new WorkspaceTreeViewProvider(vscode.workspace.workspaceFolders, environments);
 	vscode.workspace.onDidChangeWorkspaceFolders(async(event: vscode.WorkspaceFoldersChangeEvent)=>{
 		console.info('folder added');
 		if(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0){
@@ -853,7 +853,7 @@ export function activate(context: vscode.ExtensionContext) {
 					title: "Downloading configuration"
 				},
 				async(progress, token)=>{
-					await item.dconf();
+					await item.dconfAsync();
 					progress.report({
 						increment: 100,
 						message: "Done"
@@ -869,7 +869,7 @@ export function activate(context: vscode.ExtensionContext) {
 					title: "Pushing workspace"
 				},
 				async(progress, token)=>{
-					await item.pushw();
+					await item.pushwAsync();
 					progress.report({
 						increment: 100,
 						message: "Done"
@@ -885,7 +885,7 @@ export function activate(context: vscode.ExtensionContext) {
 					title: "Restoring workspace"
 				},
 				async(progress, token)=>{
-					await item.restorew();
+					await item.restorewAsync();
 					progress.report({
 						increment: 100,
 						message: "Done"
@@ -909,7 +909,7 @@ export function activate(context: vscode.ExtensionContext) {
 	//open commands
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.open-solution-framework", async (item: Workspace)=>{
 			try{
-				const result = await item.openSolutionFramework();
+				const result = await item.openSolutionFrameworkAsync();
 				console.info(result);
 			}
 			catch(error){
@@ -919,7 +919,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.open-solution-framework-sdk", async (item: Workspace)=>{
 			try{
-				const result = await item.openSolutionFrameworkSdk();
+				const result = await item.openSolutionFrameworkSdkAsync();
 				console.info(result);
 			}
 			catch(error){
@@ -929,7 +929,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.open-solution-netcore", async (item: Workspace)=>{
 			try{
-				const result = await item.openSolutionNetcore();
+				const result = await item.openSolutionNetcoreAsync();
 				console.info(result);
 			}
 			catch(error){
@@ -939,7 +939,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.open-solution-netcore-sdk", async (item: Workspace)=>{
 		try{
-			const result = await item.openSolutionNetcoreSdk();
+			const result = await item.openSolutionNetcoreSdkAsync();
 			console.info(result);
 		}
 		catch(error){
@@ -950,7 +950,7 @@ export function activate(context: vscode.ExtensionContext) {
 	//build commands
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.build-framework-sdk", async (item: Workspace)=>{
 		try{
-			const result = await item.buildFrameworkSdk();
+			const result = await item.buildFrameworkSdkAsync();
 			console.info(result);
 		}
 		catch(error){
@@ -960,7 +960,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.build-framework", async (item: Workspace)=>{
 		try{
-			const result = await item.buildFramework();
+			const result = await item.buildFrameworkAsync();
 			console.info(result);
 		}
 		catch(error){
@@ -970,7 +970,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.build-netcore", async (item: Workspace)=>{
 		try{
-			const result = await item.buildNetcore();
+			const result = await item.buildNetcoreAsync();
 			console.info(result);
 		}
 		catch(error){
@@ -980,7 +980,7 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.build-netcore-sdk", async (item: Workspace)=>{
 		try{
-			const result = await item.buildNetcoreSdk();
+			const result = await item.buildNetcoreSdkAsync();
 			console.info(result);
 		}
 		catch(error){
