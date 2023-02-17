@@ -16,12 +16,12 @@ export class AppComponent {
 		const username = this.elementRef.nativeElement.getAttribute('username');
 		const password = this.elementRef.nativeElement.getAttribute('password');
 		const maintainer = this.elementRef.nativeElement.getAttribute('maintainer');
-		const isNetCore = this.elementRef.nativeElement.getAttribute('isNetCore').toLowerCase() === 'true';
-		const isSafe = this.elementRef.nativeElement.getAttribute('isSafe').toLowerCase() === 'true';
-		const isDeveloperModeEnabled = this.elementRef.nativeElement.getAttribute('isDeveloperModeEnabled').toLowerCase() === 'true';
+		const isNetCore = this.elementRef.nativeElement.getAttribute('isNetCore')?.toLowerCase() === 'true';
+		const isSafe = this.elementRef.nativeElement.getAttribute('isSafe')?.toLowerCase() === 'true';
+		const isDeveloperModeEnabled = this.elementRef.nativeElement.getAttribute('isDeveloperModeEnabled')?.toLowerCase() === 'true';
 		const clientId = this.elementRef.nativeElement.getAttribute('clientId');
 		const clientSecret = this.elementRef.nativeElement.getAttribute('clientSecret');
-		const isEdit = this.elementRef.nativeElement.getAttribute('isEdit').toLowerCase() === 'true';
+		const isEdit = this.elementRef.nativeElement.getAttribute('isEdit')?.toLowerCase() === 'true';
 
 		switch(pageName) {
 			case "connection": {
