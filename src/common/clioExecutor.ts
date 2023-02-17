@@ -1,12 +1,12 @@
 import { exec } from 'child_process';
-import { cwd } from 'process';
 import * as vscode from 'vscode';
 
-
+/** Provides abstraction over system calls to start terminal and execute commands
+ */
 export class ClioExecutor {
-    private clioPath = 'clio';
-    private terminal: vscode.Terminal | undefined;
-    private isWin = process.platform === 'win32';	
+	private clioPath = 'clio';
+	private terminal: vscode.Terminal | undefined;
+	private isWin = process.platform === 'win32';	
 
     private createTerminal() : vscode.Terminal {
         this.terminal = this.terminal || vscode.window.createTerminal('clio console', this.isWin ? 'C:\\Windows\\System32\\cmd.exe' : undefined);
@@ -31,9 +31,13 @@ export class ClioExecutor {
 		terminal.sendText(`${this.isWin ? '' : 'wine '}${text}`);        
     }
 
-    public executeCommandByTerminal(command: string) {
+	/**
+	 * Executes clio command in a terminal
+	 * @param command clio command (do not include clio in the command name, for example)
+	 */
+	public executeCommandByTerminal(command: string) {
 		this.sendTextToTerminal(`"${this.clioPath}" ${command}`);
-    }
+	}
 
     public executeClioCommand(command: string): String {
 	    const cp = require('child_process');
@@ -56,12 +60,14 @@ export class ClioExecutor {
     		procData = procErr;
 	      }
 	    }
-        
 	    return procData;
     }
 
+	/** Executes any terminal command
+	 * @param command command to execute, for example clio restart
+	 * @returns promise of the reslt (aka: console text from the launched process)
+	 */
 	public async ExecuteClioCommand(command: string): Promise<string>{
-		
 		return new Promise<string>((resolve, reject)=>{
 			exec(command, (error, stdout, stderr )=>{
 				if(error){
@@ -77,7 +83,11 @@ export class ClioExecutor {
 		});
 	}
 
-
+	/** Similar to ExecuteClioCommand however folder allows to set working folder where command will be executed
+	 * @param folder Active working folder where command is to be executed from
+	 * @param command command to execute
+	 * @returns 
+	 */
 	public async ExecuteTaskCommand(folder: vscode.Uri, command: string): Promise<string>{
 		return new Promise<string>((resolve, reject)=>{
 
