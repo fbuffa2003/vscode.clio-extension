@@ -25,9 +25,12 @@ import { RequiredFeatures } from './common/WindowsOptionalFeature';
 import { installer } from './common/installer';
 import { instalationInpitValidator } from './common/InputValidator/instalationInpitValidator';
 import * as fs from 'node:fs/promises';
+import * as fss from 'fs';
 import { PowerShell } from 'node-powershell/dist';
 import { decompressor } from './common/TemplateWorker/decompressor';
 import { Workspace, WorkspaceTreeViewProvider } from './service/workspaceTreeViewProvider/WorkspaceTreeViewProvider';
+import path = require('path');
+import getAppDataPath from 'appdata-path';
 
 
 /**
@@ -53,6 +56,121 @@ export function activate(context: vscode.ExtensionContext) {
 		clientId: "",
 		clientSecret: ""
 	};
+
+	//#region Environments
+
+	function handleUpdateNode(instance: CreatioTreeItem):void {
+		treeProvider.environments = environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
+		treeProvider.refresh();
+	}
+	function handleDeleteNode(instance: CreatioTreeItem):void {
+
+		const removedInstance = environments.find(i=> i.label === instance.label);
+		if (removedInstance) {
+			var removedIndex = environments.indexOf(removedInstance);
+			environments.splice(removedIndex,1);
+		}
+		treeProvider.environments = environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
+		treeProvider.refresh();
+	}
+
+	function getClioEnvironments() : Map<string, IConnectionSettings> {
+		const _filePath : string = getAppDataPath() + "\\..\\Local\\creatio\\clio\\appsettings.json";
+		let _fileExists : boolean = fss.existsSync(_filePath);
+		
+		if(!_fileExists){
+			return new Map<string, IConnectionSettings>();
+		}
+		const file = fss.readFileSync(
+			path.join(_filePath),
+			{
+				encoding: "utf-8"
+			}
+		);
+
+		const json = JSON.parse(file);
+		const environments = json['Environments'];
+		let keys : string[] = [];
+		Object.keys(environments).forEach(key =>{
+			keys.push(key);
+		});
+
+		const map = new Map<string, IConnectionSettings>();
+
+		keys.forEach(key=>{
+			type ObjectKey = keyof typeof environments;
+			const keyName = key as ObjectKey;
+			const environment = environments[keyName];
+
+			const env : IConnectionSettings = {
+				uri: new URL(environment['Uri']),
+				login: environment['Login'] ?? '',
+				password: environment['Password'] ?? '',
+				maintainer: environment['Maintainer'] ?? '',
+				isNetCore: environment['IsNetCore'] ?? false,
+				isSafe: environment['Safe'] ?? false,
+				isDeveloperMode: environment['DeveloperModeEnabled'],
+				oauthUrl: environment['AuthAppUri'] !== undefined ? new URL(environment['AuthAppUri']) : undefined,
+				clientId: environment['ClientId'] !== undefined ? environment['ClientId'] : undefined,
+				clientSecret: environment['ClientSecret'] !== undefined ? environment['ClientSecret'] : undefined
+			};
+			map.set(keyName as string, env);
+		});
+		return map;
+	}
+
+	function CreateEnvironments(): Array<Environment>{
+		const _environments = new Array<Environment>();
+		const map = getClioEnvironments();
+		for (let [key, value] of map.entries()) {
+			const instance = new Environment(key, value);
+
+			instance.onDidStatusUpdate((instance: CreatioTreeItem)=>{
+				handleUpdateNode(instance);
+			});
+
+			instance.onDeleted((instance: CreatioTreeItem)=>{
+				handleDeleteNode(instance);
+			});
+			_environments.push(instance);
+		}
+		return _environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
+	}
+
+	let environments : Array<Environment> = CreateEnvironments();
+
+
+	function watchFileChange(){
+		const folder = vscode.workspace.workspaceFolders?.[0];	
+		const parts = path.parse(getAppDataPath()).dir.split('\\');
+		const myPath = `${parts[0]}\\${parts[1]}\\${parts[2]}\\${parts[3]}\\Local\\creatio\\clio`;
+		const appsettingsFolderPath = vscode.Uri.file(myPath);
+		const watcher = vscode.workspace.createFileSystemWatcher(
+			new vscode.RelativePattern(appsettingsFolderPath, "appsettings.json"), 
+			false, false, false);
+		
+		watcher.onDidCreate(uri => {
+			environments = CreateEnvironments();
+			treeProvider.environments = environments;
+			treeProvider.refresh();
+		});
+		watcher.onDidChange((uri: vscode.Uri) => {
+			environments = CreateEnvironments();
+			treeProvider.environments = environments;
+			treeProvider.refresh();
+		});
+		watcher.onDidDelete(uri => {
+			environments = CreateEnvironments();
+			treeProvider.environments = environments;
+			treeProvider.refresh();
+		});
+		
+	}
+	watchFileChange();
+
+	treeProvider.environments = environments;
+
+	//#endregion
 
 	//Check clio latest version!
 	checkClioLatestVersion(nugetClient, executor);
@@ -97,9 +215,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	treeView.onDidCollapseElement(async (event: vscode.TreeViewExpansionEvent<CreatioTreeItem>) => {
 		if(event.element instanceof PackageList){
-			//TODO: Change to clio when available
-			//await (event.element as PackageList).getPackages()
-			//(event.element as PackageList).items = [];
 			treeProvider.refresh();
 		}
 	});
@@ -238,10 +353,8 @@ export function activate(context: vscode.ExtensionContext) {
 				vscode.window.showErrorMessage(isArgValid.message.toString());
 				return;
 			}
-
-			const result = await clio.registerWebApp.executeAsync(commandArgs);
-
-			treeProvider.addNewNode(args.name, {
+			const result = await clio.registerWebApp.executeAsync(commandArgs);		
+			const newEnv = new Environment(args.name, {
 				uri: new URL(args.url),
 				login: args.username,
 				password: args.password,
@@ -251,7 +364,31 @@ export function activate(context: vscode.ExtensionContext) {
 				isDeveloperMode: args.isDeveloperModeEnabled,
 				clientId : args.clientId,
 				clientSecret : args.clientSecret
-			} as IConnectionSettings);	
+			} as IConnectionSettings);
+
+			newEnv.onDidStatusUpdate((instance: CreatioTreeItem)=>{
+				handleUpdateNode(instance);
+			});
+
+			newEnv.onDeleted((instance: CreatioTreeItem)=>{
+				handleDeleteNode(instance);
+			});
+
+			environments.push(newEnv);
+			treeProvider.environments = environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
+			treeProvider.refresh();
+			
+			// treeProvider.addNewNode(args.name, {
+			// 	uri: new URL(args.url),
+			// 	login: args.username,
+			// 	password: args.password,
+			// 	maintainer: args.maintainer,
+			// 	isNetCore: args.isNetCore,
+			// 	isSafe: args.isSafe,
+			// 	isDeveloperMode: args.isDeveloperModeEnabled,
+			// 	clientId : args.clientId,
+			// 	clientSecret : args.clientSecret
+			// } as IConnectionSettings);	
 
 			if(result.success){
 				ConnectionPanel.kill();
@@ -271,9 +408,10 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.RefreshConnection", async (node: WorkSpaceItem)=>{
-			treeProvider.reload();
-		})
-	);
+		environments =  CreateEnvironments();
+		treeProvider.environments = environments;
+		treeProvider.refresh();
+	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.Settings", async (node: Environment)=>{
 			executor.executeCommandByTerminal(`cfg open`);
@@ -369,11 +507,16 @@ export function activate(context: vscode.ExtensionContext) {
 				maintainer: connectionSettings.maintainer ?? "",
 				isNetCore: connectionSettings.isNetCore,
 				isSafe: connectionSettings.isSafe,
-				isDeveloperModeEnabled: connectionSettings.isDeveloperMode  ?? false,			
-				clientId: connectionSettings.clientId ?? "",			
+				isDeveloperModeEnabled: connectionSettings.isDeveloperMode  ?? false,
+				clientId: connectionSettings.clientId ?? "",
 				clientSecret: connectionSettings.clientSecret ?? ""
 			};
-			ConnectionPanel.render(context.extensionUri, formData, true, node);			
+
+			const editEnv = environments.find(e=> e.label === node.label);
+			if(editEnv){
+				ConnectionPanel.kill();
+				ConnectionPanel.render(context.extensionUri, formData, true, editEnv);
+			}
 		})
 	);
 

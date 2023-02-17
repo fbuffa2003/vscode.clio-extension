@@ -2,7 +2,7 @@
 	"name": "clio-explorer",
 	"displayName": "Clio explorer",
 	"description": "Control your Creatio environments, and perform clio actions on them",
-	"version": "0.0.16",
+	"version": "0.0.17",
 	"publisher": "AdvanceTechnologiesFoundation",
 	"license": "MIT",
 	"icon": "resources/creatio-triangle.png",
@@ -246,8 +246,6 @@
 					"when": "viewItem == clio.Package",
 					"group": "inline@5"
 				},
-				
-
 				{
 					"command": "ClioSQL.Open",
 					"when": "viewItem == CreatioInstance",

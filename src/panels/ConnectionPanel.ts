@@ -179,7 +179,7 @@ export class ConnectionPanel {
 						var url = message.data.url;
 						vscode.env.openExternal(vscode.Uri.parse(url));
 						break;
-					}						
+					}
 				}
 			},
 			null,
