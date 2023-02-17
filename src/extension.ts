@@ -333,75 +333,65 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.RegisterWebApp", async (args: FormData)=>{
 
-			const commandArgs : IRegisterWebAppArgs ={
-				url: args.url,
-				username: args.username,
-				password: args.password,
-				maintainer: args.maintainer,
-				isNetCore: args.isNetCore,
-				isSafe: args.isSafe,
-				isDeveloperModeEnabled: args.isDeveloperModeEnabled,
-				environmentName: args.name,
-				clientId : args.clientId,
-				clientSecret : args.clientSecret
+		const commandArgs : IRegisterWebAppArgs ={
+			url: args.url,
+			username: args.username,
+			password: args.password,
+			maintainer: args.maintainer,
+			isNetCore: args.isNetCore,
+			isSafe: args.isSafe,
+			isDeveloperModeEnabled: args.isDeveloperModeEnabled,
+			environmentName: args.name,
+			clientId : args.clientId,
+			clientSecret : args.clientSecret
 
-			};
-			const isArgValid = clio.registerWebApp.canExecute(commandArgs);
-			if(!isArgValid.success){
-				vscode.window.showErrorMessage(isArgValid.message.toString());
-				return;
-			}
-			const result = await clio.registerWebApp.executeAsync(commandArgs);		
-			const newEnv = new Environment(args.name, {
-				uri: new URL(args.url),
-				login: args.username,
-				password: args.password,
-				maintainer: args.maintainer,
-				isNetCore: args.isNetCore,
-				isSafe: args.isSafe,
-				isDeveloperMode: args.isDeveloperModeEnabled,
-				clientId : args.clientId,
-				clientSecret : args.clientSecret
-			} as IConnectionSettings);
+		};
+		const isArgValid = clio.registerWebApp.canExecute(commandArgs);
+		if(!isArgValid.success){
+			vscode.window.showErrorMessage(isArgValid.message.toString());
+			return;
+		}
+		const result = await clio.registerWebApp.executeAsync(commandArgs);		
+		const newEnv = new Environment(args.name, {
+			uri: new URL(args.url),
+			login: args.username,
+			password: args.password,
+			maintainer: args.maintainer,
+			isNetCore: args.isNetCore,
+			isSafe: args.isSafe,
+			isDeveloperMode: args.isDeveloperModeEnabled,
+			clientId : args.clientId,
+			clientSecret : args.clientSecret
+		} as IConnectionSettings);
 
-			newEnv.onDidStatusUpdate((instance: CreatioTreeItem)=>{
-				handleUpdateNode(instance);
-			});
+		newEnv.onDidStatusUpdate((instance: CreatioTreeItem)=>{
+			handleUpdateNode(instance);
+		});
 
-			newEnv.onDeleted((instance: CreatioTreeItem)=>{
-				handleDeleteNode(instance);
-			});
+		newEnv.onDeleted((instance: CreatioTreeItem)=>{
+			handleDeleteNode(instance);
+		});
 
-			environments.push(newEnv);
-			treeProvider.environments = environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
-			treeProvider.refresh();
+		// environments.push(newEnv);
+		// treeProvider.environments = environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
+		// treeProvider.refresh();
 			
-			// treeProvider.addNewNode(args.name, {
-			// 	uri: new URL(args.url),
-			// 	login: args.username,
-			// 	password: args.password,
-			// 	maintainer: args.maintainer,
-			// 	isNetCore: args.isNetCore,
-			// 	isSafe: args.isSafe,
-			// 	isDeveloperMode: args.isDeveloperModeEnabled,
-			// 	clientId : args.clientId,
-			// 	clientSecret : args.clientSecret
-			// } as IConnectionSettings);	
 
-			if(result.success){
+		if(result.success){
+			ConnectionPanel.kill();
+			vscode.window.showInformationMessage(result.message.toString());
+		} else {
+			vscode.window.showErrorMessage(result.message.toString(), "OK")
+			.then(answer => {
 				ConnectionPanel.kill();
-				vscode.window.showInformationMessage(result.message.toString());
-			} else {
-				vscode.window.showErrorMessage(result.message.toString(), "OK")
-				.then(answer => {
-					ConnectionPanel.kill();
-				});
-			}
+			});
+		}
 		})
 	);
 
 	context.subscriptions.push(	vscode.commands.registerCommand("ClioSQL.AddConnection", ()=>{
 			ConnectionPanel.render(context.extensionUri, _emptyFormData, false, undefined);
+			ConnectionPanel.kill();
 		})
 	);
 
@@ -501,15 +491,12 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.Open', async (node: Environment|Workspace) => {
-		if(node){
-			
-			if(node instanceof Workspace){
-				(node as Workspace)._currentEnvironment?.openInBrowser();
-			}
-			
-			if(node instanceof Environment){
-				(node as Environment).openInBrowser();
-			}
+		if(node instanceof Workspace){
+			(node as Workspace)._currentEnvironment?.openInBrowser();
+		}
+		
+		if(node instanceof Environment){
+			(node as Environment).openInBrowser();
 		}
 	}));
 	
