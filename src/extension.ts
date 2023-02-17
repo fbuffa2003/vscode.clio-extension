@@ -139,9 +139,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let environments : Array<Environment> = CreateEnvironments();
 
-
+	//TODO: this wont work on Mac + Linux. Should query clio for path
 	function watchFileChange(){
-		const folder = vscode.workspace.workspaceFolders?.[0];	
 		const parts = path.parse(getAppDataPath()).dir.split('\\');
 		const myPath = `${parts[0]}\\${parts[1]}\\${parts[2]}\\${parts[3]}\\Local\\creatio\\clio`;
 		const appsettingsFolderPath = vscode.Uri.file(myPath);
@@ -164,7 +163,6 @@ export function activate(context: vscode.ExtensionContext) {
 			treeProvider.environments = environments;
 			treeProvider.refresh();
 		});
-		
 	}
 	watchFileChange();
 

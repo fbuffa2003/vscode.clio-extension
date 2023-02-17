@@ -37,15 +37,6 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 				}
 			});
 		}
-
-
-		// if (rootFolder) {
-		// 	let watcher = vscode.workspace.createFileSystemWatcher(
-		// 	new vscode.RelativePattern(rootFolder[0], "**"), false, false, false);
-		// 	watcher.onDidCreate(uri => this.handleNewFolderCreated(uri));
-		// 	watcher.onDidChange(uri => this.handleNewFolderCreated(uri));
-		// 	watcher.onDidDelete(uri => this.handleNewFolderCreated(uri));
-		// }
 	}
 
 
