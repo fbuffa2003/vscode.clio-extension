@@ -148,7 +148,7 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 export class Workspace extends vscode.TreeItem {
 	
 	iconPath= new vscode.ThemeIcon("symbol-namespace");
-	private _currentEnvironment : Environment | undefined;
+	public _currentEnvironment : Environment | undefined;
 	
 	private _remote : vscode.Uri | undefined;
 	public get remote() : vscode.Uri | undefined{
@@ -197,7 +197,6 @@ export class Workspace extends vscode.TreeItem {
 		this.description = description ?? '';
 		this.contextValue = "clio.Workspace";
 		this._clioExecutor = new ClioExecutor();
-		this.getDefaultEnvironment();
 
 		this.getRemote();
 		(async()=>{
@@ -205,28 +204,7 @@ export class Workspace extends vscode.TreeItem {
 		})();
 	}
 
-	private getDefaultEnvironment() : void {
-		try{
-			const workspaceEnvironmentSettingFilePath = path.join(this.folder.fsPath, ".clio","workspaceEnvironmentSettings.json");
-			const jsonFileContent = fs.readFileSync(workspaceEnvironmentSettingFilePath);
-			var json = jsonFileContent.toString('utf8');
-			//https://github.com/nodejs/node-v0.x-archive/issues/4039#issuecomment-8828783
-			if (json.charAt(0) === '\uFEFF'){
-				json = json.substring(1);
-			} 
-			const model = JSON.parse(json) as IWorkspaceEnvironmentSettings;
-			if(model && model.Environment){
-				model.Environment;
-
-				//this.environment =  this._creatioTreeItemProvider?.environments.find(e=> e.label === model.Environment);
-				 //console.log(`set env to : ${this.environment?.label}`);
-				//this._currentEnvironment = this.environments.find(e=> e.label === model.Environment);
-			}
-		}
-		catch(error:any){
-			console.error("Could not determine default environment from workspaceEnvironmentSettings.json, using default from clio ");
-		}
-	}
+	
 
 	private getPackagesFromJson() : void {
 
@@ -255,8 +233,6 @@ export class Workspace extends vscode.TreeItem {
 			console.error(error);
 		}		
 	}
-
-
 
 	/**
 	 * Checks if Workspace contains `.git` folder. and sets contextValue
@@ -435,6 +411,8 @@ export class Workspace extends vscode.TreeItem {
 	public async restorewAsync(env?: string): Promise<void>{
 		if(env){
 			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew -e ${env}`);
+		}else if(this._currentEnvironment){
+			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew -e ${this._currentEnvironment}`);
 		}else{
 			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew`);
 		}
@@ -446,11 +424,12 @@ export class Workspace extends vscode.TreeItem {
 	 * @param env Optional environment name, uses default environment whe empty
 	 */
 	public async pushwAsync(env?: string): Promise<void>{
-
 		if(env){
 			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio pushw -e ${env}`);
+		}else if(this._currentEnvironment){
+			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio pushw -e ${this._currentEnvironment}`);
 		}else{
-			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio pushw`);
+			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew`);
 		}
 	}
 	
@@ -462,6 +441,8 @@ export class Workspace extends vscode.TreeItem {
 	public async dconfAsync(env?: string): Promise<void>{
 		if(env){
 			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf -e ${env}`);
+		}else if(this._currentEnvironment){
+			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf -e ${this._currentEnvironment}`);
 		}else{
 			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf`);
 		}

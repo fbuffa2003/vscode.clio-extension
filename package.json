@@ -217,34 +217,54 @@
 			
 			"view/item/context": [
 				{
-					"command": "ClioSQL.pushw",
+					"command": "ClioSQL.InstallGate",
 					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
 					"group": "inline@0"
 				},
 				{
-					"command": "ClioSQL.restorew",
+					"command": "ClioSQL.Open",
 					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
 					"group": "inline@1"
 				},
 				{
-					"command": "ClioSQL.dconf",
+					"command": "ClioSQL.restart",
 					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
 					"group": "inline@2"
 				},
 				{
-					"command": "ClioSQL.openGitRepository",
-					"when": "viewItem == clio.Workspace.gitInitialized",
+					"command": "ClioSQL.flushDb",
+					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
 					"group": "inline@3"
 				},
 				{
-					"submenu": "ClioSQL.WorkspaceMenu",
+					"command": "ClioSQL.pushw",
 					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
 					"group": "inline@4"
 				},
 				{
+					"command": "ClioSQL.restorew",
+					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
+					"group": "inline@5"
+				},
+				{
+					"command": "ClioSQL.dconf",
+					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
+					"group": "inline@6"
+				},
+				{
+					"command": "ClioSQL.openGitRepository",
+					"when": "viewItem == clio.Workspace.gitInitialized",
+					"group": "inline@7"
+				},
+				{
+					"submenu": "ClioSQL.WorkspaceMenu",
+					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
+					"group": "inline@8"
+				},
+				{
 					"command": "ClioSQL.pack",
 					"when": "viewItem == clio.Package",
-					"group": "inline@5"
+					"group": "inline@9"
 				},
 				{
 					"command": "ClioSQL.Open",
@@ -370,13 +390,13 @@
 				"command": "ClioSQL.pushw",
 				"title": "Clio - push workspace",
 				"shortTitle": "push",
-				"icon": "$(arrow-up)"
+				"icon": "$(cloud-upload)"
 			},
 			{
 				"command": "ClioSQL.restorew",
 				"title": "Clio - restore workspace",
 				"shortTitle": "restore",
-				"icon": "$(arrow-down)"
+				"icon": "$(cloud-download)"
 			},
 			{
 				"command": "ClioSQL.pack",

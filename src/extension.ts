@@ -475,25 +475,43 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.flushDb', async (node: Environment) => {
+	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.flushDb', async (node: Environment|Workspace) => {
+			
+		if(node instanceof Environment){
 			vscode.window
 				.showWarningMessage("Would you like to flush redis db on environment \"" + node.label + "\"?", "Yes", "No",)
 				.then(answer => {
 					if (answer === "Yes") {
-						if(node){
-							node.flushDb();
-						}
+						(node as Environment).flushDb();
+						
 					}
 				});
-		})
-	);
+		}
 
-	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.Open', async (node: Environment) => {
-			if(node){
-				await node.openInBrowser();
+		if(node instanceof Workspace){
+			vscode.window
+				.showWarningMessage("Would you like to flush redis db on environment \"" + (node as Workspace)._currentEnvironment?.label + "\"?", "Yes", "No",)
+				.then(answer => {
+					if (answer === "Yes") {
+						(node as Workspace)._currentEnvironment?.flushDb();
+					}
+				});
+		}			
+	
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.Open', async (node: Environment|Workspace) => {
+		if(node){
+			
+			if(node instanceof Workspace){
+				(node as Workspace)._currentEnvironment?.openInBrowser();
 			}
-		})
-	);
+			
+			if(node instanceof Environment){
+				(node as Environment).openInBrowser();
+			}
+		}
+	}));
 	
 	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.EditConnection', async (node: Environment) => {
 			const connectionSettings = node.connectionSettings;
@@ -540,18 +558,29 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.InstallGate', async (node: Environment) => {
+	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.InstallGate', async (node: Environment|Workspace) => {
+			
+		if(node instanceof Environment){
 			vscode.window
 				.showInformationMessage("Would you like to install clio api on environment \"" + node.label + "\"?", "Yes", "No",)
 				.then(answer => {
 					if (answer === "Yes") {
-						if(node){
-							node.installGate();
-						}
+						node.installGate();
 					}
 				});
-		})
-	);
+		};
+		
+		if(node instanceof Workspace){
+			vscode.window
+				.showInformationMessage("Would you like to install clio api on environment \"" + (node as Workspace)._currentEnvironment?.label + "\"?", "Yes", "No",)
+				.then(answer => {
+					if (answer === "Yes") {
+						(node as Workspace)._currentEnvironment?.installGate();
+					}
+				});
+		}
+	
+	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.HealthCheck', async (node: Environment) => {
 			if(node){
