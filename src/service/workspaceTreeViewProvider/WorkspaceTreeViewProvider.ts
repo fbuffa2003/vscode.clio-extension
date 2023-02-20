@@ -436,11 +436,11 @@ export class Workspace extends vscode.TreeItem {
 	 */
 	public async dconfAsync(env?: string): Promise<void>{
 		if(env){
-			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf -e ${env}`);
+			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf -e ${env}`);
 		}else if(this._currentEnvironment){
-			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf -e ${this._currentEnvironment}`);
+			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf -e ${this._currentEnvironment.label}`);
 		}else{
-			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf`);
+			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf`);
 		}
 	}
 }
