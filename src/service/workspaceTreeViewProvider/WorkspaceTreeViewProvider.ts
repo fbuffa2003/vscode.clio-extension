@@ -402,30 +402,30 @@ export class Workspace extends vscode.TreeItem {
 	/** Restores workspace from an environment
 	 *
 	 * See clio {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/clio/Command/RestoreWorkspaceCommand.cs **restorew**} documentation
-	 * @param env Optional environment name, uses default environment whe empty
+	 * @param env Optional environment name, uses default environment when empty
 	 */
 	public async restorewAsync(env?: string): Promise<void>{
 		if(env){
-			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew -e ${env}`);
+			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew -e ${env}`);
 		}else if(this._currentEnvironment){
-			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew -e ${this._currentEnvironment}`);
+			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew -e ${this._currentEnvironment.label}`);
 		}else{
-			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew`);
+			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew`);
 		}
 	}
 	
 	/** Pushes workspace to an environment
 	 *
 	 * See clio {@link https://github.com/Advance-Technologies-Foundation/clio/blob/master/clio/Command/PushWorkspaceCommand.cs **pushw**} documentation
-	 * @param env Optional environment name, uses default environment whe empty
+	 * @param env Optional environment name, uses default environment when empty
 	 */
 	public async pushwAsync(env?: string): Promise<void>{
 		if(env){
-			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio pushw -e ${env}`);
+			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio pushw -e ${env}`);
 		}else if(this._currentEnvironment){
-			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio pushw -e ${this._currentEnvironment}`);
+			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio pushw -e ${this._currentEnvironment.label}`);
 		}else{
-			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew`);
+			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew`);
 		}
 	}
 	
