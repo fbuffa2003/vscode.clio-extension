@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
+import { ClioExecutor } from "../Common/clioExecutor";
 import { Environment } from "../service/TreeItemProvider/Environment";
 import { getUri } from "../utilities/getUri";
 import { getNonce } from "./getNonce";
@@ -13,6 +14,7 @@ export class ConnectionPanel {
 	private readonly _node: Environment | undefined;
 	private _disposables: Disposable[] = [];
 	private static _envName: string | undefined;
+	private readonly _clioExecutor = new ClioExecutor();
 
 	/**
 	 * The CatalogPanel class private constructor (called only from the render method).
@@ -176,8 +178,13 @@ export class ConnectionPanel {
 						break;
 					}
 					case "GoOAuth": {
-						var url = message.data.url;
-						vscode.env.openExternal(vscode.Uri.parse(url));
+						var url = vscode.Uri.parse(message.data.url);
+						const clioUrl = `clio://OpenUrl/?authority=${url.authority}&schema=${url.scheme}`;
+						const cmd = `clio-dev externalLink \"${clioUrl.toString()}\"`;
+						const result = await this._clioExecutor.ExecuteClioCommand(cmd);
+						console.log(result);
+						
+						//vscode.env.openExternal(vscode.Uri.parse(url));
 						break;
 					}
 				}

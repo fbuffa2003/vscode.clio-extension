@@ -30,14 +30,13 @@ import { PowerShell } from 'node-powershell/dist';
 import { decompressor } from './common/TemplateWorker/decompressor';
 import { Workspace, WorkspaceTreeViewProvider } from './service/workspaceTreeViewProvider/WorkspaceTreeViewProvider';
 import path = require('path');
-import getAppDataPath from 'appdata-path';
 
 
 /**
  * Main entry point into the extension.
  * @param context - ext context, will be given by vscode runtime
  */
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 	
 	const executor : ClioExecutor = new ClioExecutor();
 	const nugetClient : NugetClient = new NugetClient();
@@ -74,15 +73,15 @@ export function activate(context: vscode.ExtensionContext) {
 		treeProvider.refresh();
 	}
 
+	const appSettingPath = await executor.ExecuteClioCommand("clio-dev externalLink clio://GetAppSettingsFilePath");
+
 	function getClioEnvironments() : Map<string, IConnectionSettings> {
-		const _filePath : string = getAppDataPath() + "\\..\\Local\\creatio\\clio\\appsettings.json";
-		let _fileExists : boolean = fss.existsSync(_filePath);
-		
+		let _fileExists : boolean = fss.existsSync(appSettingPath);		
 		if(!_fileExists){
 			return new Map<string, IConnectionSettings>();
 		}
 		const file = fss.readFileSync(
-			path.join(_filePath),
+			path.join(appSettingPath),
 			{
 				encoding: "utf-8"
 			}
@@ -138,10 +137,8 @@ export function activate(context: vscode.ExtensionContext) {
 	}
 
 	let environments : Array<Environment> = CreateEnvironments();
-
-	//TODO: this wont work on Mac + Linux. Should query clio for path
 	function watchFileChange(){
-		const parts = path.parse(getAppDataPath()).dir.split('\\');
+		const parts = path.parse(appSettingPath).dir.split('\\');
 		const myPath = `${parts[0]}\\${parts[1]}\\${parts[2]}\\${parts[3]}\\Local\\creatio\\clio`;
 		const appsettingsFolderPath = vscode.Uri.file(myPath);
 		const watcher = vscode.workspace.createFileSystemWatcher(
@@ -372,10 +369,6 @@ export function activate(context: vscode.ExtensionContext) {
 			handleDeleteNode(instance);
 		});
 
-		// environments.push(newEnv);
-		// treeProvider.environments = environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
-		// treeProvider.refresh();
-			
 
 		if(result.success){
 			ConnectionPanel.kill();
