@@ -391,7 +391,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(	vscode.commands.registerCommand("ClioSQL.AddConnection", ()=>{
 			ConnectionPanel.render(context.extensionUri, _emptyFormData, false, undefined);
-			ConnectionPanel.kill();
 		})
 	);
 
@@ -430,16 +429,32 @@ export function activate(context: vscode.ExtensionContext) {
 		ComparePanel.render(context.extensionUri, node, treeProvider.environments);
 	}));
 
-	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.restart', async (node: Environment) => {
+	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.restart', async (node: Environment|Workspace) => {
+			
+		
+		if(node instanceof Environment){
 			vscode.window
-				.showWarningMessage("Would you like to restart environment \"" + node.label + "\"?", "Yes", "No",)
-				.then(answer => {
-					if (answer === "Yes") {
-						if(node){
-							node.restartWebApp();
+					.showWarningMessage("Would you like to restart environment \"" + node.label + "\"?", "Yes", "No",)
+					.then(answer => {
+						if (answer === "Yes") {
+							if(node){
+								node.restartWebApp();
+							}
 						}
+					});
+		}
+		
+		if(node instanceof Workspace){
+			vscode.window
+			.showWarningMessage("Would you like to restart environment \"" + node._currentEnvironment?.label + "\"?", "Yes", "No",)
+			.then(answer => {
+				if (answer === "Yes") {
+					if(node){
+						node._currentEnvironment?.restartWebApp();
 					}
-				});
+				}
+			});
+		}
 		})
 	);
 
@@ -492,11 +507,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.Open', async (node: Environment|Workspace) => {
 		if(node instanceof Workspace){
-			(node as Workspace)._currentEnvironment?.openInBrowser();
+			await (node as Workspace)._currentEnvironment?.openInBrowser();
 		}
 		
 		if(node instanceof Environment){
-			(node as Environment).openInBrowser();
+			await (node as Environment).openInBrowser();
 		}
 	}));
 	
