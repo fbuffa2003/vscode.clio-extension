@@ -36,7 +36,7 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 			
 			if(this.isWorkspace(rootPath)){
 				const a = this.getConfiguredEnvironment(vscode.Uri.file(rootPath));
-				const env = environments.find(e=> e.label === a?.Environment);				
+				const env = environments.find(e=> e.label === a?.Environment);
 				const workspace = new Workspace(rootPath, vscode.TreeItemCollapsibleState.Collapsed, vscode.Uri.file(rootPath), env, "Workspace");
 				this._workspaces.push(workspace);
 				return;
@@ -49,7 +49,7 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 				console.info(`${subDir} is workspace: ${isWs}`);
 				
 				if(isWs){
-					const a = this.getConfiguredEnvironment(vscode.Uri.file(rootPath));
+					const a = this.getConfiguredEnvironment(vscode.Uri.file(subDir));
 					const env = environments.find(e=> e.label === a?.Environment);
 
 					const workspace = new Workspace(dir, vscode.TreeItemCollapsibleState.Collapsed, vscode.Uri.file(subDir),env, "Workspace");
