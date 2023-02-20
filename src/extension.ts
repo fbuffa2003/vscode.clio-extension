@@ -73,6 +73,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		treeProvider.refresh();
 	}
 
+	//FIXME: Change for prop release
 	const appSettingPath = await executor.ExecuteClioCommand("clio-dev externalLink clio://GetAppSettingsFilePath");
 
 	function getClioEnvironments() : Map<string, IConnectionSettings> {

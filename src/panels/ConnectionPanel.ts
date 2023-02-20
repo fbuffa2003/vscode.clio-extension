@@ -178,13 +178,10 @@ export class ConnectionPanel {
 						break;
 					}
 					case "GoOAuth": {
-						var url = vscode.Uri.parse(message.data.url);
-						const clioUrl = `clio://OpenUrl/?authority=${url.authority}&schema=${url.scheme}`;
-						const cmd = `clio-dev externalLink \"${clioUrl.toString()}\"`;
+						const clioUrl = `clio://OpenUrl/?url=${(message.data.url as string)}`;
+						//FIXME: Change for prop release
+						const cmd = `clio-dev externalLink \"${clioUrl}\"`;
 						const result = await this._clioExecutor.ExecuteClioCommand(cmd);
-						console.log(result);
-						
-						//vscode.env.openExternal(vscode.Uri.parse(url));
 						break;
 					}
 				}
