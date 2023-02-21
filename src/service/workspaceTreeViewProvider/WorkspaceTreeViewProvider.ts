@@ -406,11 +406,11 @@ export class Workspace extends vscode.TreeItem {
 	 */
 	public async restorewAsync(env?: string): Promise<void>{
 		if(env){
-			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew -e ${env}`);
+			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew -e ${env}`);
 		}else if(this._currentEnvironment){
-			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew -e ${this._currentEnvironment.label}`);
+			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew -e ${this._currentEnvironment.label}`);
 		}else{
-			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew`);
+			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew`);
 		}
 	}
 	
@@ -421,11 +421,11 @@ export class Workspace extends vscode.TreeItem {
 	 */
 	public async pushwAsync(env?: string): Promise<void>{
 		if(env){
-			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio pushw -e ${env}`);
+			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio pushw -e ${env}`);
 		}else if(this._currentEnvironment){
-			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio pushw -e ${this._currentEnvironment.label}`);
+			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio pushw -e ${this._currentEnvironment.label}`);
 		}else{
-			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew`);
+			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew`);
 		}
 	}
 	
@@ -436,11 +436,11 @@ export class Workspace extends vscode.TreeItem {
 	 */
 	public async dconfAsync(env?: string): Promise<void>{
 		if(env){
-			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf -e ${env}`);
+			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf -e ${env}`);
 		}else if(this._currentEnvironment){
-			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf -e ${this._currentEnvironment.label}`);
+			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf -e ${this._currentEnvironment.label}`);
 		}else{
-			this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf`);
+			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf`);
 		}
 	}
 }

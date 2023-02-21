@@ -77,19 +77,21 @@ export async function activate(context: vscode.ExtensionContext) {
 	const appSettingPath = await executor.ExecuteClioCommand("clio-dev externalLink clio://GetAppSettingsFilePath");
 
 	function getClioEnvironments() : Map<string, IConnectionSettings> {
-		let _fileExists : boolean = fss.existsSync(appSettingPath);		
+
+		let _fileExists : boolean = fss.existsSync(appSettingPath.trim());
 		if(!_fileExists){
 			return new Map<string, IConnectionSettings>();
 		}
-		const file = fss.readFileSync(
-			path.join(appSettingPath),
-			{
-				encoding: "utf-8"
-			}
-		);
+		
+		const jsonFileContent = fss.readFileSync(appSettingPath.trim());
+		var json = jsonFileContent.toString('utf8');
+		//https://github.com/nodejs/node-v0.x-archive/issues/4039#issuecomment-8828783
+		if (json.charAt(0) === '\uFEFF'){
+			json = json.substring(1);
+		} 
+		const model = JSON.parse(json);
 
-		const json = JSON.parse(file);
-		const environments = json['Environments'];
+		const environments = model['Environments'];
 		let keys : string[] = [];
 		Object.keys(environments).forEach(key =>{
 			keys.push(key);
@@ -501,6 +503,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.Open', async (node: Environment|Workspace) => {
 		if(node instanceof Workspace){
+
+			const workspace = node as Workspace;
 			await (node as Workspace)._currentEnvironment?.openInBrowser();
 		}
 		

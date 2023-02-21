@@ -136,7 +136,7 @@ export class Environment extends CreatioTreeItem {
 	}
 
 	public async openInBrowser(): Promise<void> {
-		this.clioExecutor.ExecuteClioCommand(`clio open -e "${this.label}"`);
+		await this.clioExecutor.ExecuteClioCommand(`clio open -e "${this.label}"`);
 	}
 
 	public async installGate(): Promise<void> {
