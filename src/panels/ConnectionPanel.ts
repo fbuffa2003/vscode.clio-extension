@@ -180,7 +180,7 @@ export class ConnectionPanel {
 					case "GoOAuth": {
 						const clioUrl = `clio://OpenUrl/?url=${(message.data.url as string)}`;
 						//FIXME: Change for prop release
-						const cmd = `clio-dev externalLink \"${clioUrl}\"`;
+						const cmd = `clio externalLink \"${clioUrl}\"`;
 						const result = await this._clioExecutor.ExecuteClioCommand(cmd);
 						break;
 					}

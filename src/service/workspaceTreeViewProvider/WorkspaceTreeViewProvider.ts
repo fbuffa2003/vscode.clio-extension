@@ -20,7 +20,9 @@ import { CreatioTreeItemProvider } from '../TreeItemProvider/CreatioTreeItemProv
 export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode.TreeItem>{
 	private _knownEnvironments : Array<Environment> = new Array<Environment>();
 	private _workspaces : Array<Workspace> = new Array<Workspace>;
-
+	
+	private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | void> = new vscode.EventEmitter<vscode.TreeItem | undefined | void>();
+	readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | void> = this._onDidChangeTreeData.event;
 	/**
 	 * @param workspaceRoot array of workspace folders opened in vscode
 	 * - See _vscode_ {@link https://code.visualstudio.com/api/extension-guides/tree-view **Tree View API**} documentation
@@ -29,15 +31,21 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 		private workspaceRoot: readonly vscode.WorkspaceFolder[] | undefined, 
 		private environments: Array<Environment> )
 	{
+		this.InitWorkspaces();
+		
+	}
 
+	private InitWorkspaces(): void {
+
+		this._workspaces = new Array<Workspace>();
 		const rootFolder = vscode.workspace.workspaceFolders;
 		if(rootFolder && rootFolder.length>0){
 			const rootPath : string = rootFolder[0].uri.fsPath ;
 			
 			if(this.isWorkspace(rootPath)){
 				const a = this.getConfiguredEnvironment(vscode.Uri.file(rootPath));
-				const env = environments.find(e=> e.label === a?.Environment);
-				const workspace = new Workspace(rootPath, vscode.TreeItemCollapsibleState.Collapsed, vscode.Uri.file(rootPath), env, "Workspace");
+				const env = this.environments.find(e=> e.label === a?.Environment);
+				const workspace = new Workspace(rootPath, vscode.TreeItemCollapsibleState.Collapsed, vscode.Uri.file(rootPath), env, "");
 				this._workspaces.push(workspace);
 				return;
 			}
@@ -50,15 +58,20 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 				
 				if(isWs){
 					const a = this.getConfiguredEnvironment(vscode.Uri.file(subDir));
-					const env = environments.find(e=> e.label === a?.Environment);
+					const env = this.environments.find(e=> e.label === a?.Environment);
 
-					const workspace = new Workspace(dir, vscode.TreeItemCollapsibleState.Collapsed, vscode.Uri.file(subDir),env, "Workspace");
+					const workspace = new Workspace(dir, vscode.TreeItemCollapsibleState.Collapsed, vscode.Uri.file(subDir),env, "");
 					this._workspaces.push(workspace);
 				}
 			});
 		}
 	}
 
+
+	public refresh(): void {
+		this.InitWorkspaces();
+		this._onDidChangeTreeData?.fire();
+	}
 	private getConfiguredEnvironment(folder: vscode.Uri) : IWorkspaceEnvironmentSettings | undefined {
 		try{
 			const workspaceEnvironmentSettingFilePath = path.join(folder.fsPath, ".clio","workspaceEnvironmentSettings.json");
@@ -134,7 +147,8 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 	 * - FALSE when folder is NOT a workspace
 	 */ 
 	private isWorkspace(folderPath : string): boolean{	
-		const ws = path.join(folderPath, ".clio","workspaceSettings.json");
+		//const ws = path.join(folderPath, ".clio","workspaceSettings.json");
+		const ws = path.join(folderPath, ".clio");
 		return fs.existsSync(ws);
 	}
 
@@ -473,7 +487,7 @@ export class Package extends vscode.TreeItem{
 
 			const model = JSON.parse(json);
 			const description = model['Descriptor']['Description'];
-			this.description = description ?? "Missing description";
+			this.description = description ?? "";
 
 		} catch (error) {
 			console.error(error);

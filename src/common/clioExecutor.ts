@@ -28,7 +28,7 @@ export class ClioExecutor {
 
     private sendTextToTerminal(text: string) {
 		let terminal = this.getTerminal();
-		terminal.sendText(`${this.isWin ? '' : 'wine '}${text}`);        
+		terminal.sendText(`${this.isWin ? '' : 'wine '}${text}`);
     }
 
 	/**

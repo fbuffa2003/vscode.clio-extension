@@ -30,6 +30,7 @@ import { PowerShell } from 'node-powershell/dist';
 import { decompressor } from './common/TemplateWorker/decompressor';
 import { Workspace, WorkspaceTreeViewProvider } from './service/workspaceTreeViewProvider/WorkspaceTreeViewProvider';
 import path = require('path');
+import { join } from 'node:path';
 
 
 /**
@@ -73,8 +74,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		treeProvider.refresh();
 	}
 
-	//FIXME: Change for prop release
-	const appSettingPath = await executor.ExecuteClioCommand("clio-dev externalLink clio://GetAppSettingsFilePath");
+	const appSettingPath = await executor.ExecuteClioCommand("clio externalLink clio://GetAppSettingsFilePath");
 
 	function getClioEnvironments() : Map<string, IConnectionSettings> {
 
@@ -861,18 +861,50 @@ export async function activate(context: vscode.ExtensionContext) {
 		canSelectMany: true	
 	});
 	
-	if(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length>0){
-		workspaceTreeView.message = `Workspaces derived from folder ${vscode.workspace.workspaceFolders[0].uri.fsPath}`;
-	}else{
-		workspaceTreeView.message = `Workspaces derived from folder`;
-	}
-	workspaceTreeView.description = "Its a description, do I need it?";
+	// if(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length>0){
+	// 	workspaceTreeView.message = `Workspaces derived from folder ${vscode.workspace.workspaceFolders[0].uri.fsPath}`;
+	// }else{
+	// 	workspaceTreeView.message = `Workspaces derived from folder`;
+	// }
 
 	//#endregion
 
 	//#region Workspaces : Commands
+	
+	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.refreshw", async (tree: vscode.TreeView<vscode.TreeItem>)=>{
+		_workspaceTreeViewProvider.refresh();
+	}));
+
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.createw", async (tree: vscode.TreeView<vscode.TreeItem>)=>{
-			const a = tree;
+			
+		if(vscode.workspace.workspaceFolders){
+			//1 create new dir
+			const rooPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
+			const workspaceName =  await vscode.window.showInputBox({
+				title: "How would you like to call your workspace",
+				prompt: "How would you like to call your workspace",
+				ignoreFocusOut: true
+			}) ?? '';
+
+
+			//var activeEnv = this.Environments.find(e=> e.label.toLowerCase()===workspaceName);
+			const workspacePath = path.join(rooPath, workspaceName);
+			fs.mkdir(workspacePath);
+			
+			const pathUri = vscode.Uri.file(workspacePath);
+
+			try{
+				await executor.ExecuteTaskCommand(pathUri, `clio createw `);
+			}
+			finally{
+				_workspaceTreeViewProvider.refresh();
+			}
+
+		}
+		
+
+
 		})
 	);
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.dconf", async (item: Workspace)=>{
@@ -928,7 +960,11 @@ export async function activate(context: vscode.ExtensionContext) {
 		})
 	);
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.openGitRepository", async (item: Workspace)=>{
-			vscode.commands.executeCommand('vscode.open', item.remote);
+			//vscode.commands.executeCommand('vscode.open', item.remote);
+			
+			const clioUrl = `clio://OpenUrl/?url=${item.remote}`;
+			const cmd = `clio externalLink \"${clioUrl}\"`;
+			const a = await executor.ExecuteClioCommand(cmd);
 		})
 	);
 	//#endregion 
