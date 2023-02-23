@@ -76,6 +76,25 @@ export class ConnectionComponent implements OnInit {
 			});
 	}
 
+	onUrlFocusOut(form: NgForm){
+		if (this.data.url.length === 0 || this.data.connectionName.length !== 0) {
+			return;
+		}
+		this.data.connectionName = this.getNameByUrl(this.data.url);
+	}
+
+	getNameByUrl(url: string) {
+		let httpPosition = url.search("//");
+		if (httpPosition > 0) {
+			url = url.substring(httpPosition + 2, url.length);
+		}
+		let workplacePosition = url.search("/0/");
+		if (workplacePosition > 0) {
+			url = url.substring(0, workplacePosition);
+		}
+		return url;
+	}
+
 	getCorrectOAuthUri(url: string){
 		if (url.search("http://") < 0 && url.search("https://") < 0){
 			url = "https://" + url;

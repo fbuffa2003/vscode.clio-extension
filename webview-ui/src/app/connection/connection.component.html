@@ -10,7 +10,7 @@
 	<vscode-text-field 
 		type="text" id="url" name="url" size="40" placeholder="https://myInstance.creatio.com" 
 		required [(ngModel)]="data.url" ngDefaultControl
-		#trackUrl="ngModel"> 
+		#trackUrl="ngModel" (focusout)="onUrlFocusOut(form)"> 
 		Creatio Url:
 		<span slot="end" class="codicon codicon-link"></span>
 		<span slot="start" *ngIf="!trackUrl.valid && trackUrl.touched" 
