@@ -25,16 +25,19 @@ import { RequiredFeatures } from './common/WindowsOptionalFeature';
 import { installer } from './common/installer';
 import { instalationInpitValidator } from './common/InputValidator/instalationInpitValidator';
 import * as fs from 'node:fs/promises';
+import * as fss from 'fs';
 import { PowerShell } from 'node-powershell/dist';
 import { decompressor } from './common/TemplateWorker/decompressor';
 import { Workspace, WorkspaceTreeViewProvider } from './service/workspaceTreeViewProvider/WorkspaceTreeViewProvider';
+import path = require('path');
+import { join } from 'node:path';
 
 
 /**
  * Main entry point into the extension.
  * @param context - ext context, will be given by vscode runtime
  */
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 	
 	const executor : ClioExecutor = new ClioExecutor();
 	const nugetClient : NugetClient = new NugetClient();
@@ -53,6 +56,119 @@ export function activate(context: vscode.ExtensionContext) {
 		clientId: "",
 		clientSecret: ""
 	};
+
+	//#region Environments
+
+	function handleUpdateNode(instance: CreatioTreeItem):void {
+		treeProvider.environments = environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
+		treeProvider.refresh();
+	}
+	function handleDeleteNode(instance: CreatioTreeItem):void {
+
+		const removedInstance = environments.find(i=> i.label === instance.label);
+		if (removedInstance) {
+			var removedIndex = environments.indexOf(removedInstance);
+			environments.splice(removedIndex,1);
+		}
+		treeProvider.environments = environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
+		treeProvider.refresh();
+	}
+
+	const appSettingPath = await executor.ExecuteClioCommand("clio externalLink clio://GetAppSettingsFilePath");
+
+	function getClioEnvironments() : Map<string, IConnectionSettings> {
+
+		let _fileExists : boolean = fss.existsSync(appSettingPath.trim());
+		if(!_fileExists){
+			return new Map<string, IConnectionSettings>();
+		}
+		
+		const jsonFileContent = fss.readFileSync(appSettingPath.trim());
+		var json = jsonFileContent.toString('utf8');
+		//https://github.com/nodejs/node-v0.x-archive/issues/4039#issuecomment-8828783
+		if (json.charAt(0) === '\uFEFF'){
+			json = json.substring(1);
+		} 
+		const model = JSON.parse(json);
+
+		const environments = model['Environments'];
+		let keys : string[] = [];
+		Object.keys(environments).forEach(key =>{
+			keys.push(key);
+		});
+
+		const map = new Map<string, IConnectionSettings>();
+
+		keys.forEach(key=>{
+			type ObjectKey = keyof typeof environments;
+			const keyName = key as ObjectKey;
+			const environment = environments[keyName];
+
+			const env : IConnectionSettings = {
+				uri: new URL(environment['Uri']),
+				login: environment['Login'] ?? '',
+				password: environment['Password'] ?? '',
+				maintainer: environment['Maintainer'] ?? '',
+				isNetCore: environment['IsNetCore'] ?? false,
+				isSafe: environment['Safe'] ?? false,
+				isDeveloperMode: environment['DeveloperModeEnabled'],
+				oauthUrl: environment['AuthAppUri'] !== undefined ? new URL(environment['AuthAppUri']) : undefined,
+				clientId: environment['ClientId'] !== undefined ? environment['ClientId'] : undefined,
+				clientSecret: environment['ClientSecret'] !== undefined ? environment['ClientSecret'] : undefined
+			};
+			map.set(keyName as string, env);
+		});
+		return map;
+	}
+
+	function CreateEnvironments(): Array<Environment>{
+		const _environments = new Array<Environment>();
+		const map = getClioEnvironments();
+		for (let [key, value] of map.entries()) {
+			const instance = new Environment(key, value);
+
+			instance.onDidStatusUpdate((instance: CreatioTreeItem)=>{
+				handleUpdateNode(instance);
+			});
+
+			instance.onDeleted((instance: CreatioTreeItem)=>{
+				handleDeleteNode(instance);
+			});
+			_environments.push(instance);
+		}
+		return _environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
+	}
+
+	let environments : Array<Environment> = CreateEnvironments();
+	function watchFileChange(){
+		const parts = path.parse(appSettingPath).dir.split('\\');
+		const myPath = `${parts[0]}\\${parts[1]}\\${parts[2]}\\${parts[3]}\\Local\\creatio\\clio`;
+		const appsettingsFolderPath = vscode.Uri.file(myPath);
+		const watcher = vscode.workspace.createFileSystemWatcher(
+			new vscode.RelativePattern(appsettingsFolderPath, "appsettings.json"), 
+			false, false, false);
+		
+		watcher.onDidCreate(uri => {
+			environments = CreateEnvironments();
+			treeProvider.environments = environments;
+			treeProvider.refresh();
+		});
+		watcher.onDidChange((uri: vscode.Uri) => {
+			environments = CreateEnvironments();
+			treeProvider.environments = environments;
+			treeProvider.refresh();
+		});
+		watcher.onDidDelete(uri => {
+			environments = CreateEnvironments();
+			treeProvider.environments = environments;
+			treeProvider.refresh();
+		});
+	}
+	watchFileChange();
+
+	treeProvider.environments = environments;
+
+	//#endregion
 
 	//Check clio latest version!
 	checkClioLatestVersion(nugetClient, executor);
@@ -97,9 +213,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	treeView.onDidCollapseElement(async (event: vscode.TreeViewExpansionEvent<CreatioTreeItem>) => {
 		if(event.element instanceof PackageList){
-			//TODO: Change to clio when available
-			//await (event.element as PackageList).getPackages()
-			//(event.element as PackageList).items = [];
 			treeProvider.refresh();
 		}
 	});
@@ -220,48 +333,55 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.RegisterWebApp", async (args: FormData)=>{
 
-			const commandArgs : IRegisterWebAppArgs ={
-				url: args.url,
-				username: args.username,
-				password: args.password,
-				maintainer: args.maintainer,
-				isNetCore: args.isNetCore,
-				isSafe: args.isSafe,
-				isDeveloperModeEnabled: args.isDeveloperModeEnabled,
-				environmentName: args.name,
-				clientId : args.clientId,
-				clientSecret : args.clientSecret
+		const commandArgs : IRegisterWebAppArgs ={
+			url: args.url,
+			username: args.username,
+			password: args.password,
+			maintainer: args.maintainer,
+			isNetCore: args.isNetCore,
+			isSafe: args.isSafe,
+			isDeveloperModeEnabled: args.isDeveloperModeEnabled,
+			environmentName: args.name,
+			clientId : args.clientId,
+			clientSecret : args.clientSecret
 
-			};
-			const isArgValid = clio.registerWebApp.canExecute(commandArgs);
-			if(!isArgValid.success){
-				vscode.window.showErrorMessage(isArgValid.message.toString());
-				return;
-			}
+		};
+		const isArgValid = clio.registerWebApp.canExecute(commandArgs);
+		if(!isArgValid.success){
+			vscode.window.showErrorMessage(isArgValid.message.toString());
+			return;
+		}
+		const result = await clio.registerWebApp.executeAsync(commandArgs);		
+		const newEnv = new Environment(args.name, {
+			uri: new URL(args.url),
+			login: args.username,
+			password: args.password,
+			maintainer: args.maintainer,
+			isNetCore: args.isNetCore,
+			isSafe: args.isSafe,
+			isDeveloperMode: args.isDeveloperModeEnabled,
+			clientId : args.clientId,
+			clientSecret : args.clientSecret
+		} as IConnectionSettings);
 
-			const result = await clio.registerWebApp.executeAsync(commandArgs);
+		newEnv.onDidStatusUpdate((instance: CreatioTreeItem)=>{
+			handleUpdateNode(instance);
+		});
 
-			treeProvider.addNewNode(args.name, {
-				uri: new URL(args.url),
-				login: args.username,
-				password: args.password,
-				maintainer: args.maintainer,
-				isNetCore: args.isNetCore,
-				isSafe: args.isSafe,
-				isDeveloperMode: args.isDeveloperModeEnabled,
-				clientId : args.clientId,
-				clientSecret : args.clientSecret
-			} as IConnectionSettings);	
+		newEnv.onDeleted((instance: CreatioTreeItem)=>{
+			handleDeleteNode(instance);
+		});
 
-			if(result.success){
+
+		if(result.success){
+			ConnectionPanel.kill();
+			vscode.window.showInformationMessage(result.message.toString());
+		} else {
+			vscode.window.showErrorMessage(result.message.toString(), "OK")
+			.then(answer => {
 				ConnectionPanel.kill();
-				vscode.window.showInformationMessage(result.message.toString());
-			} else {
-				vscode.window.showErrorMessage(result.message.toString(), "OK")
-				.then(answer => {
-					ConnectionPanel.kill();
-				});
-			}
+			});
+		}
 		})
 	);
 
@@ -271,9 +391,10 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.RefreshConnection", async (node: WorkSpaceItem)=>{
-			treeProvider.reload();
-		})
-	);
+		environments =  CreateEnvironments();
+		treeProvider.environments = environments;
+		treeProvider.refresh();
+	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.Settings", async (node: Environment)=>{
 			executor.executeCommandByTerminal(`cfg open`);
@@ -304,16 +425,32 @@ export function activate(context: vscode.ExtensionContext) {
 		ComparePanel.render(context.extensionUri, node, treeProvider.environments);
 	}));
 
-	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.restart', async (node: Environment) => {
+	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.restart', async (node: Environment|Workspace) => {
+			
+		
+		if(node instanceof Environment){
 			vscode.window
-				.showWarningMessage("Would you like to restart environment \"" + node.label + "\"?", "Yes", "No",)
-				.then(answer => {
-					if (answer === "Yes") {
-						if(node){
-							node.restartWebApp();
+					.showWarningMessage("Would you like to restart environment \"" + node.label + "\"?", "Yes", "No",)
+					.then(answer => {
+						if (answer === "Yes") {
+							if(node){
+								node.restartWebApp();
+							}
 						}
+					});
+		}
+		
+		if(node instanceof Workspace){
+			vscode.window
+			.showWarningMessage("Would you like to restart environment \"" + node._currentEnvironment?.label + "\"?", "Yes", "No",)
+			.then(answer => {
+				if (answer === "Yes") {
+					if(node){
+						node._currentEnvironment?.restartWebApp();
 					}
-				});
+				}
+			});
+		}
 		})
 	);
 
@@ -339,25 +476,42 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.flushDb', async (node: Environment) => {
+	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.flushDb', async (node: Environment|Workspace) => {
+			
+		if(node instanceof Environment){
 			vscode.window
 				.showWarningMessage("Would you like to flush redis db on environment \"" + node.label + "\"?", "Yes", "No",)
 				.then(answer => {
 					if (answer === "Yes") {
-						if(node){
-							node.flushDb();
-						}
+						(node as Environment).flushDb();
+						
 					}
 				});
-		})
-	);
+		}
 
-	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.Open', async (node: Environment) => {
-			if(node){
-				await node.openInBrowser();
-			}
-		})
-	);
+		if(node instanceof Workspace){
+			vscode.window
+				.showWarningMessage("Would you like to flush redis db on environment \"" + (node as Workspace)._currentEnvironment?.label + "\"?", "Yes", "No",)
+				.then(answer => {
+					if (answer === "Yes") {
+						(node as Workspace)._currentEnvironment?.flushDb();
+					}
+				});
+		}			
+	
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.Open', async (node: Environment|Workspace) => {
+		if(node instanceof Workspace){
+
+			const workspace = node as Workspace;
+			await (node as Workspace)._currentEnvironment?.openInBrowser();
+		}
+		
+		if(node instanceof Environment){
+			await (node as Environment).openInBrowser();
+		}
+	}));
 	
 	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.EditConnection', async (node: Environment) => {
 			const connectionSettings = node.connectionSettings;
@@ -369,11 +523,16 @@ export function activate(context: vscode.ExtensionContext) {
 				maintainer: connectionSettings.maintainer ?? "",
 				isNetCore: connectionSettings.isNetCore,
 				isSafe: connectionSettings.isSafe,
-				isDeveloperModeEnabled: connectionSettings.isDeveloperMode  ?? false,			
-				clientId: connectionSettings.clientId ?? "",			
+				isDeveloperModeEnabled: connectionSettings.isDeveloperMode  ?? false,
+				clientId: connectionSettings.clientId ?? "",
 				clientSecret: connectionSettings.clientSecret ?? ""
 			};
-			ConnectionPanel.render(context.extensionUri, formData, true, node);			
+
+			const editEnv = environments.find(e=> e.label === node.label);
+			if(editEnv){
+				ConnectionPanel.kill();
+				ConnectionPanel.render(context.extensionUri, formData, true, editEnv);
+			}
 		})
 	);
 
@@ -399,18 +558,29 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.InstallGate', async (node: Environment) => {
+	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.InstallGate', async (node: Environment|Workspace) => {
+			
+		if(node instanceof Environment){
 			vscode.window
 				.showInformationMessage("Would you like to install clio api on environment \"" + node.label + "\"?", "Yes", "No",)
 				.then(answer => {
 					if (answer === "Yes") {
-						if(node){
-							node.installGate();
-						}
+						node.installGate();
 					}
 				});
-		})
-	);
+		};
+		
+		if(node instanceof Workspace){
+			vscode.window
+				.showInformationMessage("Would you like to install clio api on environment \"" + (node as Workspace)._currentEnvironment?.label + "\"?", "Yes", "No",)
+				.then(answer => {
+					if (answer === "Yes") {
+						(node as Workspace)._currentEnvironment?.installGate();
+					}
+				});
+		}
+	
+	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.HealthCheck', async (node: Environment) => {
 			if(node){
@@ -676,7 +846,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	//#region Workspace : Registration
 	
-	const _workspaceTreeViewProvider = new WorkspaceTreeViewProvider(vscode.workspace.workspaceFolders);
+	const _workspaceTreeViewProvider = new WorkspaceTreeViewProvider(vscode.workspace.workspaceFolders, environments);
 	vscode.workspace.onDidChangeWorkspaceFolders(async(event: vscode.WorkspaceFoldersChangeEvent)=>{
 		console.info('folder added');
 		if(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0){
@@ -691,18 +861,50 @@ export function activate(context: vscode.ExtensionContext) {
 		canSelectMany: true	
 	});
 	
-	if(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length>0){
-		workspaceTreeView.message = `Workspaces derived from folder ${vscode.workspace.workspaceFolders[0].uri.fsPath}`;
-	}else{
-		workspaceTreeView.message = `Workspaces derived from folder`;
-	}
-	workspaceTreeView.description = "Its a description, do I need it?";
+	// if(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length>0){
+	// 	workspaceTreeView.message = `Workspaces derived from folder ${vscode.workspace.workspaceFolders[0].uri.fsPath}`;
+	// }else{
+	// 	workspaceTreeView.message = `Workspaces derived from folder`;
+	// }
 
 	//#endregion
 
 	//#region Workspaces : Commands
+	
+	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.refreshw", async (tree: vscode.TreeView<vscode.TreeItem>)=>{
+		_workspaceTreeViewProvider.refresh();
+	}));
+
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.createw", async (tree: vscode.TreeView<vscode.TreeItem>)=>{
-			const a = tree;
+			
+		if(vscode.workspace.workspaceFolders){
+			//1 create new dir
+			const rooPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
+			const workspaceName =  await vscode.window.showInputBox({
+				title: "How would you like to call your workspace",
+				prompt: "How would you like to call your workspace",
+				ignoreFocusOut: true
+			}) ?? '';
+
+
+			//var activeEnv = this.Environments.find(e=> e.label.toLowerCase()===workspaceName);
+			const workspacePath = path.join(rooPath, workspaceName);
+			fs.mkdir(workspacePath);
+			
+			const pathUri = vscode.Uri.file(workspacePath);
+
+			try{
+				await executor.ExecuteTaskCommand(pathUri, `clio createw `);
+			}
+			finally{
+				_workspaceTreeViewProvider.refresh();
+			}
+
+		}
+		
+
+
 		})
 	);
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.dconf", async (item: Workspace)=>{
@@ -712,7 +914,7 @@ export function activate(context: vscode.ExtensionContext) {
 					title: "Downloading configuration"
 				},
 				async(progress, token)=>{
-					await item.dconf();
+					await item.dconfAsync();
 					progress.report({
 						increment: 100,
 						message: "Done"
@@ -728,7 +930,7 @@ export function activate(context: vscode.ExtensionContext) {
 					title: "Pushing workspace"
 				},
 				async(progress, token)=>{
-					await item.pushw();
+					await item.pushwAsync();
 					progress.report({
 						increment: 100,
 						message: "Done"
@@ -744,7 +946,7 @@ export function activate(context: vscode.ExtensionContext) {
 					title: "Restoring workspace"
 				},
 				async(progress, token)=>{
-					await item.restorew();
+					await item.restorewAsync();
 					progress.report({
 						increment: 100,
 						message: "Done"
@@ -758,7 +960,11 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.openGitRepository", async (item: Workspace)=>{
-			vscode.commands.executeCommand('vscode.open', item.remote);
+			//vscode.commands.executeCommand('vscode.open', item.remote);
+			
+			const clioUrl = `clio://OpenUrl/?url=${item.remote}`;
+			const cmd = `clio externalLink \"${clioUrl}\"`;
+			const a = await executor.ExecuteClioCommand(cmd);
 		})
 	);
 	//#endregion 
@@ -768,7 +974,7 @@ export function activate(context: vscode.ExtensionContext) {
 	//open commands
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.open-solution-framework", async (item: Workspace)=>{
 			try{
-				const result = await item.openSolutionFramework();
+				const result = await item.openSolutionFrameworkAsync();
 				console.info(result);
 			}
 			catch(error){
@@ -778,7 +984,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.open-solution-framework-sdk", async (item: Workspace)=>{
 			try{
-				const result = await item.openSolutionFrameworkSdk();
+				const result = await item.openSolutionFrameworkSdkAsync();
 				console.info(result);
 			}
 			catch(error){
@@ -788,7 +994,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.open-solution-netcore", async (item: Workspace)=>{
 			try{
-				const result = await item.openSolutionNetcore();
+				const result = await item.openSolutionNetcoreAsync();
 				console.info(result);
 			}
 			catch(error){
@@ -798,7 +1004,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.open-solution-netcore-sdk", async (item: Workspace)=>{
 		try{
-			const result = await item.openSolutionNetcoreSdk();
+			const result = await item.openSolutionNetcoreSdkAsync();
 			console.info(result);
 		}
 		catch(error){
@@ -809,7 +1015,7 @@ export function activate(context: vscode.ExtensionContext) {
 	//build commands
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.build-framework-sdk", async (item: Workspace)=>{
 		try{
-			const result = await item.buildFrameworkSdk();
+			const result = await item.buildFrameworkSdkAsync();
 			console.info(result);
 		}
 		catch(error){
@@ -819,7 +1025,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.build-framework", async (item: Workspace)=>{
 		try{
-			const result = await item.buildFramework();
+			const result = await item.buildFrameworkAsync();
 			console.info(result);
 		}
 		catch(error){
@@ -829,7 +1035,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.build-netcore", async (item: Workspace)=>{
 		try{
-			const result = await item.buildNetcore();
+			const result = await item.buildNetcoreAsync();
 			console.info(result);
 		}
 		catch(error){
@@ -839,7 +1045,7 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.build-netcore-sdk", async (item: Workspace)=>{
 		try{
-			const result = await item.buildNetcoreSdk();
+			const result = await item.buildNetcoreSdkAsync();
 			console.info(result);
 		}
 		catch(error){

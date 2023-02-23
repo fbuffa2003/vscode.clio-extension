@@ -31,8 +31,7 @@ export class Environment extends CreatioTreeItem {
 	private _loggerPattern : string = 'ExceptNoisyLoggers';
 	private _isGateInstalled : boolean = false;
 	private _gateVersion : string = '';
-
-
+	
 	constructor(label: string, connectionSettings :IConnectionSettings)
 	{
 		super(label, connectionSettings.uri.toString(), 
@@ -52,7 +51,6 @@ export class Environment extends CreatioTreeItem {
 	public async isGateInstalled(): Promise<void>{
 		var isInstalled = await this.creatioClient.IsClioGateInstalled();
 	}
-
 
 	/**
 	* Checks creatio health
@@ -93,9 +91,9 @@ export class Environment extends CreatioTreeItem {
 		}
 	}
 
-	/**
-	 * Flushes redis
-		*/
+	/** Removes environment
+	 * 
+	*/
 	public async unregisterWebApp(): Promise<void> {
 		const args: IFlushDbArgs = {
 			environmentName: this.label
@@ -138,7 +136,7 @@ export class Environment extends CreatioTreeItem {
 	}
 
 	public async openInBrowser(): Promise<void> {
-		this.clioExecutor.executeCommandByTerminal(`open -e "${this.label}"`);
+		await this.clioExecutor.ExecuteClioCommand(`clio open -e "${this.label}"`);
 	}
 
 	public async installGate(): Promise<void> {

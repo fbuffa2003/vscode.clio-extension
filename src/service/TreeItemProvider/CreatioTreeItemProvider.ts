@@ -7,7 +7,7 @@ import { Environment, IConnectionSettings } from './Environment';
 
 
 export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioTreeItem>{
-
+	
 	private _onDidChangeTreeData: vscode.EventEmitter<CreatioTreeItem | undefined | void> = new vscode.EventEmitter<CreatioTreeItem | undefined | void>();
 	readonly onDidChangeTreeData: vscode.Event<CreatioTreeItem | undefined | void> = this._onDidChangeTreeData.event;
 
@@ -133,6 +133,7 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 	private handleUpdateNode(instance: CreatioTreeItem):void {
 		this._onDidChangeTreeData.fire(instance);
 	}
+	
 	private handleDeleteNode(instance: CreatioTreeItem):void {
 
 		const removedInstance = this.environments.find(i=> i.label === instance.label);

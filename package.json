@@ -2,7 +2,7 @@
 	"name": "clio-explorer",
 	"displayName": "Clio explorer",
 	"description": "Control your Creatio environments, and perform clio actions on them",
-	"version": "0.0.16",
+	"version": "0.0.18",
 	"publisher": "AdvanceTechnologiesFoundation",
 	"license": "MIT",
 	"icon": "resources/creatio-triangle.png",
@@ -64,7 +64,7 @@
 			"explorer": [
 				{
 					"id": "clio.workspaces",
-					"name": "My Workspaces"
+					"name": "Clio workspaces"
 				}
 			]
 		},
@@ -105,12 +105,7 @@
 					"group": "group-3@2"
 				},
 				{
-					"command": "ClioSQL.flushDb",
-					"when": "viewItem == CreatioInstance",
-					"group": "group-4@1"
-				},
-				{
-					"command": "ClioSQL.restart",
+					"command": "ClioSQL.OpenSqlDocument",
 					"when": "viewItem == CreatioInstance",
 					"group": "group-4@2"
 				},
@@ -189,6 +184,16 @@
 				{
 					"command": "ClioSQL.run-all-platfrom-build-sdk",
 					"group": "group-3@2"
+				},
+				{
+					"command": "ClioSQL.InstallGate",
+					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
+					"group": "group-4@1"
+				},
+				{
+					"command": "ClioSQL.dconf",
+					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
+					"group": "group-4@2"
 				}
 
 			],
@@ -209,9 +214,14 @@
 					"group": "navigation@3"
 				},
 				{
-					"submenu": "ClioSQL.WorkspaceBarMenu",
+					"command": "ClioSQL.createw",
 					"when": "view =~ /clio.workspaces/",
 					"group": "navigation@1"
+				},
+				{
+					"command": "ClioSQL.refreshw",
+					"when": "view =~ /clio.workspaces/",
+					"group": "navigation@2"
 				}
 			],
 			
@@ -227,41 +237,60 @@
 					"group": "inline@1"
 				},
 				{
-					"command": "ClioSQL.dconf",
+					"command": "ClioSQL.restart",
 					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
 					"group": "inline@2"
 				},
 				{
+					"command": "ClioSQL.flushDb",
+					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
+					"group": "inline@3"
+				},
+				{
 					"command": "ClioSQL.openGitRepository",
 					"when": "viewItem == clio.Workspace.gitInitialized",
-					"group": "inline@3"
+					"group": "inline@4"
+				},
+				{
+					"command": "ClioSQL.Open",
+					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
+					"group": "inline@5"
+				},
+				{
+					"command": "ClioSQL.open-solution-framework",
+					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
+					"group": "inline@6"
 				},
 				{
 					"submenu": "ClioSQL.WorkspaceMenu",
 					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
-					"group": "inline@4"
+					"group": "inline@8"
 				},
 				{
 					"command": "ClioSQL.pack",
 					"when": "viewItem == clio.Package",
-					"group": "inline@5"
+					"group": "inline@9"
 				},
-				
-
 				{
 					"command": "ClioSQL.Open",
 					"when": "viewItem == CreatioInstance",
 					"group": "inline@0"
 				},
 				{
-					"command": "ClioSQL.OpenSqlDocument",
+					"command": "ClioSQL.restart",
 					"when": "viewItem == CreatioInstance",
-					"group": "inline@3"
+					"group": "inline@1"
+				},
+				
+				{
+					"command": "ClioSQL.flushDb",
+					"when": "viewItem == CreatioInstance",
+					"group": "inline@2"
 				},
 				{
 					"command": "ClioSQL.UnregisterWebApp",
 					"when": "viewItem == CreatioInstance",
-					"group": "inline@4"
+					"group": "inline@3"
 				},
 				{
 					"command": "ClioSQL.DownloadPackage",
@@ -346,43 +375,47 @@
 			{
 				"id": "ClioSQL.WorkspaceMenu",
 				"label": "Tasks",
-				"icon": "$(tasklist)"
+				"icon": "$(ellipsis)"
 			}
 		],
 		"commands": [
 			{
 				"command": "ClioSQL.openGitRepository",
-				"title": "Clio - Open Repository",
+				"title": "Open Repository",
 				"shortTitle": "openGitRepository",
 				"icon": "$(github-alt)"
 			},
 			{
 				"command": "ClioSQL.createw",
-				"title": "Clio - create new workspace",
+				"title": "Create new workspace",
 				"shortTitle": "createw",
 				"icon": "$(add)"
 			},
 			{
+				"command": "ClioSQL.refreshw",
+				"title": "Refresh workspace list",
+				"icon": "$(refresh)"
+			},
+			{
 				"command": "ClioSQL.dconf",
-				"title": "Clio - download configuration",
+				"title": "Download configuration",
 				"shortTitle": "dconf",
-				"icon": "$(file-binary)"
+				"icon": "$(server-process)"
 			},
 			{
 				"command": "ClioSQL.pushw",
-				"title": "Clio - push workspace",
+				"title": "Push workspace",
 				"shortTitle": "push",
-				"icon": "$(arrow-up)"
+				"icon": "$(cloud-upload)"
 			},
 			{
 				"command": "ClioSQL.restorew",
-				"title": "Clio - restore workspace",
-				"shortTitle": "restore",
-				"icon": "$(arrow-down)"
+				"title": "Pull workspace",
+				"icon": "$(cloud-download)"
 			},
 			{
 				"command": "ClioSQL.pack",
-				"title": "Clio - compress package",
+				"title": "Compress package",
 				"shortTitle": "compress",
 				"icon": "$(archive)"
 			},
@@ -458,10 +491,7 @@
 			{
 				"command": "ClioSQL.ExecuteSql",
 				"title": "Clio - execute sql",
-				"icon": {
-					"light": "resources/icon/database.svg",
-					"dark": "resources/icon/database.svg"
-				}
+				"icon": "$(database)"
 			},
 			{
 				"command": "ClioSQL.AddConnection",
@@ -470,32 +500,23 @@
 			},
 			{
 				"command": "ClioSQL.RefreshConnection",
-				"title": "Refresh Connection",
+				"title": "Refresh",
 				"icon": "$(search-refresh)"
 			},	
 			{
 				"command": "ClioSQL.flushDb",
 				"title": "Flush redis",
-				"icon": {
-					"light": "resources/icon/broom.svg",
-					"dark": "resources/icon/broom.svg"
-				}
+				"icon": "$(close-all)"
 			},
 			{
 				"command": "ClioSQL.restart",
-				"title": "Restart web app",
-				"icon": {
-					"light": "resources/icon/Restart.svg",
-					"dark": "resources/icon/Restart.svg"
-				}
+				"title": "Restart",
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "ClioSQL.UnregisterWebApp",
-				"title": "Unregister web app",
-				"icon": {
-					"light": "resources/icon/trash.svg",
-					"dark": "resources/icon/trash.svg"
-				}
+				"title": "Delete",
+				"icon": "$(trash)"
 			},
 			{
 				"command": "ClioSQL.GenerateModels",
@@ -524,10 +545,7 @@
 			{
 				"command": "ClioSQL.Open",
 				"title": "Open application",
-				"icon": {
-					"light": "resources/icon/homeDark.svg",
-					"dark": "resources/icon/home.svg"
-				}
+				"icon": "$(home)"
 			},
 			{
 				"command": "ClioSQL.RegisterWebApp",
@@ -535,11 +553,8 @@
 			},
 			{
 				"command": "ClioSQL.OpenSqlDocument",
-				"title": "Open sql document",
-				"icon": {
-					"light": "resources/icon/database.svg",
-					"dark": "resources/icon/database.svg"
-				}
+				"title": "Execute Sql",
+				"icon": "$(database)"
 			},
 			{
 				"command": "ClioSQL.HealthCheck",
@@ -575,12 +590,12 @@
 			},
 			{
 				"command": "ClioSQL.UpdateClioCli",
-				"title": "Install/Update clio",
+				"title": "Install/Update clio cli",
 				"icon": "$(code)"
 			},
 			{
 				"command": "ClioSQL.UninstallClioCli",
-				"title": "Uninstall clio",
+				"title": "Uninstall clio cli",
 				"icon": "$(code)"
 			},
 			{
@@ -786,7 +801,7 @@
 	},
 	"dependencies": {
 		"@vscode/codicons": "^0.0.32",
-		"appdata-path": "^1.0.0",
+		
 		"child-shell": "^5.0.0",
 		"debug": "^4.3.4",
 		"node-powershell": "^5.0.1",
