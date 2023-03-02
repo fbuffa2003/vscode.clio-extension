@@ -405,7 +405,13 @@ export async function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.Settings", async (node: Environment)=>{
-			executor.executeCommandByTerminal(`cfg open`);
+			executor.ExecuteClioCommand(`clio cfg open`);
+		})
+	);
+	
+	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.RegisterLocalSites", async (node: Environment)=>{
+			await executor.ExecuteClioCommand(`clio reg --add-from-iis`);
+			treeProvider.refresh();
 		})
 	);
 

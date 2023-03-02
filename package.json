@@ -2,7 +2,7 @@
 	"name": "clio-explorer",
 	"displayName": "Clio explorer",
 	"description": "Control your Creatio environments, and perform clio actions on them",
-	"version": "0.0.19",
+	"version": "0.0.20",
 	"publisher": "AdvanceTechnologiesFoundation",
 	"license": "MIT",
 	"icon": "resources/creatio-triangle.png",
@@ -73,7 +73,7 @@
 		"viewsWelcome": [
 			{
 				"view": "vscode-clio-extension.creatioExplorer",
-				"contents": "You don't have any configured environment, try adding one\n [Add new connection](command:ClioSQL.AddConnection)"
+				"contents": "You don't have any configured environment, try adding one\n [Add new connection](command:ClioSQL.AddConnection)\n[Register local sites](command:ClioSQL.RegisterLocalSites)"
 			}
 		],
 		"menus": {
@@ -135,8 +135,12 @@
 					"command": "ClioSQL.UninstallClioCli",
 					"title": "Uninstall clio",
 					"group": "group-1@3"
+				},
+				{
+					"command": "ClioSQL.RegisterLocalSites",
+					"title": "Register local sites",
+					"group": "group-1@4"
 				}
-				
 			],
 			"ClioSQL.WorkspaceBarMenu":[
 				{
@@ -379,6 +383,10 @@
 			}
 		],
 		"commands": [
+			{
+				"command": "ClioSQL.RegisterLocalSites",
+				"title": "Register local sites"
+			},
 			{
 				"command": "ClioSQL.openGitRepository",
 				"title": "Open Repository",
