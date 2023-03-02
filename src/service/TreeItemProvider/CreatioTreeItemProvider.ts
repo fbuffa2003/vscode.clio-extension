@@ -60,6 +60,7 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 	public async addNewNode(name: string , connectionSettings : IConnectionSettings){
 
 		const newEnvironment = new Environment(name, connectionSettings);
+		
 		newEnvironment.onDidStatusUpdate((instance: CreatioTreeItem)=>{
 			this.handleUpdateNode(instance);
 		});
@@ -119,6 +120,8 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 			}catch{
 				parsedFromConfigUri = new URL("http://localhost");	
 			}
+			
+
 			
 			const env : IConnectionSettings = {
 				uri: parsedFromConfigUri,

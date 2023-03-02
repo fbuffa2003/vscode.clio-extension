@@ -10,14 +10,14 @@
 	<vscode-text-field 
 		type="text" id="url" name="url" size="40" placeholder="https://myInstance.creatio.com" 
 		required [(ngModel)]="data.url" ngDefaultControl
-		#trackUrl="ngModel" (keyup)="onUrlFocusOut(form)"> 
+		#trackUrl="ngModel" (keyup)="onUrlFocusOut(form)" [pattern]="urlPattern" required> 
 		Creatio Url:
 		<span slot="end" class="codicon codicon-link"></span>
 		<span slot="start" *ngIf="!trackUrl.valid && trackUrl.touched" 
 			class="codicon codicon-error invalid-icon"></span>
 	</vscode-text-field> <vscode-button (click)="onGoOAuth(form)" style="width: 100px; height: 25.5px; position: absolute; margin-top: 20px; margin-left: 20px;">Setup OAuth</vscode-button>
 	<div class="invalid-input" *ngIf="!trackUrl.valid && trackUrl.touched">
-		<span>Connection Url is required</span>
+		<span>Connection Url is required. Url must start with http:// or https://</span>
 	</div>
 	<br><br>
 

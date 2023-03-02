@@ -790,6 +790,7 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
+		"appdata-path": "^1.0.0",
 		"@types/debug": "^4.1.7",
 		"@types/glob": "^7.2.0",
 		"@types/mocha": "^9.1.1",
