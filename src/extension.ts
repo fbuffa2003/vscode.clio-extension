@@ -30,8 +30,6 @@ import { PowerShell } from 'node-powershell/dist';
 import { decompressor } from './common/TemplateWorker/decompressor';
 import { Workspace, WorkspaceTreeViewProvider } from './service/workspaceTreeViewProvider/WorkspaceTreeViewProvider';
 import path = require('path');
-import { join } from 'node:path';
-
 
 /**
  * Main entry point into the extension.
@@ -414,6 +412,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.Settings", async (node: Environment)=>{
 			executor.executeCommandByTerminal(`cfg open`);
+			//const result = await executor.ExecuteClioCommand("clio cfg open");
+			
+			
 		})
 	);
 	
