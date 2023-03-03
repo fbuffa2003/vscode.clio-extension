@@ -30,8 +30,6 @@ import { PowerShell } from 'node-powershell/dist';
 import { decompressor } from './common/TemplateWorker/decompressor';
 import { Workspace, WorkspaceTreeViewProvider } from './service/workspaceTreeViewProvider/WorkspaceTreeViewProvider';
 import path = require('path');
-import { join } from 'node:path';
-
 
 /**
  * Main entry point into the extension.
@@ -104,17 +102,25 @@ export async function activate(context: vscode.ExtensionContext) {
 			const keyName = key as ObjectKey;
 			const environment = environments[keyName];
 
+			let parsedFromConfigUri: URL;
+			try{
+				parsedFromConfigUri = new URL(environment['Uri']);
+			}catch(error){
+				parsedFromConfigUri = new URL("http://localhost");	
+			}
+			
+
 			const env : IConnectionSettings = {
-				uri: new URL(environment['Uri']),
+				uri: parsedFromConfigUri,
 				login: environment['Login'] ?? '',
 				password: environment['Password'] ?? '',
 				maintainer: environment['Maintainer'] ?? '',
 				isNetCore: environment['IsNetCore'] ?? false,
 				isSafe: environment['Safe'] ?? false,
 				isDeveloperMode: environment['DeveloperModeEnabled'],
-				oauthUrl: environment['AuthAppUri'] !== undefined ? new URL(environment['AuthAppUri']) : undefined,
-				clientId: environment['ClientId'] !== undefined ? environment['ClientId'] : undefined,
-				clientSecret: environment['ClientSecret'] !== undefined ? environment['ClientSecret'] : undefined
+				oauthUrl: environment['AuthAppUri']?  new URL(environment['AuthAppUri']) : undefined ,
+				clientId: environment['ClientId'] ?   environment['ClientId'] : undefined,
+				clientSecret: environment['ClientSecret'] ? environment['ClientSecret'] :undefined
 			};
 			map.set(keyName as string, env);
 		});
@@ -351,9 +357,17 @@ export async function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage(isArgValid.message.toString());
 			return;
 		}
-		const result = await clio.registerWebApp.executeAsync(commandArgs);		
+		const result = await clio.registerWebApp.executeAsync(commandArgs);
+
+		let parsedFromConfigUri: URL;
+		try{
+			parsedFromConfigUri = new URL(args.url);
+		}catch(error){
+			parsedFromConfigUri = new URL("http://localhost");	
+		}
+
 		const newEnv = new Environment(args.name, {
-			uri: new URL(args.url),
+			uri: parsedFromConfigUri,
 			login: args.username,
 			password: args.password,
 			maintainer: args.maintainer,
@@ -372,7 +386,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			handleDeleteNode(instance);
 		});
 
-
+		treeProvider.refresh();
 		if(result.success){
 			ConnectionPanel.kill();
 			vscode.window.showInformationMessage(result.message.toString());
@@ -398,6 +412,24 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.Settings", async (node: Environment)=>{
 			executor.executeCommandByTerminal(`cfg open`);
+			//const result = await executor.ExecuteClioCommand("clio cfg open");
+			
+			
+		})
+	);
+	
+	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.RegisterLocalSites", async (node: Environment)=>{
+			
+			const count = await executor.ExecuteClioCommand(`clio externalLink clio://IISScannerRequest/?return=count`);	
+			const intCount = Number.parseInt(count.trimEnd());
+
+			if(intCount === 0 ){
+				await vscode.window.showInformationMessage("No creatio sites found");
+				return;
+			}
+			await executor.ExecuteClioCommand(`clio reg --add-from-iis`);
+			treeProvider.refresh();
+
 		})
 	);
 

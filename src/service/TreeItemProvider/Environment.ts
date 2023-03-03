@@ -49,7 +49,8 @@ export class Environment extends CreatioTreeItem {
 	
 
 	public async isGateInstalled(): Promise<void>{
-		var isInstalled = await this.creatioClient.IsClioGateInstalled();
+		//var isInstalled = await this.creatioClient.IsClioGateInstalled();
+		return;
 	}
 
 	/**

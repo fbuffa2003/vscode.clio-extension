@@ -4,42 +4,43 @@ import * as vscode from 'vscode';
 /** Provides abstraction over system calls to start terminal and execute commands
  */
 export class ClioExecutor {
-	private clioPath = 'clio';
-	private terminal: vscode.Terminal | undefined;
-	private isWin = process.platform === 'win32';	
-
-    private createTerminal() : vscode.Terminal {
-        this.terminal = this.terminal || vscode.window.createTerminal('clio console', this.isWin ? 'C:\\Windows\\System32\\cmd.exe' : undefined);
-        this.terminal.show();
-        vscode.window.onDidCloseTerminal(closedTerminal => {
-			if (closedTerminal === this.terminal) {
-				this.terminal = undefined;
+	
+	private _terminal: vscode.Terminal | undefined;
+	
+	private createTerminal(): vscode.Terminal {
+		this._terminal = this._terminal || vscode.window.createTerminal("clio console");
+		this._terminal.show();
+		vscode.window.onDidCloseTerminal((closedTerminal :vscode.Terminal) => {
+			if (closedTerminal === this._terminal) {
+				//this.terminal = undefined;
+				this._terminal.dispose();
 			}
 		});
-        return this.terminal;
-    }
+		return this._terminal;
+	}
 
-    private getTerminal() : vscode.Terminal {
-        if(this.terminal){
-            return this.terminal;
-        }
-        return this.createTerminal(); 
-    }
+	private getTerminal(): vscode.Terminal {
+		if (this._terminal) {
+			return this._terminal;
+		}
+		return this.createTerminal();
+	}
 
-    private sendTextToTerminal(text: string) {
-		let terminal = this.getTerminal();
-		terminal.sendText(`${this.isWin ? '' : 'wine '}${text}`);
-    }
+	private sendTextToTerminal(text: string): void {
+		this.getTerminal().sendText(text);
+	}
 
 	/**
 	 * Executes clio command in a terminal
 	 * @param command clio command (do not include clio in the command name, for example)
 	 */
 	public executeCommandByTerminal(command: string) {
-		this.sendTextToTerminal(`"${this.clioPath}" ${command}`);
+		const _clioPath = "clio";
+		this.sendTextToTerminal(`${_clioPath} ${command}`);
 	}
 
-    public executeClioCommand(command: string): String {
+	/*
+    public executeClioCommand(command: string): string {
 	    const cp = require('child_process');
 	    let cmd = `${this.clioPath} ${command}`;
   
@@ -62,21 +63,22 @@ export class ClioExecutor {
 	    }
 	    return procData;
     }
+	*/
 
 	/** Executes any terminal command
 	 * @param command command to execute, for example clio restart
 	 * @returns promise of the reslt (aka: console text from the launched process)
 	 */
-	public async ExecuteClioCommand(command: string): Promise<string>{
-		return new Promise<string>((resolve, reject)=>{
-			exec(command, (error, stdout, stderr )=>{
-				if(error){
-					resolve(error?.message as string || error.toString());
+	public async ExecuteClioCommand(command: string): Promise<string> {
+		return new Promise<string>((resolve, reject) => {
+			exec(command, (error, stdout, stderr) => {
+				if (error) {
+					resolve((error?.message as string) || error.toString());
 				}
-				if(stdout){
+				if (stdout) {
 					resolve(stdout);
 				}
-				if(stderr){
+				if (stderr) {
 					resolve(stderr);
 				}
 			});
@@ -86,19 +88,18 @@ export class ClioExecutor {
 	/** Similar to ExecuteClioCommand however folder allows to set working folder where command will be executed
 	 * @param folder Active working folder where command is to be executed from
 	 * @param command command to execute
-	 * @returns 
+	 * @returns
 	 */
-	public async ExecuteTaskCommand(folder: vscode.Uri, command: string): Promise<string>{
-		return new Promise<string>((resolve, reject)=>{
-
-			exec(command, {cwd: folder.fsPath},(error, stdout, stderr )=>{
-				if(error){
-					reject(error?.message as string || error.toString());
+	public async ExecuteTaskCommand(folder: vscode.Uri, command: string): Promise<string> {
+		return new Promise<string>((resolve, reject) => {
+			exec(command, { cwd: folder.fsPath }, (error, stdout, stderr) => {
+				if (error) {
+					reject((error?.message as string) || error.toString());
 				}
-				if(stdout){
+				if (stdout) {
 					resolve(stdout);
 				}
-				if(stderr){
+				if (stderr) {
 					reject(stderr);
 				}
 			});
