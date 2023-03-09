@@ -1,13 +1,18 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import path = require('path');
-import getAppDataPath from 'appdata-path';
 import { CreatioTreeItem } from './CreatioTreeItem';
 import { Environment, IConnectionSettings } from './Environment';
-
+import { ClioExecutor } from '../../Common/clioExecutor';
 
 export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioTreeItem>{
 	
+	
+	constructor(public appSettingsPath: string) {
+		
+
+	}
+
 	private _onDidChangeTreeData: vscode.EventEmitter<CreatioTreeItem | undefined | void> = new vscode.EventEmitter<CreatioTreeItem | undefined | void>();
 	readonly onDidChangeTreeData: vscode.Event<CreatioTreeItem | undefined | void> = this._onDidChangeTreeData.event;
 
@@ -21,27 +26,30 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 	}
 
 	getChildren(element?: CreatioTreeItem | undefined): vscode.ProviderResult<CreatioTreeItem[]> {
+		
 		if(!element){
 			if(this.environments.length>0) {
 				return Promise.resolve(this.environments);
 			}
 
-			const map = this.getClioEnvironments();
-			for (let [key, value] of map.entries()) {
-				const instance = new Environment(key, value);
+			var map = this.getClioEnvironments();
+				for (let [key, value] of map.entries()) {
+					const instance = new Environment(key, value);
+	
+					instance.onDidStatusUpdate((instance: CreatioTreeItem)=>{
+						this.handleUpdateNode(instance);
+					});
+	
+					instance.onDeleted((instance: CreatioTreeItem)=>{
+						this.handleDeleteNode(instance);
+					});
+	
+					this.environments.push(instance);
+				}
+				this.environments = this.environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
+				return Promise.resolve(this.environments);
+			
 
-				instance.onDidStatusUpdate((instance: CreatioTreeItem)=>{
-					this.handleUpdateNode(instance);
-				});
-
-				instance.onDeleted((instance: CreatioTreeItem)=>{
-					this.handleDeleteNode(instance);
-				});
-
-				this.environments.push(instance);
-			}
-			this.environments = this.environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
-			return Promise.resolve(this.environments);
 		}
 
 		if(element instanceof CreatioTreeItem){
@@ -87,14 +95,18 @@ export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioT
 	//#region Methods : Private
 	private getClioEnvironments() : Map<string, IConnectionSettings> {
 		
-		const _filePath : string = getAppDataPath() + "\\..\\Local\\creatio\\clio\\appsettings.json";
-		let _fileExists : boolean = fs.existsSync(_filePath);
+		//const appSettingPath = await executor.ExecuteClioCommand("clio externalLink clio://GetAppSettingsFilePath");
+
+		//const _filePath : string = getAppDataPath() + "\\..\\Local\\creatio\\clio\\appsettings.json";
+		//let _fileExists : boolean = fs.existsSync(_filePath);
+		let _fileExists : boolean = fs.existsSync(this.appSettingsPath);
 		
 		if(!_fileExists){
 			return new Map<string, IConnectionSettings>();
 		}
 		const file = fs.readFileSync(
-			path.join(getAppDataPath() + "\\..\\Local\\creatio\\clio\\appsettings.json"),
+			//path.join(getAppDataPath() + "\\..\\Local\\creatio\\clio\\appsettings.json"),
+			path.join(this.appSettingsPath),
 			{
 				encoding: "utf-8"
 			}

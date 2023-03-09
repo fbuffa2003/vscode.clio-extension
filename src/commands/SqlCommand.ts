@@ -1,4 +1,3 @@
-import getAppDataPath from 'appdata-path';
 import { ClioExecutor } from '../Common/clioExecutor';
 import { BaseCommand, ICanExecuteValidationResult, ICommand, ICommandArgs, ICommandResponse } from './BaseCommand';
 import * as fs from 'fs';
@@ -73,7 +72,9 @@ export class Sql extends BaseCommand implements ICommand<ISqlArgs, ISqlResponse>
 			throw new Error(`${this._validationResult.message}`);
 		}
 
-		const dir = `${getAppDataPath()}\\..\\Local\\creatio\\clio\\SQL`;
+		const appSettingPath = await this.executor.ExecuteClioCommand("clio externalLink clio://GetAppSettingsFilePath");
+		//const dir = `${getAppDataPath()}\\..\\Local\\creatio\\clio\\SQL`;
+		const dir = path.join(appSettingPath, "SQL");
 		if(!fs.existsSync(dir)){
 			fs.mkdirSync(dir);
 		}
