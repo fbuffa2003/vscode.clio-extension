@@ -2,7 +2,7 @@
 	"name": "clio-explorer",
 	"displayName": "Clio explorer",
 	"description": "Control your Creatio environments, and perform clio actions on them",
-	"version": "0.0.22",
+	"version": "0.0.24",
 	"publisher": "AdvanceTechnologiesFoundation",
 	"license": "MIT",
 	"icon": "resources/creatio-triangle.png",
@@ -73,7 +73,7 @@
 		"viewsWelcome": [
 			{
 				"view": "vscode-clio-extension.creatioExplorer",
-				"contents": "You don't have any configured environment, try adding one\n [Add new connection](command:ClioSQL.AddConnection)\n[Register local sites](command:ClioSQL.RegisterLocalSites)"
+				"contents": "You don't have any configured environment, try adding one\n [Add new connection](command:ClioSQL.AddConnection)\n[Register local sites](command:ClioSQL.RegisterLocalSites)\n[Register remote sites](command:ClioSQL.RegisterRemoteSites)"
 			}
 		],
 		"menus": {
@@ -140,6 +140,16 @@
 					"command": "ClioSQL.RegisterLocalSites",
 					"title": "Register local sites",
 					"group": "group-1@4"
+				},
+				{
+					"command": "ClioSQL.RegisterRemoteSites",
+					"title": "Register remote sites",
+					"group": "group-1@5"
+				},
+				{
+					"command": "ClioSQL.UnregisterAllSites",
+					"title": "Delete all environments",
+					"group": "group-1@6"
 				}
 			],
 			"ClioSQL.WorkspaceBarMenu":[
@@ -386,6 +396,14 @@
 			{
 				"command": "ClioSQL.RegisterLocalSites",
 				"title": "Register local sites"
+			},
+			{
+				"command": "ClioSQL.RegisterRemoteSites",
+				"title": "Register remote sites"
+			},
+			{
+				"command": "ClioSQL.UnregisterAllSites",
+				"title": "Delete all environments"
 			},
 			{
 				"command": "ClioSQL.openGitRepository",
@@ -790,7 +808,6 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
-		"appdata-path": "^1.0.0",
 		"@types/debug": "^4.1.7",
 		"@types/glob": "^7.2.0",
 		"@types/mocha": "^9.1.1",
@@ -810,7 +827,6 @@
 	},
 	"dependencies": {
 		"@vscode/codicons": "^0.0.32",
-		
 		"child-shell": "^5.0.0",
 		"debug": "^4.3.4",
 		"node-powershell": "^5.0.1",

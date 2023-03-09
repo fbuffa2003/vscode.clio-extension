@@ -36,10 +36,11 @@ import path = require('path');
  * @param context - ext context, will be given by vscode runtime
  */
 export async function activate(context: vscode.ExtensionContext) {
-	
 	const executor : ClioExecutor = new ClioExecutor();
+	const appSettingPath = await executor.ExecuteClioCommand("clio externalLink clio://GetAppSettingsFilePath");
+	
 	const nugetClient : NugetClient = new NugetClient();
-	const treeProvider = new CreatioTreeItemProvider();
+	const treeProvider = new CreatioTreeItemProvider(appSettingPath);
 	const clio = new Clio();
 	const _marketplaceCatalogue = new MarketplaceCatalogue();
 	const _emptyFormData: FormData = {
@@ -71,8 +72,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		treeProvider.environments = environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
 		treeProvider.refresh();
 	}
-
-	const appSettingPath = await executor.ExecuteClioCommand("clio externalLink clio://GetAppSettingsFilePath");
 
 	function getClioEnvironments() : Map<string, IConnectionSettings> {
 
@@ -177,7 +176,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	//#endregion
 
 	//Check clio latest version!
-	checkClioLatestVersion(nugetClient, executor);
+	//const isLatest = checkClioLatestVersion(nugetClient, executor);
+
 	// (async()=>{
 	// 	await forceUpdateClio(executor);
 	// })();
@@ -430,6 +430,27 @@ export async function activate(context: vscode.ExtensionContext) {
 			await executor.ExecuteClioCommand(`clio reg --add-from-iis`);
 			treeProvider.refresh();
 
+		})
+	);
+	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.RegisterRemoteSites", async (node: Environment)=>{
+			
+			const remoteHostName =  await vscode.window.showInputBox({
+				title: "Register remote sites from server",
+				prompt: "Server name",
+				ignoreFocusOut: true
+			});
+
+			await executor.ExecuteClioCommand(`clio reg --add-from-iis --host ${remoteHostName}`);
+			treeProvider.refresh();
+		})
+	);
+	
+	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.UnregisterAllSites", async (node: Environment)=>{
+			vscode.window.showInformationMessage("Would you like to delete all environments ?",	"DELETE", "CANCEL")
+			.then(async(answer) => {
+				if (answer === "DELETE") {
+					await executor.ExecuteClioCommand("clio unreg --all");
+			}});
 		})
 	);
 
@@ -1129,18 +1150,19 @@ function checkClioLatestVersion(nugetClient: NugetClient, executor: ClioExecutor
 				console.log("Clio is of the latest version");
 				break;
 			case 1:
-				(async()=>{
-					await forceUpdateClio(executor);
-				})();
-				// vscode.window.showInformationMessage(
-				// 	`Would you like to update clio to the latest version ${_lv} ?
-				// 	Your version is: ${_currentVersion.toString()}`,
-				// 	"UPDATE", "SKIP"
-				// ).then(answer => {
-				// 	if (answer === "UPDATE") {
-				// 		vscode.commands.executeCommand("ClioSQL.UpdateClioCli");
-				// 	}
-				// });
+				// (async()=>{
+				// 	await forceUpdateClio(executor);
+				// })();
+				vscode.window.showInformationMessage(
+					`Would you like to update clio to the latest version ${_lv} ?
+					Your version is: ${_currentVersion.toString()}`,
+					"UPDATE", "SKIP"
+				).then(answer => {
+					if (answer === "UPDATE") {
+						vscode.window.showInformationMessage("Clio will updated to the next version after restart");
+						//vscode.commands.executeCommand("ClioSQL.UpdateClioCli");
+					}
+				});
 				break;
 			case -1:
 				vscode.window.showInformationMessage(
