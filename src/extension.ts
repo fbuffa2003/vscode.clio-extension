@@ -810,11 +810,18 @@ export async function activate(context: vscode.ExtensionContext) {
 				}
 			}
 
+			await inst.setCookiesSameSiteMode("Lax");
+			vscode.window.showInformationMessage("Set CookiesSameSiteMode: Lax completed");
+			
 			await inst.createDbFromTemplateAsync();
 			vscode.window.showInformationMessage("Restore db from template completed");
+			
 			await inst.updateConnectionString();
 			vscode.window.showInformationMessage("Update connection string completed");
-			await inst.createIISSiteAsync();
+
+			const isNetCore = foldername.indexOf("_Linux_") !== -1;
+			await inst.createIISSiteAsync(isNetCore);
+			
 			vscode.window.showInformationMessage("Create IIS completed");
 		
 			const url = `http://localhost:${iis_port}`;

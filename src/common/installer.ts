@@ -27,7 +27,15 @@ export interface Iinstaller{
 	/**
 	 * Create IIS Site and IIS Pool for the site
 	 */
-	createIISSiteAsync(): Promise<void>;
+	createIISSiteAsync(isNetCore: boolean): Promise<void>;
+	
+	
+	/**
+	 * When configuring for HTTP
+	 * Sets CookiesSameSiteMode to one of None, Lax, Strict
+	 * @param value 
+	 */
+	setCookiesSameSiteMode(value:string): Promise<void>;
 
 }
 
@@ -122,7 +130,6 @@ export class installer implements Iinstaller {
 		
 		const lines = fileContent.split('\r\n');
 
-
 		for(let i = 0; i< lines.length; i++){
 			if(lines[i].trim().startsWith("<add name=\"redis\" connectionString=")){
 				lines[i] = `  <add name="redis" connectionString="host=localhost;db=${this.redisDbNum};port=30379" />`;
@@ -142,15 +149,49 @@ export class installer implements Iinstaller {
 		fs.writeFile(fileName, content);
 	}
 	
-	public async createIISSiteAsync(): Promise<void> {
+	/**
+	 * When configuring for HTTP
+	 * Sets CookiesSameSiteMode to one of None, Lax, Strict
+	 * @param value 
+	 */
+	public async setCookiesSameSiteMode(value:string): Promise<void>{
+		
+		const fileName = `${this._installRoot}\\${this.appName}\\Terrasoft.WebHost.dll.config`;
+		// Original Value <add key="CookiesSameSiteMode" value="" />
+		const fileContent = await fs.readFile(fileName, {encoding: 'utf-8'});
+		
+		const lines = fileContent.split('\r\n');
+		for(let i = 0; i< lines.length; i++){
+			if(lines[i].trim().startsWith("<add key=\"CookiesSameSiteMode\" value=")){
+				lines[i] = `    <add key="CookiesSameSiteMode" value="Lax" />`;
+			}
+		}
+		let content ='';
+		for(let i = 0; i< lines.length; i++){
+			content += lines[i]+"\r\n";
+		}
+		fs.writeFile(fileName, content);
+	}
+
+	public async createIISSiteAsync(isNetCore:boolean): Promise<void> {
 
 		const appPath = `${this._installRoot}\\${this.appName}`;
-		const poolPath = `${this._installRoot}\\${this.appName}\\Terrasoft.WebApp`;
+		
+		if(isNetCore){
+			const cmd = `C:\\Windows\\System32\\inetsrv\\appcmd.exe add apppool /name:${this.appName} /managedRuntimeVersion:"" /managedPipelineMode:"Integrated"`;
+			await PowerShell.$`Invoke-Expression ${cmd}`;
+		}else{
+			await PowerShell.$`New-WebAppPool -Name ${this.appName} -Force`;
+		}
 
-		const a = await PowerShell.$`New-WebAppPool -Name ${this.appName} -Force`;
 		const b = await PowerShell.$`New-WebSite -Name ${this.appName} -ApplicationPool ${this.appName} -Port ${this.iis_port} -HostHeader ${this._hostname} -PhysicalPath ${appPath} -Force`;
-		const c = await PowerShell.$`New-WebApplication -Name 0 -Site ${this.appName} -ApplicationPool ${this.appName} -PhysicalPath ${poolPath} -Force`;
+		
+		if(!isNetCore){
+			const poolPath = `${this._installRoot}\\${this.appName}\\Terrasoft.WebApp`;
+			const c = await PowerShell.$`New-WebApplication -Name 0 -Site ${this.appName} -ApplicationPool ${this.appName} -PhysicalPath ${poolPath} -Force`;
+		}
 	}
+	
 	public async renameTemplateAsync(): Promise<void>{
 
 		const templateFolder = `${this._installRoot}\\${this._templatePrefix}${this.folder_name}`;
@@ -171,6 +212,7 @@ export class installer implements Iinstaller {
 			console.log(error);
 		}
 	}
+	
 	private async createNewFolderAsync(dir: string): Promise<void>{
 		try{
 			await fs.mkdir(dir);
