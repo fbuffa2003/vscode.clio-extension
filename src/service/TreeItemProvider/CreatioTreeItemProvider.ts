@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import path = require('path');
 import { CreatioTreeItem } from './CreatioTreeItem';
 import { Environment, IConnectionSettings } from './Environment';
-import { ClioExecutor } from '../../Common/clioExecutor';
+import { ClioExecutor } from '../../common/clioExecutor';
 
 export class CreatioTreeItemProvider implements vscode.TreeDataProvider<CreatioTreeItem>{
 	

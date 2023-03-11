@@ -1,7 +1,7 @@
 import { env } from "process";
 import * as vscode from "vscode";
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
-import { ClioExecutor } from "../Common/clioExecutor";
+import { ClioExecutor } from "../common/clioExecutor";
 import { IFeature } from "../common/CreatioClient/CreatioClient";
 import { Environment } from "../service/TreeItemProvider/Environment";
 import { getUri } from "../utilities/getUri";

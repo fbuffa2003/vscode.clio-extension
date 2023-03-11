@@ -3,7 +3,7 @@ import { Clio } from './commands/Clio';
 import { IRegisterWebAppArgs } from './commands/RegisterWebAppCommand';
 import { TextEditor } from 'vscode';
 import { ConnectionPanel, FormData } from './panels/ConnectionPanel';
-import { ClioExecutor } from './Common/clioExecutor';
+import { ClioExecutor } from './common/clioExecutor';
 import { CreatioTreeItemProvider } from './service/TreeItemProvider/CreatioTreeItemProvider';
 import { Environment, IConnectionSettings } from './service/TreeItemProvider/Environment';
 import { CatalogPanel } from './panels/CatalogPanel';

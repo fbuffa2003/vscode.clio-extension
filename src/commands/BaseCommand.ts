@@ -1,5 +1,5 @@
 import exp = require("constants");
-import { ClioExecutor } from "../Common/clioExecutor";
+import { ClioExecutor } from "../common/clioExecutor";
 
 export abstract class BaseCommand {
 

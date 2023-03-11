@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
 import { IWebSocketMessage } from "../common/CreatioClient/CreatioClient";
 import { LogLevel } from "../common/CreatioClient/enums";
-//import { ClioExecutor } from "../Common/clioExecutor";
+//import { ClioExecutor } from "../common/clioExecutor";
 import { Environment } from "../service/TreeItemProvider/Environment";
 import { getUri } from "../utilities/getUri";
 

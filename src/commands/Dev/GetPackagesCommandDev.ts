@@ -1,4 +1,4 @@
-import { ClioExecutor } from '../../Common/clioExecutor';
+import { ClioExecutor } from '../../common/clioExecutor';
 import { BaseCommand, ICanExecuteValidationResult, ICommand, ICommandArgs, ICommandResponse } from '../BaseCommand';
 
 /**
