@@ -439,7 +439,7 @@ export class Workspace extends vscode.TreeItem {
 		}else if(this._currentEnvironment){
 			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio pushw -e ${this._currentEnvironment.label}`);
 		}else{
-			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio restorew`);
+			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio pushw`);
 		}
 	}
 	

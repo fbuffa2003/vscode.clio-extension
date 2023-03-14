@@ -74,7 +74,7 @@ export class pgClient{
 	}
 	
 	public async createTemplateDbAsync(dbName: string): Promise<void>{
-		const sql =`CREATE DATABASE ${dbName} ENCODING='UTF8' CONNECTION LIMIT=-1 IS_TEMPLATE='TRUE'`;
+		const sql =`CREATE DATABASE "${dbName}" ENCODING='UTF8' CONNECTION LIMIT=-1 IS_TEMPLATE='TRUE'`;
 		await this._client.query(sql);
 	}
 	

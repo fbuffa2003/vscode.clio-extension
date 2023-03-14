@@ -227,7 +227,7 @@ export class decompressor {
 		const dirName = path.parse(this._unzippedFolder?.fsPath ?? '').base;	
 		const dbFileName = `template_${dirName}.backup`;
 
-		const pg_restoreCmd = `pg_restore -U postgres -j 4 --no-owner --no-privilege -d ${this.templateDbName} ${dbBackupPath}/${dbFileName}`;
+		const pg_restoreCmd = `pg_restore -U postgres -j 16 --no-owner --no-privilege -d ${this.templateDbName} ${dbBackupPath}/${dbFileName}`;
 		const psCommand = `kubectl exec -it -n creatio ${this.postgresPod} -- ${pg_restoreCmd}`;
 		console.log(psCommand);
 		
