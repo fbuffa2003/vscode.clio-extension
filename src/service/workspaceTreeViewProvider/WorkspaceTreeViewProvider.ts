@@ -5,22 +5,13 @@ import { mySemVer } from '../../utilities/mySemVer';
 import { ClioExecutor } from '../../common/clioExecutor';
 import { execSync } from 'child_process';
 import { Environment } from '../TreeItemProvider/Environment';
-import { env } from 'process';
-import { CreatioTreeItemProvider } from '../TreeItemProvider/CreatioTreeItemProvider';
-
-//import { readdir } from 'fs/promises';
-//import { cwd } from 'process';
-//import nodeTest from 'node:test';
-//import { fileURLToPath } from 'url';
 
 
 /**
  * Creatio workspaces
  */
 export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode.TreeItem>{
-	private _knownEnvironments : Array<Environment> = new Array<Environment>();
 	private _workspaces : Array<Workspace> = new Array<Workspace>;
-	
 	private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | void> = new vscode.EventEmitter<vscode.TreeItem | undefined | void>();
 	readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | void> = this._onDidChangeTreeData.event;
 	/**
@@ -32,7 +23,6 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 		private environments: Array<Environment> )
 	{
 		this.InitWorkspaces();
-		
 	}
 
 	private InitWorkspaces(): void {
@@ -66,7 +56,6 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 			});
 		}
 	}
-
 
 	public refresh(): void {
 		this.InitWorkspaces();
