@@ -2,7 +2,7 @@ import { IncomingMessage, OutgoingHttpHeaders } from "http";
 import { request as httpsRequest, RequestOptions} from "https";
 import { SemVer } from "semver";
 import { HttpMethod } from '../Enums';
-import { IRequestOptions, IResponse } from '../interfaces';
+import { IRequestOptions, IResponse } from '../Interfaces';
 import { CompatiblePlatform, DbmsCompatibility, MarketplaceApp, ModerationState, ProductCategory } from './marketplaceApp';
 
 export class MarketplaceClient{

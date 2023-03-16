@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
-import { ClioExecutor } from "../Common/clioExecutor";
+import { ClioExecutor } from "../common/clioExecutor";
 import { MarketplaceCatalogue } from "../common/MarketplaceClient/MarketplaceCatalogue";
 import { Environment } from "../service/TreeItemProvider/Environment";
 import { getUri } from "../utilities/getUri";

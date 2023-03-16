@@ -2,7 +2,7 @@ import { ClientRequest, IncomingMessage, OutgoingHttpHeaders } from "http";
 import { RequestOptions } from "https";
 import { request as httpRequest } from "http";
 import { request as httpsRequest} from "https";
-import { IRequestOptions, IResponse } from "../interfaces";
+import { IRequestOptions, IResponse } from "../Interfaces";
 import { HttpMethod } from "../Enums";
 import { isArrayBufferView } from "util/types";
 

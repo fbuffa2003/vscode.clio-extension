@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import path = require('path');
 import { mySemVer } from '../../utilities/mySemVer';
-import { ClioExecutor } from '../../Common/clioExecutor';
+import { ClioExecutor } from '../../common/clioExecutor';
 import { execSync } from 'child_process';
 import { Environment } from '../TreeItemProvider/Environment';
 import { env } from 'process';

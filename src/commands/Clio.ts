@@ -1,4 +1,4 @@
-import { ClioExecutor } from '../Common/clioExecutor';
+import { ClioExecutor } from '../common/clioExecutor';
 import { ICommand, ICommandArgs, ICommandResponse } from './BaseCommand';
 import { FlushDb,IFlushDbArgs,IFlushDbResponse } from './FlushDbCommand';
 import { HealthCheck, IHealthCheckArgs, IHealthCheckResponse } from './HealthCheckCommand';

@@ -8,7 +8,7 @@ import { CreatioTreeItem } from "./CreatioTreeItem";
 import { ItemType } from "./ItemType";
 import { IHealthCheckArgs } from '../../commands/HealthCheckCommand';
 import { CreatioClient, IFeature, IWebSocketMessage } from '../../common/CreatioClient/CreatioClient';
-import { ClioExecutor } from '../../Common/clioExecutor';
+import { ClioExecutor } from '../../common/clioExecutor';
 import { IRestoreConfigurationArgs } from '../../commands/RestoreConfiguration';
 import { IFlushDbArgs } from '../../commands/FlushDbCommand';
 import { ISqlArgs } from '../../commands/SqlCommand';
