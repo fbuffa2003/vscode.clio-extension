@@ -93,11 +93,11 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 		this.workspaceRoot = workspaceRoot;
 	}
 
-	public updateKnownEnvironments(environments: Array<Environment>){
-		if(environments.length>0){
-			this._knownEnvironments = environments;
-		}
-	}
+	// public updateKnownEnvironments(environments: Array<Environment>){
+	// 	if(environments.length>0){
+	// 		this._knownEnvironments = environments;
+	// 	}
+	// }
 
 
 	getTreeItem(element: vscode.TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
