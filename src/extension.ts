@@ -809,9 +809,6 @@ export async function activate(context: vscode.ExtensionContext) {
 					await inst.renameTemplateAsync();
 				}
 			}
-
-			await inst.setCookiesSameSiteMode("Lax");
-			vscode.window.showInformationMessage("Set CookiesSameSiteMode: Lax completed");
 			
 			await inst.createDbFromTemplateAsync();
 			vscode.window.showInformationMessage("Restore db from template completed");
@@ -821,6 +818,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
 			const isNetCore = foldername.indexOf("_Linux_") !== -1;
 			await inst.createIISSiteAsync(isNetCore);
+			if(isNetCore){
+				await inst.setCookiesSameSiteMode("Lax");
+				vscode.window.showInformationMessage("Set CookiesSameSiteMode: Lax completed");
+			}
 			
 			vscode.window.showInformationMessage("Create IIS completed");
 		
