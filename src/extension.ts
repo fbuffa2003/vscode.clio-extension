@@ -1114,6 +1114,64 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	}));
 	
+	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.add-ui-project", async (workspace: Workspace)=>{
+			const UiPrompt = new UIPrompt();
+			const packageName = await UiPrompt.getFreedomUiPackageName();
+			const vendorPrefix = await UiPrompt.getVendorPrefix();
+			const creatioPackage = await UiPrompt.getCreatioPackageName();
+			await executor.ExecuteTaskCommand(workspace.folder,`clio new-ui-project ${packageName} -v ${vendorPrefix} --package ${creatioPackage} --silent true`);	
+
+			const demoCompPath = path.join(workspace.folder.fsPath,`\\projects\\${packageName}\\src\\app\\view-elements\\demo\\demo.component.ts`);
+			
+			const shouldInit = await UiPrompt.initAngEnv();
+			if(shouldInit.toLocaleLowerCase() ==='yes'){
+				const angularProjectRootPath = path.join(workspace.folder.fsPath,"projects", packageName);
+				//const angularProjectRootPathUri = vscode.Uri.file(angularProjectRootPath);
+
+				// vscode.window.withProgress(
+				// 	{
+				// 		location : vscode.ProgressLocation.Notification,
+				// 		title: "Initializing your Freedom UI"
+				// 	},
+				// 	async(progress, token)=>{
+				// 		progress.report({
+				// 			increment: 10,
+				// 			message: "npm install"
+				// 		});
+				// 		//await executor.ExecuteTaskCommand(angularProjectRootPathUri, "npm install");
+				// 		progress.report({
+				// 			increment: 50,
+				// 			message: "ng build"
+				// 		});
+				
+				// 		//await executor.ExecuteTaskCommand(angularProjectRootPathUri, "ng build");
+				// 		progress.report({
+				// 			increment: 100,
+				// 			message: "Done"
+				// 		});
+				// 	}
+				// );
+
+				executor.executeByTerminal(`cd ${angularProjectRootPath}; npm install;ng build`);
+			}
+
+			var setting: vscode.Uri = vscode.Uri.file(demoCompPath);
+			vscode.workspace.openTextDocument(setting)
+			.then((a: vscode.TextDocument) => {
+				vscode.window.showTextDocument(a, 1, false);
+			}, (error: any) => {
+				console.error(error);
+			});
+		})
+	);
+	
+	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.add-package", async (workspace: Workspace)=>{
+		const UiPrompt = new UIPrompt();
+		const creatioPackage = await UiPrompt.getCreatioPackageName();	
+		await executor.ExecuteTaskCommand(workspace.folder,`clio ap ${creatioPackage}`);	
+		})
+	);
+
 	//#endregion
 
 }
@@ -1303,5 +1361,41 @@ export class UIPrompt{
 			console.log(error);
 			return false;
 		}
+	}
+
+	//Add Freedom UI Package prompts
+	public async getFreedomUiPackageName(): Promise<string>{
+		const _result = await vscode.window.showInputBox({
+			title: "Project Name (only letters in lower register)",
+			prompt: "Enter Angular project name",
+		});
+		return _result?.toLocaleLowerCase() ?? '';
+	}
+	public async getVendorPrefix(): Promise<string>{
+		const _result = await vscode.window.showInputBox({
+			title: "Vendor Prefix (only 3 letters in lower register)",
+			prompt: "Enter vendor prefix",
+		});
+		return _result ?? '';
+	}
+	public async getCreatioPackageName(): Promise<string>{
+		const _result = await vscode.window.showInputBox({
+			title: "Package name",
+			prompt: "Enter Creatio package name",
+		});
+		return _result ?? '';
+	}
+	
+	public async initAngEnv(): Promise<string>{
+
+
+		const _result = await vscode.window.showQuickPick(["Yes","No"],{
+			title: "Initialize Angular environment"
+		});
+		// const _result = await vscode.window.showInputBox({
+		// 	title: "Initialize Angular environment",
+		// 	prompt: "Would you like to initialize angular environment",
+		// });
+		return _result ?? '';
 	}
 }

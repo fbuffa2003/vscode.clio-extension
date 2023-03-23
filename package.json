@@ -2,7 +2,7 @@
 	"name": "clio-explorer",
 	"displayName": "Clio explorer",
 	"description": "Control your Creatio environments, and perform clio actions on them",
-	"version": "0.0.26",
+	"version": "0.0.27",
 	"publisher": "AdvanceTechnologiesFoundation",
 	"license": "MIT",
 	"icon": "resources/creatio-triangle.png",
@@ -208,6 +208,16 @@
 					"command": "ClioSQL.dconf",
 					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
 					"group": "group-4@2"
+				},
+				{
+					"command": "ClioSQL.add-package",
+					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
+					"group": "group-5@1"
+				},
+				{
+					"command": "ClioSQL.add-ui-project",
+					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
+					"group": "group-5@2"
 				}
 
 			],
@@ -393,6 +403,14 @@
 			}
 		],
 		"commands": [
+			{
+				"command": "ClioSQL.add-ui-project",
+				"title": "Add Freedom UI component"
+			},
+			{
+				"command": "ClioSQL.add-package",
+				"title": "Add package"
+			},
 			{
 				"command": "ClioSQL.RegisterLocalSites",
 				"title": "Register local sites"

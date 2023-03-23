@@ -38,6 +38,10 @@ export class ClioExecutor {
 		const _clioPath = "clio";
 		this.sendTextToTerminal(`${_clioPath} ${command}`);
 	}
+	
+	public executeByTerminal(command: string) {
+		this.sendTextToTerminal(command);
+	}
 
 	/*
     public executeClioCommand(command: string): string {
