@@ -1122,46 +1122,19 @@ export async function activate(context: vscode.ExtensionContext) {
 			await executor.ExecuteTaskCommand(workspace.folder,`clio new-ui-project ${packageName} -v ${vendorPrefix} --package ${creatioPackage} --silent true`);	
 
 			const demoCompPath = path.join(workspace.folder.fsPath,`\\projects\\${packageName}\\src\\app\\view-elements\\demo\\demo.component.ts`);
-			
-			const shouldInit = await UiPrompt.initAngEnv();
-			if(shouldInit.toLocaleLowerCase() ==='yes'){
-				const angularProjectRootPath = path.join(workspace.folder.fsPath,"projects", packageName);
-				//const angularProjectRootPathUri = vscode.Uri.file(angularProjectRootPath);
-
-				// vscode.window.withProgress(
-				// 	{
-				// 		location : vscode.ProgressLocation.Notification,
-				// 		title: "Initializing your Freedom UI"
-				// 	},
-				// 	async(progress, token)=>{
-				// 		progress.report({
-				// 			increment: 10,
-				// 			message: "npm install"
-				// 		});
-				// 		//await executor.ExecuteTaskCommand(angularProjectRootPathUri, "npm install");
-				// 		progress.report({
-				// 			increment: 50,
-				// 			message: "ng build"
-				// 		});
-				
-				// 		//await executor.ExecuteTaskCommand(angularProjectRootPathUri, "ng build");
-				// 		progress.report({
-				// 			increment: 100,
-				// 			message: "Done"
-				// 		});
-				// 	}
-				// );
-
-				executor.executeByTerminal(`cd ${angularProjectRootPath}; npm install;ng build`);
-			}
-
 			var setting: vscode.Uri = vscode.Uri.file(demoCompPath);
-			vscode.workspace.openTextDocument(setting)
+			await vscode.workspace.openTextDocument(setting)
 			.then((a: vscode.TextDocument) => {
 				vscode.window.showTextDocument(a, 1, false);
 			}, (error: any) => {
 				console.error(error);
 			});
+			
+			const shouldInit = await UiPrompt.initAngEnv();
+			if(shouldInit.toLocaleLowerCase() ==='yes'){
+				const angularProjectRootPath = path.join(workspace.folder.fsPath,"projects", packageName);
+				executor.executeByTerminal(`cd ${angularProjectRootPath}; npm install;ng build;`);
+			}
 		})
 	);
 	
