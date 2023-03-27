@@ -8,14 +8,19 @@ export class ClioExecutor {
 	private _terminal: vscode.Terminal | undefined;
 	
 	private createTerminal(): vscode.Terminal {
-		this._terminal = this._terminal || vscode.window.createTerminal("clio console");
-		this._terminal.show();
-		vscode.window.onDidCloseTerminal((closedTerminal :vscode.Terminal) => {
-			if (closedTerminal === this._terminal) {
-				//this.terminal = undefined;
-				this._terminal.dispose();
-			}
-		});
+		const clioTerminal = vscode.window.terminals.find(i=> i.name === "clio console");
+		if(clioTerminal){
+			this._terminal = clioTerminal;
+		}else{
+			this._terminal = this._terminal || vscode.window.createTerminal("clio console");
+			this._terminal.show();
+			vscode.window.onDidCloseTerminal((closedTerminal :vscode.Terminal) => {
+				if (closedTerminal === this._terminal) {
+					this._terminal.dispose();
+					this._terminal = undefined;
+				}
+			});
+		}
 		return this._terminal;
 	}
 
@@ -42,32 +47,6 @@ export class ClioExecutor {
 	public executeByTerminal(command: string) {
 		this.sendTextToTerminal(command);
 	}
-
-	/*
-    public executeClioCommand(command: string): string {
-	    const cp = require('child_process');
-	    let cmd = `${this.clioPath} ${command}`;
-  
-	    const proc = cp.spawnSync(cmd, {
-	        shell: true,
-	        encoding: 'utf8',
-	    });
-  
-	    let procData = proc.stdout.toString();
-  
-	    if (proc !== null) {
-	        if (proc.stdout !== null && proc.stdout.toString() !== '') {
-		    procData = proc.stdout.toString();
-	    }
-	    if (proc.stderr !== null && proc.stderr.toString() !== '') {
-    		const procErr = proc.stderr.toString;
-	    	vscode.window.showInformationMessage("The '" + cmd + "' process failed: " + procErr);
-    		procData = procErr;
-	      }
-	    }
-	    return procData;
-    }
-	*/
 
 	/** Executes any terminal command
 	 * @param command command to execute, for example clio restart

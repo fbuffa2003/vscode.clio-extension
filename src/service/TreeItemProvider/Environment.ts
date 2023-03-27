@@ -11,7 +11,7 @@ import { CreatioClient, IFeature, IWebSocketMessage } from '../../common/Creatio
 import { ClioExecutor } from '../../common/clioExecutor';
 import { IRestoreConfigurationArgs } from '../../commands/RestoreConfiguration';
 import { IFlushDbArgs } from '../../commands/FlushDbCommand';
-import { ISqlArgs } from '../../commands/SqlCommand';
+//import { ISqlArgs } from '../../commands/SqlCommand';
 import WebSocket = require('ws');
 import { LogLevel } from '../../common/CreatioClient/enums';
 
@@ -47,7 +47,6 @@ export class Environment extends CreatioTreeItem {
 
 	//#region Public methods
 	
-
 	public async isGateInstalled(): Promise<void>{
 		//var isInstalled = await this.creatioClient.IsClioGateInstalled();
 		return;

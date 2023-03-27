@@ -23,13 +23,14 @@ import { NugetClient } from './common/NugetClient/NugetClient';
 import { mySemVer } from './utilities/mySemVer';
 import { RequiredFeatures } from './common/WindowsOptionalFeature';
 import { installer } from './common/installer';
-import { instalationInpitValidator } from './common/InputValidator/instalationInpitValidator';
+import { InstallationInputValidator } from './common/InputValidator/InstallationInputValidator';
 import * as fs from 'node:fs/promises';
 import * as fss from 'fs';
 import { PowerShell } from 'node-powershell/dist';
 import { decompressor } from './common/TemplateWorker/decompressor';
 import { Workspace, WorkspaceTreeViewProvider } from './service/workspaceTreeViewProvider/WorkspaceTreeViewProvider';
 import path = require('path');
+import { resolveNaptr } from 'node:dns';
 
 /**
  * Main entry point into the extension.
@@ -62,6 +63,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		treeProvider.environments = environments.sort((a,b) => 0 - (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
 		treeProvider.refresh();
 	}
+	
 	function handleDeleteNode(instance: CreatioTreeItem):void {
 
 		const removedInstance = environments.find(i=> i.label === instance.label);
@@ -156,16 +158,19 @@ export async function activate(context: vscode.ExtensionContext) {
 		watcher.onDidCreate(uri => {
 			environments = CreateEnvironments();
 			treeProvider.environments = environments;
+			_workspaceTreeViewProvider.environments = environments;
 			treeProvider.refresh();
 		});
 		watcher.onDidChange((uri: vscode.Uri) => {
 			environments = CreateEnvironments();
 			treeProvider.environments = environments;
+			_workspaceTreeViewProvider.environments = environments;
 			treeProvider.refresh();
 		});
 		watcher.onDidDelete(uri => {
 			environments = CreateEnvironments();
 			treeProvider.environments = environments;
+			_workspaceTreeViewProvider.environments = environments;
 			treeProvider.refresh();
 		});
 	}
@@ -235,7 +240,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 		
 		if(event.element instanceof PackageList && !(event.element as PackageList).isPackageRetrievalInProgress && (event.element as PackageList).items.length === 0){
-
 			vscode.window.withProgress(
 				{
 					location : vscode.ProgressLocation.Notification,
@@ -259,7 +263,6 @@ export async function activate(context: vscode.ExtensionContext) {
 				}
 			);
 		}
-
 
 		if(event.element instanceof Package){
 			//console.log("Package expanded");
@@ -411,10 +414,14 @@ export async function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.Settings", async (node: Environment)=>{
-			executor.executeCommandByTerminal(`cfg open`);
-			//const result = await executor.ExecuteClioCommand("clio cfg open");
-			
-			
+			const appSettingsPath = await executor.ExecuteClioCommand("clio externalLink clio://GetAppSettingsFilePath");
+			var fileToOepn: vscode.Uri = vscode.Uri.file(appSettingsPath.trim());
+			await vscode.workspace.openTextDocument(fileToOepn)
+			.then((a: vscode.TextDocument) => {
+				vscode.window.showTextDocument(a, 1, false);
+			}, (error: any) => {
+				console.error(error);
+			});
 		})
 	);
 	
@@ -432,6 +439,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		})
 	);
+
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.RegisterRemoteSites", async (node: Environment)=>{
 			
 			const remoteHostName =  await vscode.window.showInputBox({
@@ -479,8 +487,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.restart', async (node: Environment|Workspace) => {
-			
-		
 		if(node instanceof Environment){
 			vscode.window
 					.showWarningMessage("Would you like to restart environment \"" + node.label + "\"?", "Yes", "No",)
@@ -632,7 +638,6 @@ export async function activate(context: vscode.ExtensionContext) {
 					}
 				});
 		}
-	
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('ClioSQL.HealthCheck', async (node: Environment) => {
@@ -909,7 +914,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	
 	const _workspaceTreeViewProvider = new WorkspaceTreeViewProvider(vscode.workspace.workspaceFolders, environments);
 	vscode.workspace.onDidChangeWorkspaceFolders(async(event: vscode.WorkspaceFoldersChangeEvent)=>{
-		console.info('folder added');
 		if(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0){
 			_workspaceTreeViewProvider.updateWorkspaceRoot(vscode.workspace.workspaceFolders);
 		}
@@ -919,14 +923,24 @@ export async function activate(context: vscode.ExtensionContext) {
 	const workspaceTreeView = vscode.window.createTreeView("clio.workspaces", {
 		treeDataProvider : _workspaceTreeViewProvider,
 		showCollapseAll: true,
-		canSelectMany: true	
+		canSelectMany: true
 	});
+
+	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.map-environment", async (workspace: Workspace)=>{
+		
+		const prompt = new UIPrompt();
+		const envLabels = new Array<string>();
+		environments.forEach(element => {
+			envLabels.push(element.label);
+		});
+		const env = await prompt.mapEnvironment(envLabels);
+		const workspaceEnvironmentSettingsFilePath = path.join(workspace.folder.fsPath,".clio","workspaceEnvironmentSettings.json");
 	
-	// if(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length>0){
-	// 	workspaceTreeView.message = `Workspaces derived from folder ${vscode.workspace.workspaceFolders[0].uri.fsPath}`;
-	// }else{
-	// 	workspaceTreeView.message = `Workspaces derived from folder`;
-	// }
+		const data = {
+			Environment: env
+		};
+		fs.writeFile(workspaceEnvironmentSettingsFilePath,JSON.stringify(data, null, 4));
+	}));
 
 	//#endregion
 
@@ -937,7 +951,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.createw", async (tree: vscode.TreeView<vscode.TreeItem>)=>{
-			
 		if(vscode.workspace.workspaceFolders){
 			//1 create new dir
 			const rooPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
@@ -947,7 +960,6 @@ export async function activate(context: vscode.ExtensionContext) {
 				prompt: "How would you like to call your workspace",
 				ignoreFocusOut: true
 			}) ?? '';
-
 
 			//var activeEnv = this.Environments.find(e=> e.label.toLowerCase()===workspaceName);
 			const workspacePath = path.join(rooPath, workspaceName);
@@ -961,73 +973,79 @@ export async function activate(context: vscode.ExtensionContext) {
 			finally{
 				_workspaceTreeViewProvider.refresh();
 			}
-
 		}
-		
+	}));
+	
+	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.dconf", async (workspace: Workspace)=>{
+		executor.executeByTerminal(`cd ${workspace.folder.fsPath}`);
+		if(workspace._currentEnvironment && workspace._currentEnvironment.label){
+			executor.executeByTerminal(`clio dconf -e ${workspace._currentEnvironment?.label}`);
+		}else{
+			executor.executeByTerminal(`clio dconf`);
+		}
+	}));
+	
+	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.pushw", async (workspace: Workspace)=>{
+			
+		executor.executeByTerminal(`cd ${workspace.folder.fsPath}`);
+		if(workspace._currentEnvironment && workspace._currentEnvironment.label){
+			executor.executeByTerminal(`clio pushw -e ${workspace._currentEnvironment?.label}`);
+		}else{
+			executor.executeByTerminal(`clio pushw`);
+		}
 
-
-		})
-	);
-	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.dconf", async (item: Workspace)=>{
-			vscode.window.withProgress(
-				{
-					location : vscode.ProgressLocation.Notification,
-					title: "Downloading configuration"
-				},
-				async(progress, token)=>{
-					await item.dconfAsync();
-					progress.report({
-						increment: 100,
-						message: "Done"
-					});
-				}
-			);
-		})
-	);
-	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.pushw", async (item: Workspace)=>{
-			vscode.window.withProgress(
-				{
-					location : vscode.ProgressLocation.Notification,
-					title: "Pushing workspace"
-				},
-				async(progress, token)=>{
-					await item.pushwAsync();
-					progress.report({
-						increment: 100,
-						message: "Done"
-					});
-				}
-			);
-		})
-	);
-	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.restorew", async (item: Workspace)=>{
-			vscode.window.withProgress(
-				{
-					location : vscode.ProgressLocation.Notification,
-					title: "Restoring workspace"
-				},
-				async(progress, token)=>{
-					await item.restorewAsync();
-					progress.report({
-						increment: 100,
-						message: "Done"
-					});
-				}
-			);
-		})
-	);
+	}));
+	
+	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.restorew", async (workspace: Workspace)=>{
+		executor.executeByTerminal(`cd ${workspace.folder.fsPath}`);
+		if(workspace._currentEnvironment && workspace._currentEnvironment.label){
+			executor.executeByTerminal(`clio restorew -e ${workspace._currentEnvironment?.label}`);
+		}else{
+			executor.executeByTerminal(`clio restorew`);
+		}		
+	}));
+	
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.compress", async (item: Package)=>{
 			const a = item;
 		})
 	);
+	
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.openGitRepository", async (item: Workspace)=>{
-			//vscode.commands.executeCommand('vscode.open', item.remote);
-			
 			const clioUrl = `clio://OpenUrl/?url=${item.remote}`;
 			const cmd = `clio externalLink \"${clioUrl}\"`;
-			const a = await executor.ExecuteClioCommand(cmd);
+			await executor.ExecuteClioCommand(cmd);
 		})
 	);
+
+	//add package
+	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.add-ui-project", async (workspace: Workspace)=>{
+		const UiPrompt = new UIPrompt();
+		const packageName = await UiPrompt.getFreedomUiPackageName();
+		const vendorPrefix = await UiPrompt.getVendorPrefix();
+		const creatioPackage = await UiPrompt.getCreatioPackageName();
+		await executor.ExecuteTaskCommand(workspace.folder,`clio new-ui-project ${packageName} -v ${vendorPrefix} --package ${creatioPackage} -m Customer --silent true`);	
+
+		const demoCompPath = path.join(workspace.folder.fsPath,`\\projects\\${packageName}\\src\\app\\view-elements\\demo\\demo.component.ts`);
+		var setting: vscode.Uri = vscode.Uri.file(demoCompPath);
+		await vscode.workspace.openTextDocument(setting)
+		.then((a: vscode.TextDocument) => {
+			vscode.window.showTextDocument(a, 1, false);
+		}, (error: any) => {
+			console.error(error);
+		});
+		
+		const shouldInit = await UiPrompt.initAngEnv();
+		if(shouldInit.toLocaleLowerCase() ==='yes'){
+			const angularProjectRootPath = path.join(workspace.folder.fsPath,"projects", packageName);
+			executor.executeByTerminal(`cd ${angularProjectRootPath}; npm install;ng build;`);
+		}
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.add-package", async (workspace: Workspace)=>{
+		const UiPrompt = new UIPrompt();
+		const creatioPackage = await UiPrompt.getCreatioPackageName();	
+		await executor.ExecuteTaskCommand(workspace.folder,`clio ap ${creatioPackage}`);	
+	}));
 	//#endregion 
 	
 	//#region Workspace: Tasks
@@ -1043,6 +1061,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		})
 	);
+	
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.open-solution-framework-sdk", async (item: Workspace)=>{
 			try{
 				const result = await item.openSolutionFrameworkSdkAsync();
@@ -1053,6 +1072,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		})
 	);
+	
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.open-solution-netcore", async (item: Workspace)=>{
 			try{
 				const result = await item.openSolutionNetcoreAsync();
@@ -1063,6 +1083,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		})
 	);
+	
 	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.open-solution-netcore-sdk", async (item: Workspace)=>{
 		try{
 			const result = await item.openSolutionNetcoreSdkAsync();
@@ -1113,38 +1134,6 @@ export async function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage(error as string);
 		}
 	}));
-	
-	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.add-ui-project", async (workspace: Workspace)=>{
-			const UiPrompt = new UIPrompt();
-			const packageName = await UiPrompt.getFreedomUiPackageName();
-			const vendorPrefix = await UiPrompt.getVendorPrefix();
-			const creatioPackage = await UiPrompt.getCreatioPackageName();
-			await executor.ExecuteTaskCommand(workspace.folder,`clio new-ui-project ${packageName} -v ${vendorPrefix} --package ${creatioPackage} --silent true`);	
-
-			const demoCompPath = path.join(workspace.folder.fsPath,`\\projects\\${packageName}\\src\\app\\view-elements\\demo\\demo.component.ts`);
-			var setting: vscode.Uri = vscode.Uri.file(demoCompPath);
-			await vscode.workspace.openTextDocument(setting)
-			.then((a: vscode.TextDocument) => {
-				vscode.window.showTextDocument(a, 1, false);
-			}, (error: any) => {
-				console.error(error);
-			});
-			
-			const shouldInit = await UiPrompt.initAngEnv();
-			if(shouldInit.toLocaleLowerCase() ==='yes'){
-				const angularProjectRootPath = path.join(workspace.folder.fsPath,"projects", packageName);
-				executor.executeByTerminal(`cd ${angularProjectRootPath}; npm install;ng build;`);
-			}
-		})
-	);
-	
-	context.subscriptions.push(vscode.commands.registerCommand("ClioSQL.add-package", async (workspace: Workspace)=>{
-		const UiPrompt = new UIPrompt();
-		const creatioPackage = await UiPrompt.getCreatioPackageName();	
-		await executor.ExecuteTaskCommand(workspace.folder,`clio ap ${creatioPackage}`);	
-		})
-	);
-
 	//#endregion
 
 }
@@ -1238,8 +1227,7 @@ async function forceUpdateClio(executor: ClioExecutor){
 }
 
 export class UIPrompt{
-	private _iisValidator = new instalationInpitValidator();
-
+	private _iisValidator = new InstallationInputValidator();
 	private readonly _hostname : string = 'localhost';
 	private readonly _archivePath : string;
 	private readonly _installRoot : string;
@@ -1360,8 +1348,6 @@ export class UIPrompt{
 	}
 	
 	public async initAngEnv(): Promise<string>{
-
-
 		const _result = await vscode.window.showQuickPick(["Yes","No"],{
 			title: "Initialize Angular environment"
 		});
@@ -1370,5 +1356,11 @@ export class UIPrompt{
 		// 	prompt: "Would you like to initialize angular environment",
 		// });
 		return _result ?? '';
+	}
+
+	public async mapEnvironment(envLabels :string[]): Promise<string|undefined>{
+		return await vscode.window.showQuickPick(envLabels,{
+			title: "Select environment to associate with workspace"
+		});
 	}
 }

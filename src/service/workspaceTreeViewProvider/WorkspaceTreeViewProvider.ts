@@ -5,7 +5,9 @@ import { mySemVer } from '../../utilities/mySemVer';
 import { ClioExecutor } from '../../common/clioExecutor';
 import { execSync } from 'child_process';
 import { Environment } from '../TreeItemProvider/Environment';
-
+import { Application } from './application';
+import { Package } from './package';
+import {IWorkspaceSettings, IWorkspaceEnvironmentSettings} from './inrefaces'
 
 /**
  * Creatio workspaces
@@ -18,15 +20,11 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 	 * @param workspaceRoot array of workspace folders opened in vscode
 	 * - See _vscode_ {@link https://code.visualstudio.com/api/extension-guides/tree-view **Tree View API**} documentation
 	 */
-	constructor(
-		private workspaceRoot: readonly vscode.WorkspaceFolder[] | undefined, 
-		private environments: Array<Environment> )
-	{
+	constructor(private workspaceRoot: readonly vscode.WorkspaceFolder[] | undefined, public environments: Array<Environment>){
 		this.InitWorkspaces();
 	}
 
 	private InitWorkspaces(): void {
-
 		this._workspaces = new Array<Workspace>();
 		const rootFolder = vscode.workspace.workspaceFolders;
 		if(rootFolder && rootFolder.length>0){
@@ -35,7 +33,7 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 			if(this.isWorkspace(rootPath)){
 				const a = this.getConfiguredEnvironment(vscode.Uri.file(rootPath));
 				const env = this.environments.find(e=> e.label === a?.Environment);
-				const workspace = new Workspace(rootPath, vscode.TreeItemCollapsibleState.Collapsed, vscode.Uri.file(rootPath), env, "");
+				const workspace = new Workspace(rootPath, vscode.TreeItemCollapsibleState.Collapsed, vscode.Uri.file(rootPath), this.environments ,env, "");
 				this._workspaces.push(workspace);
 				return;
 			}
@@ -50,7 +48,7 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 					const a = this.getConfiguredEnvironment(vscode.Uri.file(subDir));
 					const env = this.environments.find(e=> e.label === a?.Environment);
 
-					const workspace = new Workspace(dir, vscode.TreeItemCollapsibleState.Collapsed, vscode.Uri.file(subDir),env, "");
+					const workspace = new Workspace(dir, vscode.TreeItemCollapsibleState.Collapsed, vscode.Uri.file(subDir),this.environments, env, "");
 					this._workspaces.push(workspace);
 				}
 			});
@@ -78,27 +76,9 @@ export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<vscode
 		}
 	}
 
-
-	private handleNewFolderCreated(uri: vscode.Uri){
-		console.log(`created ${uri}`);
-		var x = path.parse(uri.fsPath);
-
-		if(this.workspaceRoot && this.workspaceRoot.length>0 && this.workspaceRoot[0].uri.fsPath === x.dir){
-			console.info(`Created in Root`);
-			console.info(`Parent: ${x.dir}`);
-		}
-	}
-
 	public updateWorkspaceRoot(workspaceRoot: readonly vscode.WorkspaceFolder[]): void{
 		this.workspaceRoot = workspaceRoot;
 	}
-
-	// public updateKnownEnvironments(environments: Array<Environment>){
-	// 	if(environments.length>0){
-	// 		this._knownEnvironments = environments;
-	// 	}
-	// }
-
 
 	getTreeItem(element: vscode.TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
 		return element;
@@ -148,7 +128,7 @@ export class Workspace extends vscode.TreeItem {
 	
 	iconPath= new vscode.ThemeIcon("symbol-namespace");
 	public _currentEnvironment : Environment | undefined;
-	
+	private _environments : Array<Environment>;
 	private _remote : vscode.Uri | undefined;
 	public get remote() : vscode.Uri | undefined{
 		return this._remote;
@@ -185,11 +165,12 @@ export class Workspace extends vscode.TreeItem {
 		public readonly label: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 		public readonly folder : vscode.Uri,
+		environments: Array<Environment>,
 		environment?: Environment,
 		public readonly description? : string
 	) {
 		super(label, collapsibleState);
-		
+		this._environments = environments;
 		this._currentEnvironment = environment;
 
 		this.tooltip = new vscode.MarkdownString("See workspace [documentation](https://github.com/Advance-Technologies-Foundation/clio#workspaces)");
@@ -197,16 +178,17 @@ export class Workspace extends vscode.TreeItem {
 		this.contextValue = "clio.Workspace";
 		this._clioExecutor = new ClioExecutor();
 
+		this.watchFileChange();
 		this.getRemote();
 		(async()=>{
-			await this.getPackagesFromJson();
+			this.getPackagesFromJson();
 		})();
 	}
 
-	
-
+	/** Gets list of packages from workspaceSettings.json file
+	 *  @returns void
+	 */
 	private getPackagesFromJson() : void {
-
 		try {
 			const workspaceSettingFilePath = path.join(this.folder.fsPath, ".clio","workspaceSettings.json");
 			const jsonFileContent = fs.readFileSync(workspaceSettingFilePath);
@@ -216,7 +198,6 @@ export class Workspace extends vscode.TreeItem {
 				json = json.substring(1);
 			} 
 			const model = JSON.parse(json);
-
 			const settings = {
 				ApplicationVersion: new mySemVer(model['ApplicationVersion']),
 				Packages : model["Packages"]
@@ -226,16 +207,13 @@ export class Workspace extends vscode.TreeItem {
 				const p = new Package(packageName, this.folder);
 				this.packages.push(p);
 			});
-
-			
 		} catch (error) {
 			console.error(error);
-		}		
+		}
 	}
 
 	/**
 	 * Checks if Workspace contains `.git` folder. and sets contextValue
-	 * 
 	 * @returns void
 	 */
 	private getRemote(): void {
@@ -262,8 +240,42 @@ export class Workspace extends vscode.TreeItem {
 		}
 	}
 
-	//TODO: Shold this even be here, or should I return path and call open from extension ?
+
+	private watchFileChange(){
+
+		const watcher = vscode.workspace.createFileSystemWatcher(
+			new vscode.RelativePattern(path.join(this.folder.fsPath, ".clio"), "workspaceEnvironmentSettings.json"), 
+			false, false, false);
+		
+		watcher.onDidCreate(uri => {
+			const envLabel = this.getEnvironmentNameFromSettings();
+			this._currentEnvironment = this._environments.find(e=> e.label === envLabel);
+		});
+		watcher.onDidChange((uri: vscode.Uri) => {
+			const envLabel = this.getEnvironmentNameFromSettings();
+			this._currentEnvironment = this._environments.find(e=> e.label === envLabel);
+		});
+		watcher.onDidDelete(uri => {
+			const envLabel = this.getEnvironmentNameFromSettings();
+			this._currentEnvironment = undefined;
+		});
+	}
 	
+
+	private getEnvironmentNameFromSettings(): string{
+		const workspaceEnvironmentSettingsFilePath = path.join(this.folder.fsPath, ".clio","workspaceEnvironmentSettings.json");
+		const jsonFileContent = fs.readFileSync(workspaceEnvironmentSettingsFilePath);
+		var json = jsonFileContent.toString('utf8');
+		//https://github.com/nodejs/node-v0.x-archive/issues/4039#issuecomment-8828783
+		if (json.charAt(0) === '\uFEFF'){
+			json = json.substring(1);
+		} 
+		const model = JSON.parse(json);
+		return model["Environment"] as string;
+	}
+
+
+	//#region Commands
 	/** Checks if in Windows, and executes `/tasks/open-solution-framework.cmd` from workspace folder
 	 * @returns response form terminal
 	 */
@@ -446,65 +458,5 @@ export class Workspace extends vscode.TreeItem {
 			await this.clioExecutor.ExecuteTaskCommand(this.folder, `clio dconf`);
 		}
 	}
-}
-
-export class Package extends vscode.TreeItem{
-	
-	constructor(
-		public readonly label: string,
-		private readonly folderUri: vscode.Uri
-	  ) {
-		super(label, vscode.TreeItemCollapsibleState.None);
-		this.tooltip = new vscode.MarkdownString("This is an assembly package, read more on the [academy](https://academy.creatio.com/docs/developer/development_tools/packages/assembly_package/overview)");
-		
-		this.getDescription();
-		this.contextValue = "clio.Package";
-	  }
-	iconPath = new vscode.ThemeIcon("package");
-
-	private getDescription(): void{
-		const descriptorFilePath = path.join(this.folderUri.fsPath, "packages",this.label,"descriptor.json");
-		if(!fs.existsSync(descriptorFilePath)){return;}
-
-		try {
-			const jsonFileContent = fs.readFileSync(descriptorFilePath);
-			var json = jsonFileContent.toString('utf8');
-			//https://github.com/nodejs/node-v0.x-archive/issues/4039#issuecomment-8828783
-			if (json.charAt(0) === '\uFEFF'){
-				json = json.substr(1);
-			} 
-
-			const model = JSON.parse(json);
-			const description = model['Descriptor']['Description'];
-			this.description = description ?? "";
-
-		} catch (error) {
-			console.error(error);
-		}
-	}
-}
-
-export class Application extends vscode.TreeItem{
-	constructor(
-		public readonly label: string,
-		private version: string,
-		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-		
-	  ) {
-		super(label, collapsibleState);
-		this.tooltip = `Application`;
-		this.description = this.version;
-		this.contextValue = "clio.Application";
-	  }
-	
-	iconPath = new vscode.ThemeIcon("symbol-class");
-}
-
-export interface IWorkspaceSettings {
-	ApplicationVersion: mySemVer
-	Packages: Array<string>
-}
-
-export interface IWorkspaceEnvironmentSettings {
-	Environment: string | undefined
+	//#endregion
 }

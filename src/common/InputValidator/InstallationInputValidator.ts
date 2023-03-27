@@ -1,7 +1,6 @@
 import { PowerShell } from 'node-powershell';
-export class instalationInpitValidator{
+export class InstallationInputValidator{
 
-	
 	private _takenPorts : Array<number> = new Array<number>();
 	public get takenPorts() : Array<number> {
 		return this._takenPorts;
@@ -36,9 +35,8 @@ export class instalationInpitValidator{
 		}
 
 		if(ps.raw.startsWith('{')){
-            ps.raw = `[${ps.raw}]`;
-        }
-
+			ps.raw = `[${ps.raw}]`;
+		}
 
 		const json : Array<IiisBindingDto> = JSON.parse(ps.raw) as Array<IiisBindingDto>;
 

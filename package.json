@@ -2,7 +2,7 @@
 	"name": "clio-explorer",
 	"displayName": "Clio explorer",
 	"description": "Control your Creatio environments, and perform clio actions on them",
-	"version": "0.0.28",
+	"version": "0.0.29",
 	"publisher": "AdvanceTechnologiesFoundation",
 	"license": "MIT",
 	"icon": "resources/creatio-triangle.png",
@@ -218,6 +218,11 @@
 					"command": "ClioSQL.add-ui-project",
 					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
 					"group": "group-5@2"
+				},
+				{
+					"command": "ClioSQL.map-environment",
+					"when": "viewItem == clio.Workspace || viewItem == clio.Workspace.gitInitialized",
+					"group": "group-6@1"
 				}
 
 			],
@@ -403,6 +408,10 @@
 			}
 		],
 		"commands": [
+			{
+				"command": "ClioSQL.map-environment",
+				"title": "Map environment for workspace"
+			},
 			{
 				"command": "ClioSQL.add-ui-project",
 				"title": "Add Freedom UI component"
